@@ -19,6 +19,23 @@ class FranchiseController extends Controller
         return view('franchise');
     }
 
+    public function show(FranchiseBooking $franchiseBooking)
+    {
+        abort_unless($franchiseBooking->status === 'paid', 404);
+
+        $franchiseBooking->loadCount([
+            'courses' => fn ($q) => $q->where('status', 'active'),
+            'enrollments',
+        ]);
+        $franchiseBooking->load([
+            'courses' => fn ($q) => $q->where('status', 'active')->with(['category', 'modules']),
+        ]);
+
+        $minCoursePrice = $franchiseBooking->courses->min('price');
+
+        return view('franchise-show', compact('franchiseBooking', 'minCoursePrice'));
+    }
+
     public function inquiry(Request $request)
     {
         $validated = $request->validate([

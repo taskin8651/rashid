@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Course;
+use App\Models\FranchiseBooking;
 
 class HomeController extends Controller
 {
@@ -20,6 +21,15 @@ class HomeController extends Controller
 
         $totalDemoVideos = $categories->flatMap->courses->flatMap->videos->count();
 
-        return view('home', compact('courses', 'categories', 'totalDemoVideos'));
+        $franchises = FranchiseBooking::where('status', 'paid')
+            ->withCount([
+                'courses' => fn ($q) => $q->where('status', 'active'),
+                'enrollments',
+            ])
+            ->withMin(['courses as min_course_price' => fn ($q) => $q->where('status', 'active')], 'price')
+            ->latest()
+            ->get();
+
+        return view('home', compact('courses', 'categories', 'totalDemoVideos', 'franchises'));
     }
 }

@@ -49,8 +49,21 @@ class FranchiseBooking extends Model
         return $this->hasMany(Course::class);
     }
 
+    public function enrollments()
+    {
+        return $this->hasManyThrough(Enrollment::class, Course::class);
+    }
+
     public function stageLabel(): string
     {
         return self::STAGES[$this->stage] ?? $this->stage;
+    }
+
+    public function stageIndex(): int
+    {
+        $keys = array_keys(self::STAGES);
+        $index = array_search($this->stage, $keys, true);
+
+        return $index === false ? 0 : $index;
     }
 }

@@ -51,6 +51,7 @@ Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.submit');
 
 Route::get('/franchise', [FranchiseController::class, 'index'])->name('franchise');
+Route::get('/franchises/{franchiseBooking}', [FranchiseController::class, 'show'])->name('franchises.show');
 Route::post('/franchise/inquiry', [FranchiseController::class, 'inquiry'])->name('franchise.inquiry');
 Route::post('/franchise/booking', [FranchiseController::class, 'bookingCreate'])->name('franchise.booking.create');
 Route::post('/franchise/booking/verify', [FranchiseController::class, 'bookingVerify'])->name('franchise.booking.verify');
