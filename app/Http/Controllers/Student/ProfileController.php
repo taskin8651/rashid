@@ -20,9 +20,12 @@ class ProfileController extends Controller
             'phone' => $user->phone,
             'address' => $user->address,
             'date_of_birth' => optional($user->date_of_birth)->format('Y-m-d'),
+            'guardian_name' => $user->guardian_name,
+            'blood_group' => $user->blood_group,
+            'emergency_contact' => $user->emergency_contact,
         ];
 
-        return view('student.profile', compact('profile'));
+        return view('student.profile', compact('profile', 'user'));
     }
 
     public function update(Request $request)
@@ -35,9 +38,20 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
             'date_of_birth' => ['nullable', 'date'],
+            'guardian_name' => ['nullable', 'string', 'max:255'],
+            'blood_group' => ['nullable', 'string', 'max:5'],
+            'emergency_contact' => ['nullable', 'string', 'max:20'],
+            'photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
+        $photo = $request->hasFile('photo');
+        unset($validated['photo']);
+
         $user->update($validated);
+
+        if ($photo) {
+            $user->addMediaFromRequest('photo')->toMediaCollection('photo');
+        }
 
         return back()->with('status', 'Profile updated!');
     }

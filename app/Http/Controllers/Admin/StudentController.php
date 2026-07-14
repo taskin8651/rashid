@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\VideoProgress;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -53,6 +54,34 @@ class StudentController extends Controller
         ];
 
         return view('admin.students.show', compact('student', 'courses', 'certificates', 'quizAttempts', 'payments', 'stats'));
+    }
+
+    public function idCardView(User $student)
+    {
+        return $this->renderIdCard($student, inline: true);
+    }
+
+    public function idCardDownload(User $student)
+    {
+        return $this->renderIdCard($student, inline: false);
+    }
+
+    protected function renderIdCard(User $student, bool $inline)
+    {
+        abort_unless($student->hasRole('student'), 404);
+
+        $student->ensureStudentCode();
+
+        $enrollment = $student->enrollments()->whereIn('status', ['paid', 'completed'])->with('course')->latest('enrolled_at')->first();
+
+        $pdf = Pdf::loadView('id-card.pdf', [
+            'user' => $student,
+            'course' => $enrollment?->course,
+        ])->setPaper([0, 0, 242.65, 153.07]);
+
+        $filename = 'RTech-ID-Card-' . $student->student_code . '.pdf';
+
+        return $inline ? $pdf->stream($filename) : $pdf->download($filename);
     }
 
     public function update(Request $request, User $student)

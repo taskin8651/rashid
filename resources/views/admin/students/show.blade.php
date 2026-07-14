@@ -15,7 +15,13 @@
     </div>
   </div>
 
-  <p class="mb-4"><a href="{{ route('admin.students.index') }}" style="color:var(--muted);text-decoration:none;font-size:12px"><i class="bi bi-arrow-left me-1"></i>Back to Student Management</a></p>
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <a href="{{ route('admin.students.index') }}" style="color:var(--muted);text-decoration:none;font-size:12px"><i class="bi bi-arrow-left me-1"></i>Back to Student Management</a>
+    <div class="d-flex gap-2">
+      <a href="{{ route('admin.students.id-card.view', $student) }}" target="_blank" class="bghost" style="text-decoration:none;font-size:12px;padding:8px 16px"><i class="bi bi-eye-fill me-1"></i>View ID Card</a>
+      <a href="{{ route('admin.students.id-card.download', $student) }}" class="bsave" style="text-decoration:none;font-size:12px;padding:8px 16px"><i class="bi bi-download me-1"></i>Download</a>
+    </div>
+  </div>
 
   <div class="shead mb-3"><h4 style="font-size:16px">Course Progress</h4></div>
   <div class="row g-3 mb-4">

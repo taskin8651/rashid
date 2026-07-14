@@ -34,6 +34,7 @@ use App\Http\Controllers\Student\AssignmentController as StudentAssignmentContro
 use App\Http\Controllers\Student\CertificateController as StudentCertificateController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\IdCardController as StudentIdCardController;
 use App\Http\Controllers\Student\NoteController as StudentNoteController;
 use App\Http\Controllers\Student\PaymentController as StudentPaymentController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
@@ -129,6 +130,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [StudentProfileController::class, 'edit'])->name('student.profile.edit');
         Route::post('/profile', [StudentProfileController::class, 'update'])->name('student.profile.update');
         Route::post('/change-password', [StudentProfileController::class, 'changePassword'])->name('student.password.update');
+
+        Route::get('/id-card', [StudentIdCardController::class, 'view'])->name('student.id-card.view');
+        Route::get('/id-card/download', [StudentIdCardController::class, 'download'])->name('student.id-card.download');
     });
 
     Route::prefix('franchise')->middleware('role:franchisee')->group(function () {
@@ -179,6 +183,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
         Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
+        Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCardView'])->name('admin.students.id-card.view');
+        Route::get('/students/{student}/id-card/download', [AdminStudentController::class, 'idCardDownload'])->name('admin.students.id-card.download');
         Route::post('/students/{student}', [AdminStudentController::class, 'update'])->name('admin.students.update');
         Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
 

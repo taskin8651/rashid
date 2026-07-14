@@ -6,12 +6,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +27,9 @@ class User extends Authenticatable
         'phone',
         'address',
         'date_of_birth',
+        'guardian_name',
+        'blood_group',
+        'emergency_contact',
         'password',
         'is_active',
     ];
@@ -49,6 +55,38 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'password' => 'hashed',
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('photo')->singleFile();
+    }
+
+    public function photoUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('photo') ?: null;
+    }
+
+    public function photoPath(): ?string
+    {
+        $media = $this->getFirstMedia('photo');
+
+        return $media && file_exists($media->getPath()) ? $media->getPath() : null;
+    }
+
+    public function ensureStudentCode(): string
+    {
+        if (!$this->student_code) {
+            do {
+                $code = 'RTC-' . now()->format('y') . '-' . strtoupper(Str::random(5));
+            } while (self::where('student_code', $code)->exists());
+
+            // Deliberately not mass-assignable: a system-issued identifier,
+            // never something a form should be able to set.
+            $this->forceFill(['student_code' => $code])->save();
+        }
+
+        return $this->student_code;
+    }
 
     public function enrollments()
     {
