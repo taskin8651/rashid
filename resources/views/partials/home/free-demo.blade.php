@@ -59,7 +59,7 @@
               <div class="row g-3 mb-2">
                 @foreach ($demoVideos as $video)
                   <div class="col-md-6 col-lg-4">
-                    <div class="dc" data-bs-toggle="modal" data-bs-target="#demoM">
+                    <div class="dc" data-bs-toggle="modal" data-bs-target="#demoM" data-src="{{ $video->fileUrl() }}" data-title="{{ $video->title }}">
                       <div class="dthumb" style="background:linear-gradient(135deg, rgba({{ $catRgb ?? '37,99,235' }},.9), rgba({{ $catRgb ?? '37,99,235' }},.4)), linear-gradient(135deg,#050d1f,#0f2147)">
                         <span class="free-chip">FREE</span>
                         <div class="pc"><i class="bi bi-play-fill"></i></div>

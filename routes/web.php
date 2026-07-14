@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\CourseAssignmentController as AdminCourseAssignmentController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Admin\CourseNoteController as AdminCourseNoteController;
+use App\Http\Controllers\Admin\CourseQuizController as AdminCourseQuizController;
 use App\Http\Controllers\Admin\CourseVideoController as AdminCourseVideoController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FranchiseController as AdminFranchiseController;
@@ -13,7 +16,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\Franchise\CourseAssignmentController as FranchiseCourseAssignmentController;
 use App\Http\Controllers\Franchise\CourseController as FranchiseCourseController;
+use App\Http\Controllers\Franchise\CourseNoteController as FranchiseCourseNoteController;
+use App\Http\Controllers\Franchise\CourseQuizController as FranchiseCourseQuizController;
 use App\Http\Controllers\Franchise\CourseVideoController as FranchiseCourseVideoController;
 use App\Http\Controllers\Franchise\DashboardController as FranchiseDashboardController;
 use App\Http\Controllers\Franchise\DocumentController as FranchiseDocumentController;
@@ -22,13 +28,19 @@ use App\Http\Controllers\Franchise\ResourceController as FranchiseResourceContro
 use App\Http\Controllers\Franchise\StudentController as FranchiseStudentController;
 use App\Http\Controllers\FranchiseController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NoteDownloadController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\CertificateController as StudentCertificateController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\NoteController as StudentNoteController;
 use App\Http\Controllers\Student\PaymentController as StudentPaymentController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
+use App\Http\Controllers\Student\QuizController as StudentQuizController;
 use App\Http\Controllers\Student\WishlistController as StudentWishlistController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SubmissionDownloadController;
 use App\Http\Controllers\VideoStreamController;
 use Illuminate\Support\Facades\Route;
 
@@ -47,27 +59,43 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
 Route::get('/courses', [CourseController::class, 'index'])->name('courses');
 Route::get('/free-demo', [PageController::class, 'freeDemo'])->name('free-demo');
 
-// Public route, but access to non-demo videos is enforced inside the controller
-// (must be logged in, enrolled/owning franchisee/admin) — see VideoStreamController.
-Route::get('/videos/{video}/stream', [VideoStreamController::class, 'stream'])->name('videos.stream');
+// URL must be a valid, unexpired signature (see Video::fileUrl()) AND, for
+// non-demo videos, the requester must be authorized — see VideoStreamController.
+Route::get('/videos/{video}/stream', [VideoStreamController::class, 'stream'])
+    ->name('videos.stream')
+    ->middleware('signed');
+
+Route::get('/submissions/{submission}/download', [SubmissionDownloadController::class, 'download'])
+    ->name('submissions.download')
+    ->middleware('auth');
+
+Route::get('/notes/{note}/download', [NoteDownloadController::class, 'download'])
+    ->name('notes.download')
+    ->middleware('auth');
 Route::get('/why-rtech', [PageController::class, 'whyRtech'])->name('why-rtech');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.submit');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.submit')->middleware('throttle:5,1');
 
 Route::get('/franchise', [FranchiseController::class, 'index'])->name('franchise');
 Route::get('/franchises/{franchiseBooking}', [FranchiseController::class, 'show'])->name('franchises.show');
-Route::post('/franchise/inquiry', [FranchiseController::class, 'inquiry'])->name('franchise.inquiry');
-Route::post('/franchise/booking', [FranchiseController::class, 'bookingCreate'])->name('franchise.booking.create');
+Route::post('/franchise/inquiry', [FranchiseController::class, 'inquiry'])->name('franchise.inquiry')->middleware('throttle:5,1');
+Route::post('/franchise/booking', [FranchiseController::class, 'bookingCreate'])->name('franchise.booking.create')->middleware('throttle:5,1');
 Route::post('/franchise/booking/verify', [FranchiseController::class, 'bookingVerify'])->name('franchise.booking.verify');
 
 Route::get('/login', fn () => redirect()->route('home'))->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
-Route::post('/signup', [AuthController::class, 'signup'])->name('signup.attempt');
+Route::post('/login', [AuthController::class, 'login'])->name('login.attempt')->middleware('throttle:10,1');
+Route::post('/signup', [AuthController::class, 'signup'])->name('signup.attempt')->middleware('throttle:10,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:5,1');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:10,1');
 
 Route::middleware('auth')->group(function () {
     Route::get('/enroll/{course:slug}', [EnrollmentController::class, 'create'])->name('enroll.create');
@@ -78,6 +106,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
 
         Route::get('/courses', [StudentCourseController::class, 'index'])->name('student.courses.index');
+        Route::get('/courses/{course}/learn', [StudentCourseController::class, 'learn'])->name('student.courses.learn');
+        Route::post('/videos/{video}/watched', [StudentCourseController::class, 'markWatched'])->name('student.videos.watched');
+
+        Route::get('/courses/{course}/quiz', [StudentQuizController::class, 'show'])->name('student.courses.quiz.show');
+        Route::post('/courses/{course}/quiz', [StudentQuizController::class, 'submit'])->name('student.courses.quiz.submit');
+        Route::get('/courses/{course}/quiz/{attempt}', [StudentQuizController::class, 'result'])->name('student.courses.quiz.result');
+
+        Route::get('/courses/{course}/assignments', [StudentAssignmentController::class, 'index'])->name('student.courses.assignments.index');
+        Route::post('/assignments/{assignment}/submit', [StudentAssignmentController::class, 'submit'])->name('student.assignments.submit');
+
+        Route::get('/courses/{course}/notes', [StudentNoteController::class, 'index'])->name('student.courses.notes.index');
 
         Route::get('/certificates', [StudentCertificateController::class, 'index'])->name('student.certificates.index');
         Route::get('/certificates/{certificate}/download', [StudentCertificateController::class, 'download'])->name('student.certificates.download');
@@ -112,6 +151,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/courses/{course}/videos/{video}', [FranchiseCourseVideoController::class, 'update'])->name('franchise.courses.videos.update');
         Route::delete('/courses/{course}/videos/{video}', [FranchiseCourseVideoController::class, 'destroy'])->name('franchise.courses.videos.destroy');
 
+        Route::get('/courses/{course}/quiz', [FranchiseCourseQuizController::class, 'index'])->name('franchise.courses.quiz.index');
+        Route::post('/courses/{course}/quiz', [FranchiseCourseQuizController::class, 'store'])->name('franchise.courses.quiz.store');
+        Route::post('/courses/{course}/quiz/{question}', [FranchiseCourseQuizController::class, 'update'])->name('franchise.courses.quiz.update');
+        Route::delete('/courses/{course}/quiz/{question}', [FranchiseCourseQuizController::class, 'destroy'])->name('franchise.courses.quiz.destroy');
+
+        Route::get('/courses/{course}/assignments', [FranchiseCourseAssignmentController::class, 'index'])->name('franchise.courses.assignments.index');
+        Route::post('/courses/{course}/assignments', [FranchiseCourseAssignmentController::class, 'store'])->name('franchise.courses.assignments.store');
+        Route::post('/courses/{course}/assignments/{assignment}', [FranchiseCourseAssignmentController::class, 'update'])->name('franchise.courses.assignments.update');
+        Route::delete('/courses/{course}/assignments/{assignment}', [FranchiseCourseAssignmentController::class, 'destroy'])->name('franchise.courses.assignments.destroy');
+        Route::post('/courses/{course}/submissions/{submission}/grade', [FranchiseCourseAssignmentController::class, 'grade'])->name('franchise.courses.assignments.grade');
+
+        Route::get('/courses/{course}/notes', [FranchiseCourseNoteController::class, 'index'])->name('franchise.courses.notes.index');
+        Route::post('/courses/{course}/notes', [FranchiseCourseNoteController::class, 'store'])->name('franchise.courses.notes.store');
+        Route::post('/courses/{course}/notes/{note}', [FranchiseCourseNoteController::class, 'update'])->name('franchise.courses.notes.update');
+        Route::delete('/courses/{course}/notes/{note}', [FranchiseCourseNoteController::class, 'destroy'])->name('franchise.courses.notes.destroy');
+
         Route::get('/students', [FranchiseStudentController::class, 'index'])->name('franchise.students.index');
 
         Route::get('/profile', [FranchiseProfileController::class, 'edit'])->name('franchise.profile.edit');
@@ -123,6 +178,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
+        Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
         Route::post('/students/{student}', [AdminStudentController::class, 'update'])->name('admin.students.update');
         Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
 
@@ -135,6 +191,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/courses/{course}/videos', [AdminCourseVideoController::class, 'store'])->name('admin.courses.videos.store');
         Route::post('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'update'])->name('admin.courses.videos.update');
         Route::delete('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'destroy'])->name('admin.courses.videos.destroy');
+
+        Route::get('/courses/{course}/quiz', [AdminCourseQuizController::class, 'index'])->name('admin.courses.quiz.index');
+        Route::post('/courses/{course}/quiz', [AdminCourseQuizController::class, 'store'])->name('admin.courses.quiz.store');
+        Route::post('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'update'])->name('admin.courses.quiz.update');
+        Route::delete('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'destroy'])->name('admin.courses.quiz.destroy');
+
+        Route::get('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'index'])->name('admin.courses.assignments.index');
+        Route::post('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'store'])->name('admin.courses.assignments.store');
+        Route::post('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'update'])->name('admin.courses.assignments.update');
+        Route::delete('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'destroy'])->name('admin.courses.assignments.destroy');
+        Route::post('/courses/{course}/submissions/{submission}/grade', [AdminCourseAssignmentController::class, 'grade'])->name('admin.courses.assignments.grade');
+
+        Route::get('/courses/{course}/notes', [AdminCourseNoteController::class, 'index'])->name('admin.courses.notes.index');
+        Route::post('/courses/{course}/notes', [AdminCourseNoteController::class, 'store'])->name('admin.courses.notes.store');
+        Route::post('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'update'])->name('admin.courses.notes.update');
+        Route::delete('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'destroy'])->name('admin.courses.notes.destroy');
 
         Route::get('/categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
         Route::post('/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');

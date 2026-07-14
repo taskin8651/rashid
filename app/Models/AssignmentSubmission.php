@@ -23,7 +23,10 @@ class AssignmentSubmission extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('file')->singleFile();
+        // Private disk: a student's submitted work must not be reachable by a
+        // guessable public URL. Access is only granted through the authorized
+        // download route (owning student, admin, or the owning franchisee).
+        $this->addMediaCollection('file')->singleFile()->useDisk('local');
     }
 
     public function assignment()

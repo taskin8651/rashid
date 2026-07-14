@@ -59,7 +59,7 @@
               <strong style="font-size:13px">{{ $video->title }}</strong>
               <button type="button" class="action-btn" onclick="this.closest('dialog').close()"><i class="bi bi-x-lg"></i></button>
             </div>
-            <video src="{{ $video->fileUrl() }}" controls style="width:100%;border-radius:8px;background:#000"></video>
+            <video src="{{ $video->fileUrl() }}" controls controlsList="nodownload noremoteplayback" disablePictureInPicture disableRemotePlayback oncontextmenu="return false" style="width:100%;border-radius:8px;background:#000"></video>
           </div>
         </dialog>
       @endforeach

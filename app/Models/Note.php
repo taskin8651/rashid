@@ -15,7 +15,9 @@ class Note extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('file')->singleFile();
+        // Private disk: course notes are only for enrolled students, admins
+        // and the owning franchisee — see NoteDownloadController.
+        $this->addMediaCollection('file')->singleFile()->useDisk('local');
     }
 
     public function course()

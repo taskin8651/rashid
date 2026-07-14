@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -25,7 +26,14 @@ class Video extends Model implements HasMedia
 
     public function fileUrl(): ?string
     {
-        return $this->getFirstMedia('file') ? route('videos.stream', $this) : null;
+        if (!$this->getFirstMedia('file')) {
+            return null;
+        }
+
+        // Signed + time-limited: the link itself expires and can't be edited,
+        // shared or reused outside the page that generated it. Expiry is long
+        // enough that pausing mid-lesson won't break playback.
+        return URL::temporarySignedRoute('videos.stream', now()->addHours(4), ['video' => $this->id]);
     }
 
     public function course()

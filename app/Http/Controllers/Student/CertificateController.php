@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CertificateIssued;
 use App\Models\Certificate;
 use App\Models\VideoProgress;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class CertificateController extends Controller
 {
@@ -20,9 +22,9 @@ class CertificateController extends Controller
             ->get();
 
         $rows = $enrollments->map(function ($enrollment) use ($user) {
-            $totalVideos = $enrollment->course->videos()->count();
+            $totalVideos = $enrollment->course->videos()->where('status', 'active')->whereHas('media')->count();
             $watched = VideoProgress::where('user_id', $user->id)
-                ->whereIn('video_id', $enrollment->course->videos()->pluck('id'))
+                ->whereIn('video_id', $enrollment->course->videos()->where('status', 'active')->whereHas('media')->pluck('id'))
                 ->where('completed', true)
                 ->count();
             $percent = $totalVideos > 0 ? round(($watched / $totalVideos) * 100) : 0;
@@ -35,6 +37,12 @@ class CertificateController extends Controller
             if ($percent >= 100 && $certificate->status !== 'issued') {
                 $certificate->update(['status' => 'issued', 'issued_date' => now()]);
                 $enrollment->update(['status' => 'completed', 'completed_at' => $enrollment->completed_at ?? now()]);
+
+                try {
+                    Mail::to($user->email)->send(new CertificateIssued($certificate->fresh(['user', 'course'])));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
             }
 
             return [

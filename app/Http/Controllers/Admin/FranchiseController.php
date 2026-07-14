@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\FranchiseStatusUpdated;
 use App\Models\FranchiseBooking;
 use App\Models\FranchiseDocument;
 use App\Models\FranchiseLead;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -39,6 +41,14 @@ class FranchiseController extends Controller
         ]);
 
         $booking->update($validated);
+
+        if ($booking->email) {
+            try {
+                Mail::to($booking->email)->send(new FranchiseStatusUpdated($booking));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return back()->with('status', 'Booking stage updated.');
     }

@@ -39,6 +39,26 @@
     @if ($errors->has('login') || $errors->has('name') || $errors->has('email') || $errors->has('password'))
       new bootstrap.Modal(document.getElementById('lm')).show();
     @endif
+
+    @if (session('show_forgot_modal'))
+      new bootstrap.Modal(document.getElementById('lm')).show();
+      document.getElementById('forgotTabTrigger').click();
+    @endif
+
+    const demoM = document.getElementById('demoM');
+    if (demoM) {
+      const demoPlayer = document.getElementById('demoMPlayer');
+      demoM.addEventListener('show.bs.modal', e => {
+        const card = e.relatedTarget;
+        demoPlayer.src = card?.dataset.src || '';
+        document.getElementById('demoMTitle').textContent = card?.dataset.title || 'Free Demo Video';
+      });
+      demoM.addEventListener('hidden.bs.modal', () => {
+        demoPlayer.pause();
+        demoPlayer.removeAttribute('src');
+        demoPlayer.load();
+      });
+    }
   </script>
   @include('partials.theme-toggle-script')
   @yield('scripts')

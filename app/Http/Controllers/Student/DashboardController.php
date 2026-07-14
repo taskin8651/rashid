@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $enrollments = $user->enrollments()->with('course')->whereIn('status', ['paid', 'completed'])->get();
+        $enrollments = $user->enrollments()->with(['course', 'payment'])->whereIn('status', ['paid', 'completed'])->get();
 
         $stats = [
             'courses_enrolled' => $enrollments->count(),
@@ -22,9 +22,9 @@ class DashboardController extends Controller
         ];
 
         $myCourses = $enrollments->map(function ($e) use ($user) {
-            $totalVideos = $e->course->videos()->count();
+            $totalVideos = $e->course->videos()->where('status', 'active')->whereHas('media')->count();
             $watched = VideoProgress::where('user_id', $user->id)
-                ->whereIn('video_id', $e->course->videos()->pluck('id'))
+                ->whereIn('video_id', $e->course->videos()->where('status', 'active')->whereHas('media')->pluck('id'))
                 ->where('completed', true)
                 ->count();
             $percent = $totalVideos > 0 ? round(($watched / $totalVideos) * 100) : 0;
@@ -35,9 +35,21 @@ class DashboardController extends Controller
                 'videos_watched' => $watched,
                 'total_videos' => $totalVideos,
                 'enrolled_at' => optional($e->enrolled_at)->format('d M Y'),
+                'amount' => (float) $e->final_amount,
+                'payment_status' => $e->payment->status ?? $e->status,
             ];
         });
 
-        return view('student.dashboard', compact('stats', 'myCourses'));
+        $progressSegments = [
+            ['label' => 'Completed', 'value' => $myCourses->where('percent_complete', '>=', 100)->count(), 'color' => '40,180,90'],
+            ['label' => 'In Progress', 'value' => $myCourses->filter(fn ($mc) => $mc['percent_complete'] > 0 && $mc['percent_complete'] < 100)->count(), 'color' => '37,99,235'],
+            ['label' => 'Not Started', 'value' => $myCourses->where('percent_complete', 0)->count(), 'color' => '107,127,163'],
+        ];
+
+        $totalSpent = $enrollments->sum('final_amount');
+
+        $recentPayments = $enrollments->sortByDesc(fn ($e) => $e->enrolled_at ?? $e->created_at)->take(5);
+
+        return view('student.dashboard', compact('stats', 'myCourses', 'progressSegments', 'totalSpent', 'recentPayments'));
     }
 }

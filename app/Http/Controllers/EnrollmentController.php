@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EnrollmentConfirmed;
 use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Enrollment;
@@ -9,6 +10,7 @@ use App\Models\Payment;
 use App\Services\RazorpayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class EnrollmentController extends Controller
 {
@@ -103,7 +105,7 @@ class EnrollmentController extends Controller
             return redirect()->route('enroll.create', $course)->withErrors(['payment' => 'Payment verification failed.']);
         }
 
-        DB::transaction(function () use ($payment, $validated) {
+        $enrollment = DB::transaction(function () use ($payment, $validated) {
             $payment->update([
                 'razorpay_payment_id' => $validated['razorpay_payment_id'],
                 'razorpay_signature' => $validated['razorpay_signature'],
@@ -120,7 +122,15 @@ class EnrollmentController extends Controller
             if ($enrollment->batch_id) {
                 $enrollment->batch()->increment('seats_filled');
             }
+
+            return $enrollment;
         });
+
+        try {
+            Mail::to($enrollment->user->email)->send(new EnrollmentConfirmed($enrollment->load(['user', 'course'])));
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->route('student.dashboard')->with('status', 'Payment verified. Enrollment confirmed!');
     }

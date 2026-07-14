@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Payment;
 use App\Models\User;
+use App\Models\VideoProgress;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -20,6 +22,37 @@ class StudentController extends Controller
         $students = $query->latest()->paginate(20)->withQueryString();
 
         return view('admin.students.index', compact('students', 'search'));
+    }
+
+    public function show(User $student)
+    {
+        abort_unless($student->hasRole('student'), 404);
+
+        $enrollments = $student->enrollments()->with(['course', 'payment'])->latest('enrolled_at')->get();
+
+        $courses = $enrollments->map(function ($e) use ($student) {
+            $totalVideos = $e->course->videos()->where('status', 'active')->whereHas('media')->count();
+            $watched = VideoProgress::where('user_id', $student->id)
+                ->whereIn('video_id', $e->course->videos()->where('status', 'active')->whereHas('media')->pluck('id'))
+                ->where('completed', true)
+                ->count();
+            $percent = $totalVideos > 0 ? round(($watched / $totalVideos) * 100) : 0;
+
+            return ['enrollment' => $e, 'course' => $e->course, 'percent' => $percent];
+        });
+
+        $certificates = $student->certificates()->with('course')->get();
+        $quizAttempts = $student->quizAttempts()->with('course')->latest('submitted_at')->get();
+        $payments = Payment::where('user_id', $student->id)->latest()->get();
+
+        $stats = [
+            'courses' => $enrollments->count(),
+            'certificates' => $certificates->where('status', 'issued')->count(),
+            'videos_watched' => $student->videoProgress()->where('completed', true)->count(),
+            'total_spent' => $payments->where('status', 'paid')->sum('amount'),
+        ];
+
+        return view('admin.students.show', compact('student', 'courses', 'certificates', 'quizAttempts', 'payments', 'stats'));
     }
 
     public function update(Request $request, User $student)

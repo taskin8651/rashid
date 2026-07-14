@@ -129,8 +129,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var
 
 /* ANALYTICS BARS */
 .bar-chart{display:flex;align-items:end;gap:8px;height:160px;padding-top:10px}
-.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
-.bar-fill{width:100%;background:var(--grad);border-radius:6px 6px 0 0;transition:height 1s ease}
+.bar-col{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px}
+.bar-fill{width:100%;min-height:3px;background:var(--grad);border-radius:6px 6px 0 0;transition:height 1s ease}
 .bar-lbl{font-size:10px;color:var(--muted)}
 
 /* THEME TOGGLE */
@@ -139,6 +139,47 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var
 
 .psec{display:none}
 .psec.act{display:block}
+
+/* COURSE CARD (shared visual language with student/franchise course cards) */
+.mcc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all .3s}
+.mcc:hover{border-color:var(--orange)}
+.cthumb{height:140px;display:flex;align-items:center;justify-content:center;font-size:56px}
+.cinfo{padding:16px}
+.ptrack{background:rgba(var(--text-rgb),.08);height:5px;border-radius:5px}
+.pfill{background:var(--grad);border-radius:5px;height:100%}
+.bcontinue{background:var(--grad);color:#fff;border:none;border-radius:9px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;width:100%;margin-top:12px;font-family:inherit}
+.bcontinue:hover{opacity:.88}
+
+/* PREMIUM OVERVIEW BANNER / QUICK ACTIONS */
+.ov-banner{position:relative;overflow:hidden;background:var(--grad);border-radius:18px;padding:32px 28px;color:#fff;margin-bottom:24px}
+.ov-banner::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:rgba(255,255,255,.08);border-radius:50%}
+.ov-banner::after{content:'';position:absolute;bottom:-80px;left:22%;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%}
+.ov-banner h4{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;margin-bottom:4px;position:relative}
+.ov-banner p{font-size:13px;color:rgba(255,255,255,.85);margin:0;position:relative;max-width:520px}
+.ov-ribbon{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 11px;border-radius:20px;margin-bottom:12px;position:relative}
+.ov-banner-stats{display:flex;gap:28px;margin-top:20px;flex-wrap:wrap;position:relative}
+.ov-banner-stats b{display:block;font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700}
+.ov-banner-stats span{font-size:11px;color:rgba(255,255,255,.72);text-transform:uppercase;letter-spacing:.5px}
+
+/* BOOTSTRAP MODAL (dark-theme aware, used by Edit dialogs) */
+.modal-content{background:var(--navy-2);border:1px solid rgba(var(--text-rgb),.1);border-radius:18px;color:var(--text)}
+.modal-header{border-bottom:1px solid var(--border);padding:20px 22px}
+.modal-body{padding:22px}
+.modal-footer{border-top:1px solid var(--border);padding:14px 22px}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px}
+.btn-close{opacity:.6}
+[data-theme="dark"] .btn-close{filter:invert(1)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn-close{filter:invert(1)}}
+
+/* DONUT CHART */
+.donut{border-radius:50%;position:relative;flex-shrink:0}
+.donut-hole{position:absolute;inset:14%;background:var(--card);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.donut-center-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:var(--text)}
+.donut-center-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.donut-legend{display:flex;flex-direction:column;gap:10px;flex:1;min-width:140px}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.donut-legend-item b{margin-left:auto;color:var(--text);font-weight:700}
+.donut-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
 @media(max-width:768px){
   .sb{transform:translateX(-100%)}

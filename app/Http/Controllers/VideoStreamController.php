@@ -18,9 +18,21 @@ class VideoStreamController extends Controller
             abort(403, 'Enroll in this course to watch this video.');
         }
 
-        return response()->file($media->getPath(), [
+        $response = response()->file($media->getPath(), [
             'Content-Type' => $media->mime_type,
+            'Content-Disposition' => 'inline; filename="video"',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
+
+        // Symfony's ResponseHeaderBag recomputes Cache-Control from its own
+        // directive state rather than keeping a raw string, so these must be
+        // set via its API to actually stick (a plain header string gets
+        // silently rewritten, e.g. "private" reverting to "public").
+        $response->setPrivate();
+        $response->setMaxAge(0);
+        $response->headers->addCacheControlDirective('no-store');
+
+        return $response;
     }
 
     protected function canAccessPremium(Video $video): bool

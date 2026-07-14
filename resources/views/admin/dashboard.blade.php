@@ -3,16 +3,20 @@
 @section('title', 'Dashboard')
 
 @section('content')
-  <div class="shead mb-4"><h4>Welcome back, {{ explode(' ', auth()->user()->name)[0] }} 👋</h4><p>Here's what's happening with R-Tech Computer today.</p></div>
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3"><div class="stat"><div class="sicon" style="background:rgba(var(--accent-rgb),.15);color:var(--orange)"><i class="bi bi-people-fill"></i></div><div><div class="snum">{{ $totalStudents }}</div><div class="slbl">Total Students</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="stat"><div class="sicon" style="background:rgba(40,120,220,.15);color:var(--info)"><i class="bi bi-collection-play-fill"></i></div><div><div class="snum">{{ $activeCourses }}</div><div class="slbl">Active Courses</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="stat"><div class="sicon" style="background:rgba(40,180,90,.15);color:var(--ok)"><i class="bi bi-cash-stack"></i></div><div><div class="snum">₹{{ number_format($totalRevenue / 100000, 1) }}L</div><div class="slbl">Total Revenue</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="stat"><div class="sicon" style="background:rgba(160,50,200,.15);color:var(--purple)"><i class="bi bi-award-fill"></i></div><div><div class="snum">{{ $certificatesIssued }}</div><div class="slbl">Certificates Issued</div></div></div></div>
+  <div class="ov-banner">
+    <div class="ov-ribbon"><i class="bi bi-speedometer2"></i>Admin Panel</div>
+    <h4>Welcome back, {{ explode(' ', auth()->user()->name)[0] }} 👋</h4>
+    <p>Here's what's happening across R-Tech Computer today.</p>
+    <div class="ov-banner-stats">
+      <div><b>{{ $totalStudents }}</b><span>Students</span></div>
+      <div><b>{{ $activeCourses }}</b><span>Active Courses</span></div>
+      <div><b>₹{{ number_format($totalRevenue / 100000, 1) }}L</b><span>Total Revenue</span></div>
+      <div><b>{{ $certificatesIssued }}</b><span>Certificates</span></div>
+    </div>
   </div>
 
   <div class="row g-4">
-    <div class="col-lg-8">
+    <div class="col-lg-7">
       <div class="card-rt mb-4">
         <div class="card-title">Recent Enrollments</div>
         <div class="table-wrap"><table class="table-rt">
@@ -26,8 +30,44 @@
           </tbody>
         </table></div>
       </div>
+
+      <div class="card-rt">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="card-title mb-0">Recent Payments</div>
+          <a href="{{ route('admin.payments.index') }}" style="font-size:12px;color:var(--orange);text-decoration:none;font-weight:600">View All &rarr;</a>
+        </div>
+        <div class="table-wrap"><table class="table-rt">
+          <thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+          <tbody>
+            @forelse ($recentPayments as $p)
+              <tr>
+                <td>{{ $p->user->name ?? '—' }}</td>
+                <td>{{ $p->payable_type === 'course_enrollment' ? 'Course' : 'Franchise' }}</td>
+                <td>₹{{ number_format($p->amount, 0) }}</td>
+                <td>{{ $p->method ? ucfirst($p->method) : '—' }}</td>
+                <td>
+                  @php $badge = ['paid' => 'bg-paid', 'created' => 'bg-pending', 'failed' => 'bg-failed', 'refunded' => 'bg-inactive'][$p->status] ?? 'bg-inactive'; @endphp
+                  <span class="badge-rt {{ $badge }}">{{ ucfirst($p->status) }}</span>
+                </td>
+              </tr>
+            @empty
+              <tr><td colspan="5" style="color:var(--muted)">No payments yet.</td></tr>
+            @endforelse
+          </tbody>
+        </table></div>
+      </div>
     </div>
-    <div class="col-lg-4">
+
+    <div class="col-lg-5">
+      <div class="card-rt mb-4">
+        <div class="card-title">Revenue by Source</div>
+        @include('partials.charts.donut', [
+          'segments' => $revenueSegments,
+          'centerValue' => '₹' . number_format(($revenueSegments[0]['value'] + $revenueSegments[1]['value']) / 100000, 1) . 'L',
+          'centerLabel' => 'Total',
+        ])
+      </div>
+
       <div class="card-rt">
         <div class="card-title">Course Popularity</div>
         <div class="bar-chart">

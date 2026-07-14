@@ -16,10 +16,18 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $bookings = $request->user()->franchiseBookings()->with(['courses.category', 'courses.modules'])->latest()->get();
-        $bookings->flatMap->courses->loadCount('videos');
+        $courses = \Illuminate\Database\Eloquent\Collection::make($bookings->flatMap->courses);
+        $courses->loadCount(['videos', 'enrollments' => fn ($q) => $q->where('status', 'paid')]);
         $categories = Category::where('status', 'active')->get();
 
-        return view('franchise.courses', compact('bookings', 'categories'));
+        $stats = [
+            'total' => $courses->count(),
+            'active' => $courses->where('status', 'active')->count(),
+            'students' => $courses->sum('enrollments_count'),
+            'videos' => $courses->sum('videos_count'),
+        ];
+
+        return view('franchise.courses', compact('bookings', 'categories', 'stats'));
     }
 
     public function store(Request $request)

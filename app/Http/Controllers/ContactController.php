@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContactMessageReceived;
 use App\Models\ContactMessage;
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -25,7 +28,16 @@ class ContactController extends Controller
             'message' => ['nullable', 'string'],
         ]);
 
-        ContactMessage::create($validated);
+        $contactMessage = ContactMessage::create($validated);
+
+        $adminEmails = User::role('admin')->pluck('email');
+        if ($adminEmails->isNotEmpty()) {
+            try {
+                Mail::to($adminEmails->all())->send(new ContactMessageReceived($contactMessage));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return back()->with('status', 'Message sent! We will reply within 24 hours.');
     }

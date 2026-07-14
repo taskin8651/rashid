@@ -14,10 +14,19 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::with(['category', 'franchiseBooking'])->withCount('videos')->get();
+        $courses = Course::with(['category', 'franchiseBooking'])
+            ->withCount(['videos', 'enrollments' => fn ($q) => $q->where('status', 'paid')])
+            ->get();
         $categories = Category::all();
 
-        return view('admin.courses.index', compact('courses', 'categories'));
+        $stats = [
+            'total' => $courses->count(),
+            'active' => $courses->where('status', 'active')->count(),
+            'franchise' => $courses->whereNotNull('franchise_booking_id')->count(),
+            'students' => $courses->sum('enrollments_count'),
+        ];
+
+        return view('admin.courses.index', compact('courses', 'categories', 'stats'));
     }
 
     public function store(Request $request)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\FranchiseBookingConfirmed;
 use App\Models\FranchiseBooking;
 use App\Models\FranchiseLead;
 use App\Models\Payment;
@@ -9,6 +10,7 @@ use App\Models\User;
 use App\Services\RazorpayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
@@ -140,6 +142,14 @@ class FranchiseController extends Controller
 
         $booking = FranchiseBooking::findOrFail($payment->payable_id);
         $booking->update(['status' => 'paid']);
+
+        if ($booking->email) {
+            try {
+                Mail::to($booking->email)->send(new FranchiseBookingConfirmed($booking));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return view('franchise.success', compact('booking'));
     }
