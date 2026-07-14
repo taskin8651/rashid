@@ -52,6 +52,7 @@
               <button type="submit" class="action-btn danger" style="border:none;background:none"><i class="bi bi-trash-fill"></i></button>
             </form>
           </div>
+          <a href="{{ route('admin.courses.videos.index', $course) }}" class="bsave d-block text-center mb-2" style="text-decoration:none;font-size:12px;padding:8px"><i class="bi bi-camera-reels-fill me-1"></i>Manage Videos ({{ $course->videos_count }})</a>
           <details>
             <summary style="cursor:pointer;font-size:12px;color:var(--orange)">Edit course</summary>
             <form method="POST" action="{{ route('admin.courses.update', $course) }}" enctype="multipart/form-data" class="mt-3">

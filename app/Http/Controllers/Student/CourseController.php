@@ -12,7 +12,7 @@ class CourseController extends Controller
     {
         $user = $request->user();
 
-        $myCourses = $user->enrollments()->with('course')->where('status', 'paid')->get()->map(function ($e) use ($user) {
+        $myCourses = $user->enrollments()->with('course')->whereIn('status', ['paid', 'completed'])->get()->map(function ($e) use ($user) {
             $totalVideos = $e->course->videos()->count();
             $watched = VideoProgress::where('user_id', $user->id)
                 ->whereIn('video_id', $e->course->videos()->pluck('id'))

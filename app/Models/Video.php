@@ -18,7 +18,14 @@ class Video extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('file')->singleFile();
+        // Private disk: video files must never be reachable by a guessable public URL.
+        // Access is only granted through VideoStreamController's authorization check.
+        $this->addMediaCollection('file')->singleFile()->useDisk('local');
+    }
+
+    public function fileUrl(): ?string
+    {
+        return $this->getFirstMedia('file') ? route('videos.stream', $this) : null;
     }
 
     public function course()

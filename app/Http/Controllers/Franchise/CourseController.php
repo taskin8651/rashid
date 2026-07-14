@@ -16,6 +16,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $bookings = $request->user()->franchiseBookings()->with(['courses.category', 'courses.modules'])->latest()->get();
+        $bookings->flatMap->courses->loadCount('videos');
         $categories = Category::where('status', 'active')->get();
 
         return view('franchise.courses', compact('bookings', 'categories'));

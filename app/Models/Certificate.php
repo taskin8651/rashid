@@ -31,4 +31,13 @@ class Certificate extends Model implements HasMedia
     {
         return $this->belongsTo(Course::class);
     }
+
+    public static function generateCode(): string
+    {
+        do {
+            $code = 'RTC-' . now()->format('y') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
+        } while (self::where('cert_code', $code)->exists());
+
+        return $code;
+    }
 }

@@ -25,6 +25,7 @@
     <a class="slink {{ request()->routeIs('student.dashboard') ? 'act' : '' }}" href="{{ route('student.dashboard') }}"><i class="bi bi-grid-fill"></i>Dashboard</a>
     <a class="slink {{ request()->routeIs('student.courses.*') ? 'act' : '' }}" href="{{ route('student.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
     <div class="nsec">Learning</div>
+    <a class="slink {{ request()->routeIs('student.certificates.*') ? 'act' : '' }}" href="{{ route('student.certificates.index') }}"><i class="bi bi-award-fill"></i>Certificates</a>
     <a class="slink {{ request()->routeIs('student.wishlist.*') ? 'act' : '' }}" href="{{ route('student.wishlist.index') }}"><i class="bi bi-heart-fill"></i>Wishlist</a>
     <div class="nsec">Account</div>
     <a class="slink {{ request()->routeIs('student.profile.*') ? 'act' : '' }}" href="{{ route('student.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
