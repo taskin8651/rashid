@@ -47,7 +47,7 @@
         </div>
       </div>
       <div class="fbot">
-        <p>© {{ date('Y') }} R-Tech Computer · All rights reserved · <a href="#">Privacy Policy</a> · <a href="#">Terms</a></p>
+        <p>© {{ date('Y') }} R-Tech Computer · All rights reserved · <a href="{{ route('privacy-policy') }}">Privacy Policy</a> · <a href="{{ route('terms') }}">Terms</a></p>
         <a href="#topnav" class="back-top"><i class="bi bi-arrow-up"></i>Back to top</a>
       </div>
     </div>

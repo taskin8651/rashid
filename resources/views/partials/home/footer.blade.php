@@ -20,6 +20,8 @@
           <ul class="flinks">
             <li><a href="{{ route('home') }}">Home</a></li>
             <li><a href="{{ route('courses') }}">Courses</a></li>
+            <li><a href="{{ route('gallery') }}">Gallery</a></li>
+            <li><a href="{{ route('blog') }}">Blog</a></li>
             <li><a href="{{ route('franchise') }}">Franchise</a></li>
             <li><a href="{{ route('contact') }}">Contact</a></li>
           </ul>
@@ -38,7 +40,7 @@
         </div>
       </div>
       <div class="fbot">
-        <p>© {{ date('Y') }} R-Tech Computer · All rights reserved</p>
+        <p>© {{ date('Y') }} R-Tech Computer · All rights reserved · <a href="{{ route('privacy-policy') }}">Privacy Policy</a> · <a href="{{ route('terms') }}">Terms</a> · <a href="{{ route('refund-policy') }}">Refund Policy</a></p>
         <a href="#topnav" class="back-top"><i class="bi bi-arrow-up"></i>Back to top</a>
       </div>
     </div>

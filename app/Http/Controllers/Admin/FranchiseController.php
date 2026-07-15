@@ -23,6 +23,28 @@ class FranchiseController extends Controller
         return view('admin.franchise.index', compact('leads', 'bookings', 'stages'));
     }
 
+    public function export()
+    {
+        $leads = FranchiseLead::latest()->get();
+
+        $rows = ["Name,Email,Phone,City,Status,Date\n"];
+        foreach ($leads as $lead) {
+            $rows[] = implode(',', [
+                '"' . str_replace('"', '""', $lead->name) . '"',
+                $lead->email,
+                $lead->phone ?? '—',
+                $lead->city ?? '—',
+                $lead->status,
+                $lead->created_at->format('Y-m-d'),
+            ]) . "\n";
+        }
+
+        return \Illuminate\Support\Facades\Response::make(implode('', $rows), 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="franchise-leads-' . now()->format('Y-m-d') . '.csv"',
+        ]);
+    }
+
     public function updateLead(Request $request, FranchiseLead $lead)
     {
         $validated = $request->validate([

@@ -48,6 +48,40 @@
             @if ($mc['percent_complete'] >= 100)
               <a href="{{ route('student.certificates.index') }}" class="bcontinue" style="text-decoration:none;text-align:center;display:block;margin-top:8px;background:linear-gradient(135deg,#b8860b,#d4a017)"><i class="bi bi-award-fill me-1"></i>View Certificate</a>
             @endif
+
+            @if ($mc['review'])
+              <p style="font-size:11px;color:var(--muted);margin:10px 0 0;text-align:center">
+                <i class="bi bi-star-fill" style="color:var(--warn)"></i> You rated {{ $mc['review']->rating }}/5 &middot;
+                <span class="badge-rt {{ $mc['review']->status === 'approved' ? 'bg-active' : ($mc['review']->status === 'pending' ? 'bg-pending' : 'bg-failed') }}">{{ ucfirst($mc['review']->status) }}</span>
+              </p>
+            @else
+              <button type="button" class="bcontinue" style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--text)" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $mc['course']->id }}"><i class="bi bi-star me-1"></i>Rate this Course</button>
+            @endif
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="reviewModal{{ $mc['course']->id }}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Rate {{ $mc['course']->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form method="POST" action="{{ route('student.courses.review.store', $mc['course']) }}">
+              @csrf
+              <div class="modal-body">
+                <div class="star-picker mb-3">
+                  @for ($i = 5; $i >= 1; $i--)
+                    <input type="radio" name="rating" id="star{{ $mc['course']->id }}_{{ $i }}" value="{{ $i }}" {{ $i === 5 ? 'required' : '' }}>
+                    <label for="star{{ $mc['course']->id }}_{{ $i }}"><i class="bi bi-star-fill"></i></label>
+                  @endfor
+                </div>
+                <label class="flbl">Your Review (optional)</label>
+                <textarea class="fctrl" name="comment" rows="3" placeholder="Share your experience with this course…"></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="bsave">Submit Review</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

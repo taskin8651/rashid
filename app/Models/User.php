@@ -122,4 +122,32 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->hasMany(QuizAttempt::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function referralsMade()
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    public function referredBy()
+    {
+        return $this->hasOne(Referral::class, 'referred_user_id');
+    }
+
+    public function ensureReferralCode(): string
+    {
+        if (!$this->referral_code) {
+            do {
+                $code = 'REF' . strtoupper(Str::random(6));
+            } while (self::where('referral_code', $code)->exists());
+
+            $this->forceFill(['referral_code' => $code])->save();
+        }
+
+        return $this->referral_code;
+    }
 }

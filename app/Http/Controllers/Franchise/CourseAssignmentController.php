@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\Course;
+use App\Notifications\AssignmentGradedNotification;
 use Illuminate\Http\Request;
 
 class CourseAssignmentController extends Controller
@@ -78,6 +79,8 @@ class CourseAssignmentController extends Controller
             'status' => 'graded',
             'graded_at' => now(),
         ]);
+
+        $submission->user->notify(new AssignmentGradedNotification($submission->fresh(['assignment'])));
 
         return back()->with('status', 'Submission graded.');
     }

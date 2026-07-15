@@ -5,10 +5,13 @@
 @section('content')
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
     <div class="shead mb-0"><h4>Student Management</h4><p>{{ $students->total() }} registered students</p></div>
-    <form method="GET" action="{{ route('admin.students.index') }}" class="d-flex gap-2">
-      <input class="fctrl" type="text" name="search" value="{{ $search }}" placeholder="Search students…" style="width:220px"/>
-      <button class="bsave" type="submit">Search</button>
-    </form>
+    <div class="d-flex gap-2 flex-wrap">
+      <form method="GET" action="{{ route('admin.students.index') }}" class="d-flex gap-2">
+        <input class="fctrl" type="text" name="search" value="{{ $search }}" placeholder="Search students…" style="width:220px"/>
+        <button class="bsave" type="submit">Search</button>
+      </form>
+      <a href="{{ route('admin.students.export') }}" class="bghost" style="text-decoration:none;font-size:14px;padding:11px 20px"><i class="bi bi-download me-1"></i>Export CSV</a>
+    </div>
   </div>
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">

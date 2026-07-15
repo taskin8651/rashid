@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\CertificateIssued;
 use App\Models\Certificate;
 use App\Models\VideoProgress;
+use App\Notifications\CertificateIssuedNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -38,11 +39,15 @@ class CertificateController extends Controller
                 $certificate->update(['status' => 'issued', 'issued_date' => now()]);
                 $enrollment->update(['status' => 'completed', 'completed_at' => $enrollment->completed_at ?? now()]);
 
+                $issued = $certificate->fresh(['user', 'course']);
+
                 try {
-                    Mail::to($user->email)->send(new CertificateIssued($certificate->fresh(['user', 'course'])));
+                    Mail::to($user->email)->send(new CertificateIssued($issued));
                 } catch (\Throwable $e) {
                     report($e);
                 }
+
+                $user->notify(new CertificateIssuedNotification($issued));
             }
 
             return [

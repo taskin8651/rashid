@@ -27,6 +27,11 @@
     <a class="slink {{ request()->routeIs('admin.payments.*') ? 'act' : '' }}" href="{{ route('admin.payments.index') }}"><i class="bi bi-credit-card-fill"></i>Payments</a>
     <a class="slink {{ request()->routeIs('admin.franchise.index') ? 'act' : '' }}" href="{{ route('admin.franchise.index') }}"><i class="bi bi-flag-fill"></i>Franchise Leads</a>
     <a class="slink {{ request()->routeIs('admin.franchise.resources.*') ? 'act' : '' }}" href="{{ route('admin.franchise.resources.index') }}"><i class="bi bi-folder2-open"></i>Franchise Resources</a>
+    <div class="nsec">Content</div>
+    <a class="slink {{ request()->routeIs('admin.gallery.*') ? 'act' : '' }}" href="{{ route('admin.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
+    <a class="slink {{ request()->routeIs('admin.reviews.*') ? 'act' : '' }}" href="{{ route('admin.reviews.index') }}"><i class="bi bi-star-fill"></i>Reviews</a>
+    <a class="slink {{ request()->routeIs('admin.faqs.*') ? 'act' : '' }}" href="{{ route('admin.faqs.index') }}"><i class="bi bi-question-circle-fill"></i>FAQs</a>
+    <a class="slink {{ request()->routeIs('admin.posts.*') ? 'act' : '' }}" href="{{ route('admin.posts.index') }}"><i class="bi bi-file-earmark-richtext-fill"></i>Blog</a>
     <div class="nsec">More</div>
     <a class="slink" href="{{ route('home') }}"><i class="bi bi-house-fill"></i>Back to Website</a>
     <form method="POST" action="{{ route('logout') }}">
@@ -42,6 +47,7 @@
     <button class="sbtn" onclick="document.getElementById('sb').classList.toggle('open')"><i class="bi bi-list"></i></button>
     <div class="tt">@yield('title', 'Dashboard')</div>
     <div class="tact">
+      @include('partials.notification-bell')
       <a href="{{ route('home') }}" class="ibtn" title="View Site"><i class="bi bi-box-arrow-up-right"></i></a>
       @include('partials.theme-toggle-button')
     </div>

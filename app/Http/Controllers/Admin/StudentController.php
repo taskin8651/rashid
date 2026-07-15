@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VideoProgress;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
@@ -23,6 +24,28 @@ class StudentController extends Controller
         $students = $query->latest()->paginate(20)->withQueryString();
 
         return view('admin.students.index', compact('students', 'search'));
+    }
+
+    public function export()
+    {
+        $students = User::role('student')->with('enrollments')->latest()->get();
+
+        $rows = ["Name,Email,Phone,Courses Enrolled,Joined,Status\n"];
+        foreach ($students as $s) {
+            $rows[] = implode(',', [
+                '"' . str_replace('"', '""', $s->name) . '"',
+                $s->email,
+                $s->phone ?? '—',
+                $s->enrollments->where('status', 'paid')->count(),
+                $s->created_at->format('Y-m-d'),
+                $s->is_active ? 'Active' : 'Inactive',
+            ]) . "\n";
+        }
+
+        return Response::make(implode('', $rows), 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="students-' . now()->format('Y-m-d') . '.csv"',
+        ]);
     }
 
     public function show(User $student)

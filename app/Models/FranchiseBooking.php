@@ -54,6 +54,11 @@ class FranchiseBooking extends Model
         return $this->hasManyThrough(Enrollment::class, Course::class);
     }
 
+    public function galleryImages()
+    {
+        return $this->hasMany(GalleryImage::class);
+    }
+
     public function stageLabel(): string
     {
         return self::STAGES[$this->stage] ?? $this->stage;

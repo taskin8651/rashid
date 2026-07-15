@@ -43,9 +43,23 @@
         <h2 class="sec-h">What Our <em>Students Say</em></h2>
       </div>
       <div class="row g-4">
-        <div class="col-md-6 col-lg-4 rv"><div class="tc"><div class="stars">★★★★★</div><p>"R-Tech completely changed my career direction. The Web Development course was 100% practical — I built real projects and got placed within 2 months!"</p><div class="rr"><div class="ra" style="background:var(--grad)">A</div><div><div class="rname">Amit Sharma</div><div class="rrole">Web Developer @ TechCorp</div></div></div></div></div>
-        <div class="col-md-6 col-lg-4 rv"><div class="tc"><div class="stars">★★★★★</div><p>"The Graphic Design course covered everything in depth. Now I run my own freelance design business!"</p><div class="rr"><div class="ra" style="background:linear-gradient(135deg,#9c27b0,#e91e63)">P</div><div><div class="rname">Priya Singh</div><div class="rrole">Freelance Graphic Designer</div></div></div></div></div>
-        <div class="col-md-6 col-lg-4 rv"><div class="tc"><div class="stars">★★★★★</div><p>"Best digital marketing training I've found. I now manage ₹5L/month ad budgets professionally!"</p><div class="rr"><div class="ra" style="background:linear-gradient(135deg,#009688,#4caf50)">R</div><div><div class="rname">Rohit Verma</div><div class="rrole">Digital Marketing Manager</div></div></div></div></div>
+        @forelse ($testimonials as $t)
+          @php $grad = ['var(--grad)', 'linear-gradient(135deg,#9c27b0,#e91e63)', 'linear-gradient(135deg,#009688,#4caf50)', 'linear-gradient(135deg,#f59e0b,#ef4444)'][$loop->index % 4]; @endphp
+          <div class="col-md-6 col-lg-4 rv">
+            <div class="tc">
+              <div class="stars">{{ str_repeat('★', $t->rating) }}{{ str_repeat('☆', 5 - $t->rating) }}</div>
+              <p>"{{ $t->comment }}"</p>
+              <div class="rr">
+                <div class="ra" style="background:{{ $grad }}">{{ strtoupper(substr($t->user->name, 0, 1)) }}</div>
+                <div><div class="rname">{{ $t->user->name }}</div><div class="rrole">{{ $t->course->name }}</div></div>
+              </div>
+            </div>
+          </div>
+        @empty
+          <div class="col-md-6 col-lg-4 rv"><div class="tc"><div class="stars">★★★★★</div><p>"R-Tech completely changed my career direction. The Web Development course was 100% practical — I built real projects and got placed within 2 months!"</p><div class="rr"><div class="ra" style="background:var(--grad)">A</div><div><div class="rname">Amit Sharma</div><div class="rrole">Web Developer @ TechCorp</div></div></div></div></div>
+          <div class="col-md-6 col-lg-4 rv"><div class="tc"><div class="stars">★★★★★</div><p>"The Graphic Design course covered everything in depth. Now I run my own freelance design business!"</p><div class="rr"><div class="ra" style="background:linear-gradient(135deg,#9c27b0,#e91e63)">P</div><div><div class="rname">Priya Singh</div><div class="rrole">Freelance Graphic Designer</div></div></div></div></div>
+          <div class="col-md-6 col-lg-4 rv"><div class="tc"><div class="stars">★★★★★</div><p>"Best digital marketing training I've found. I now manage ₹5L/month ad budgets professionally!"</p><div class="rr"><div class="ra" style="background:linear-gradient(135deg,#009688,#4caf50)">R</div><div><div class="rname">Rohit Verma</div><div class="rrole">Digital Marketing Manager</div></div></div></div></div>
+        @endforelse
       </div>
     </div>
   </section>

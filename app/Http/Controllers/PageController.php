@@ -25,4 +25,19 @@ class PageController extends Controller
     {
         return view('why-rtech');
     }
+
+    public function privacyPolicy()
+    {
+        return view('legal.privacy-policy');
+    }
+
+    public function terms()
+    {
+        return view('legal.terms');
+    }
+
+    public function refundPolicy()
+    {
+        return view('legal.refund-policy');
+    }
 }

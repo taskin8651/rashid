@@ -27,6 +27,7 @@
     <div class="nsec">Learning</div>
     <a class="slink {{ request()->routeIs('student.certificates.*') ? 'act' : '' }}" href="{{ route('student.certificates.index') }}"><i class="bi bi-award-fill"></i>Certificates</a>
     <a class="slink {{ request()->routeIs('student.wishlist.*') ? 'act' : '' }}" href="{{ route('student.wishlist.index') }}"><i class="bi bi-heart-fill"></i>Wishlist</a>
+    <a class="slink {{ request()->routeIs('student.referrals.*') ? 'act' : '' }}" href="{{ route('student.referrals.index') }}"><i class="bi bi-gift-fill"></i>Refer &amp; Earn</a>
     <div class="nsec">Account</div>
     <a class="slink {{ request()->routeIs('student.profile.*') ? 'act' : '' }}" href="{{ route('student.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
     <a class="slink {{ request()->routeIs('student.payments.*') ? 'act' : '' }}" href="{{ route('student.payments.index') }}"><i class="bi bi-receipt"></i>Payment History</a>
@@ -45,6 +46,7 @@
     <button class="sbtn" onclick="document.getElementById('sb').classList.toggle('open')"><i class="bi bi-list"></i></button>
     <div class="tt">@yield('title', 'Dashboard')</div>
     <div class="tact">
+      @include('partials.notification-bell')
       <a href="{{ route('home') }}" class="ibtn" title="Home"><i class="bi bi-house-fill"></i></a>
       @include('partials.theme-toggle-button')
     </div>

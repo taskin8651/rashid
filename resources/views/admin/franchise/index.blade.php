@@ -3,7 +3,10 @@
 @section('title', 'Franchise Leads & Bookings')
 
 @section('content')
-  <div class="shead mb-4"><h4>Franchise Inquiries</h4><p>Follow up on inquiries and track paid registrations</p></div>
+  <div class="shead mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div><h4>Franchise Inquiries</h4><p>Follow up on inquiries and track paid registrations</p></div>
+    <a href="{{ route('admin.franchise.export') }}" class="bghost" style="text-decoration:none;font-size:14px;padding:11px 20px"><i class="bi bi-download me-1"></i>Export Leads CSV</a>
+  </div>
 
   <div class="card-rt mb-4">
     <div class="card-title">Inquiries ({{ $leads->count() }})</div>

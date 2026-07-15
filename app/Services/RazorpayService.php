@@ -43,4 +43,13 @@ class RazorpayService
             return false;
         }
     }
+
+    public function refund(string $paymentId, float $amountRupees): string
+    {
+        $refund = $this->api->payment->fetch($paymentId)->refund([
+            'amount' => (int) round($amountRupees * 100),
+        ]);
+
+        return $refund['id'];
+    }
 }

@@ -7,6 +7,8 @@ use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Payment;
+use App\Models\Referral;
+use App\Notifications\EnrollmentConfirmedNotification;
 use App\Services\RazorpayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -126,11 +128,17 @@ class EnrollmentController extends Controller
             return $enrollment;
         });
 
+        $enrollment->load(['user', 'course']);
+
         try {
-            Mail::to($enrollment->user->email)->send(new EnrollmentConfirmed($enrollment->load(['user', 'course'])));
+            Mail::to($enrollment->user->email)->send(new EnrollmentConfirmed($enrollment));
         } catch (\Throwable $e) {
             report($e);
         }
+
+        $enrollment->user->notify(new EnrollmentConfirmedNotification($enrollment));
+
+        Referral::rewardForFirstPurchase($enrollment->user);
 
         return redirect()->route('student.dashboard')->with('status', 'Payment verified. Enrollment confirmed!');
     }

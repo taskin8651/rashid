@@ -10,9 +10,14 @@ use App\Http\Controllers\Admin\CourseVideoController as AdminCourseVideoControll
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FranchiseController as AdminFranchiseController;
 use App\Http\Controllers\Admin\FranchiseResourceController as AdminFranchiseResourceController;
+use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\PostController as AdminPostController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
@@ -23,11 +28,14 @@ use App\Http\Controllers\Franchise\CourseQuizController as FranchiseCourseQuizCo
 use App\Http\Controllers\Franchise\CourseVideoController as FranchiseCourseVideoController;
 use App\Http\Controllers\Franchise\DashboardController as FranchiseDashboardController;
 use App\Http\Controllers\Franchise\DocumentController as FranchiseDocumentController;
+use App\Http\Controllers\Franchise\GalleryController as FranchiseGalleryController;
 use App\Http\Controllers\Franchise\ProfileController as FranchiseProfileController;
 use App\Http\Controllers\Franchise\ResourceController as FranchiseResourceController;
 use App\Http\Controllers\Franchise\StudentController as FranchiseStudentController;
 use App\Http\Controllers\FranchiseController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NoteDownloadController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
@@ -39,6 +47,8 @@ use App\Http\Controllers\Student\NoteController as StudentNoteController;
 use App\Http\Controllers\Student\PaymentController as StudentPaymentController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\Student\QuizController as StudentQuizController;
+use App\Http\Controllers\Student\ReferralController as StudentReferralController;
+use App\Http\Controllers\Student\ReviewController as StudentReviewController;
 use App\Http\Controllers\Student\WishlistController as StudentWishlistController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SubmissionDownloadController;
@@ -64,6 +74,15 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 
 Route::get('/courses', [CourseController::class, 'index'])->name('courses');
 Route::get('/free-demo', [PageController::class, 'freeDemo'])->name('free-demo');
+
+Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+
+Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+Route::get('/refund-policy', [PageController::class, 'refundPolicy'])->name('refund-policy');
 
 // URL must be a valid, unexpired signature (see Video::fileUrl()) AND, for
 // non-demo videos, the requester must be authorized — see VideoStreamController.
@@ -103,6 +122,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/enroll/{course:slug}', [EnrollmentController::class, 'store'])->name('enroll.store');
     Route::post('/enroll/{course:slug}/verify', [EnrollmentController::class, 'verify'])->name('enroll.verify');
 
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
     Route::prefix('student')->middleware('role:student')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
 
@@ -133,6 +156,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/id-card', [StudentIdCardController::class, 'view'])->name('student.id-card.view');
         Route::get('/id-card/download', [StudentIdCardController::class, 'download'])->name('student.id-card.download');
+
+        Route::post('/courses/{course}/review', [StudentReviewController::class, 'store'])->name('student.courses.review.store');
+
+        Route::get('/referrals', [StudentReferralController::class, 'index'])->name('student.referrals.index');
     });
 
     Route::prefix('franchise')->middleware('role:franchisee')->group(function () {
@@ -173,6 +200,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/students', [FranchiseStudentController::class, 'index'])->name('franchise.students.index');
 
+        Route::get('/gallery', [FranchiseGalleryController::class, 'index'])->name('franchise.gallery.index');
+        Route::post('/gallery', [FranchiseGalleryController::class, 'store'])->name('franchise.gallery.store');
+        Route::delete('/gallery/{gallery}', [FranchiseGalleryController::class, 'destroy'])->name('franchise.gallery.destroy');
+
         Route::get('/profile', [FranchiseProfileController::class, 'edit'])->name('franchise.profile.edit');
         Route::post('/profile', [FranchiseProfileController::class, 'update'])->name('franchise.profile.update');
         Route::post('/change-password', [FranchiseProfileController::class, 'changePassword'])->name('franchise.password.update');
@@ -182,6 +213,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
+        Route::get('/students/export', [AdminStudentController::class, 'export'])->name('admin.students.export');
         Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
         Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCardView'])->name('admin.students.id-card.view');
         Route::get('/students/{student}/id-card/download', [AdminStudentController::class, 'idCardDownload'])->name('admin.students.id-card.download');
@@ -223,8 +255,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('admin.coupons.destroy');
 
         Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
+        Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');
+        Route::post('/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('admin.payments.refund');
 
         Route::get('/franchise', [AdminFranchiseController::class, 'index'])->name('admin.franchise.index');
+        Route::get('/franchise/export', [AdminFranchiseController::class, 'export'])->name('admin.franchise.export');
         Route::post('/franchise/leads/{lead}', [AdminFranchiseController::class, 'updateLead'])->name('admin.franchise.leads.update');
         Route::post('/franchise/bookings/{booking}', [AdminFranchiseController::class, 'updateBooking'])->name('admin.franchise.bookings.update');
         Route::post('/franchise/bookings/{booking}/documents', [AdminFranchiseController::class, 'uploadAgreement'])->name('admin.franchise.bookings.upload');
@@ -233,5 +268,27 @@ Route::middleware('auth')->group(function () {
         Route::get('/franchise/resources', [AdminFranchiseResourceController::class, 'index'])->name('admin.franchise.resources.index');
         Route::post('/franchise/resources', [AdminFranchiseResourceController::class, 'store'])->name('admin.franchise.resources.store');
         Route::delete('/franchise/resources/{resource}', [AdminFranchiseResourceController::class, 'destroy'])->name('admin.franchise.resources.destroy');
+
+        Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('admin.gallery.index');
+        Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('admin.gallery.store');
+        Route::post('/gallery/{gallery}/approve', [AdminGalleryController::class, 'approve'])->name('admin.gallery.approve');
+        Route::post('/gallery/{gallery}/reject', [AdminGalleryController::class, 'reject'])->name('admin.gallery.reject');
+        Route::delete('/gallery/{gallery}', [AdminGalleryController::class, 'destroy'])->name('admin.gallery.destroy');
+
+        Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
+        Route::post('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('admin.reviews.approve');
+        Route::post('/reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('admin.reviews.reject');
+        Route::post('/reviews/{review}/feature', [AdminReviewController::class, 'toggleFeature'])->name('admin.reviews.feature');
+        Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+
+        Route::get('/faqs', [AdminFaqController::class, 'index'])->name('admin.faqs.index');
+        Route::post('/faqs', [AdminFaqController::class, 'store'])->name('admin.faqs.store');
+        Route::post('/faqs/{faq}', [AdminFaqController::class, 'update'])->name('admin.faqs.update');
+        Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])->name('admin.faqs.destroy');
+
+        Route::get('/posts', [AdminPostController::class, 'index'])->name('admin.posts.index');
+        Route::post('/posts', [AdminPostController::class, 'store'])->name('admin.posts.store');
+        Route::post('/posts/{post}', [AdminPostController::class, 'update'])->name('admin.posts.update');
+        Route::delete('/posts/{post}', [AdminPostController::class, 'destroy'])->name('admin.posts.destroy');
     });
 });

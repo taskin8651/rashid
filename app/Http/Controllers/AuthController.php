@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Referral;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +63,18 @@ class AuthController extends Controller
             'password' => $validated['password'],
         ]);
         $user->assignRole('student');
+
+        $refCode = $request->session()->pull('ref_code');
+        if ($refCode) {
+            $referrer = User::where('referral_code', $refCode)->first();
+            if ($referrer) {
+                Referral::create([
+                    'referrer_id' => $referrer->id,
+                    'referred_user_id' => $user->id,
+                    'status' => 'pending',
+                ]);
+            }
+        }
 
         Auth::login($user);
         $request->session()->regenerate();

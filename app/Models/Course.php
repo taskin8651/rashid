@@ -82,4 +82,30 @@ class Course extends Model implements HasMedia
     {
         return $this->getFirstMediaUrl('thumbnail') ?: null;
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function approvedReviews()
+    {
+        return $this->reviews()->where('status', 'approved');
+    }
+
+    public function averageRating(): float
+    {
+        $count = $this->approvedReviews()->count();
+
+        return $count > 0
+            ? round((float) $this->approvedReviews()->avg('rating'), 1)
+            : (float) $this->rating;
+    }
+
+    public function reviewCount(): int
+    {
+        $count = $this->approvedReviews()->count();
+
+        return $count > 0 ? $count : (int) $this->rating_count;
+    }
 }

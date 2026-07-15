@@ -11,13 +11,14 @@ class Payment extends Model
 
     protected $fillable = [
         'payable_type', 'payable_id', 'user_id',
-        'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature',
-        'amount', 'currency', 'method', 'status', 'raw_response',
+        'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature', 'razorpay_refund_id',
+        'amount', 'currency', 'method', 'status', 'refunded_at', 'raw_response',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'raw_response' => 'array',
+        'refunded_at' => 'datetime',
     ];
 
     public function user()

@@ -28,6 +28,7 @@
     <div class="nsec">My Institute</div>
     <a class="slink {{ request()->routeIs('franchise.courses.*') ? 'act' : '' }}" href="{{ route('franchise.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
     <a class="slink {{ request()->routeIs('franchise.students.*') ? 'act' : '' }}" href="{{ route('franchise.students.index') }}"><i class="bi bi-people-fill"></i>My Students</a>
+    <a class="slink {{ request()->routeIs('franchise.gallery.*') ? 'act' : '' }}" href="{{ route('franchise.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
     <div class="nsec">Account</div>
     <a class="slink {{ request()->routeIs('franchise.profile.*') ? 'act' : '' }}" href="{{ route('franchise.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
     <div class="nsec">More</div>
@@ -45,6 +46,7 @@
     <button class="sbtn" onclick="document.getElementById('sb').classList.toggle('open')"><i class="bi bi-list"></i></button>
     <div class="tt">@yield('title', 'Overview')</div>
     <div class="tact">
+      @include('partials.notification-bell')
       <a href="{{ route('home') }}" class="ibtn" title="Home"><i class="bi bi-house-fill"></i></a>
       @include('partials.theme-toggle-button')
     </div>

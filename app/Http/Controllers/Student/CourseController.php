@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\Review;
 use App\Models\Video;
 use App\Models\VideoProgress;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ class CourseController extends Controller
                 'percent_complete' => $percent,
                 'videos_watched' => $watched,
                 'total_videos' => $totalVideos,
+                'review' => Review::where('course_id', $e->course_id)->where('user_id', $user->id)->first(),
             ];
         });
 

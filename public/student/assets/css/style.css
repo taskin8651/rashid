@@ -218,3 +218,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var
   .main{margin-left:0}
   .sbtn{display:block}
 }
+
+.star-picker{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px}
+.star-picker input{display:none}
+.star-picker label{font-size:28px;color:rgba(var(--text-rgb),.15);cursor:pointer;transition:color .15s}
+
+.notif-dot{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1}
+.notif-menu{width:340px;max-width:90vw;padding:0;border-radius:14px;border:1px solid var(--border);box-shadow:0 16px 40px rgba(0,0,0,.16);overflow:hidden}
+.notif-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text)}
+.notif-mark-all{background:none;border:none;color:var(--orange);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.notif-item-form{margin:0}
+.notif-item{display:flex;align-items:flex-start;gap:10px;width:100%;background:none;border:none;border-bottom:1px solid var(--border);padding:12px 16px;text-align:left;cursor:pointer;transition:background .15s}
+.notif-item:hover{background:rgba(var(--text-rgb),.04)}
+.notif-item i{color:var(--orange);font-size:15px;margin-top:2px;flex-shrink:0}
+.notif-item span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.notif-item b{font-size:12.5px;color:var(--text)}
+.notif-item small{font-size:11.5px;color:var(--muted);white-space:normal}
+.notif-item em{font-size:10px;color:var(--muted);font-style:normal}
+.notif-empty{padding:24px 16px;text-align:center;font-size:12.5px;color:var(--muted)}
+.notif-view-all{display:block;text-align:center;padding:12px;font-size:12px;font-weight:600;color:var(--orange);text-decoration:none}
+.notif-view-all:hover{background:rgba(var(--text-rgb),.04)}
+.star-picker input:checked~label,.star-picker label:hover,.star-picker label:hover~label{color:var(--warn)}

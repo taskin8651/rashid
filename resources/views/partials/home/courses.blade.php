@@ -23,8 +23,8 @@
                 <p>{{ $course->description }}</p>
                 <div class="cc-meta">
                   <span><i class="bi bi-clock-fill"></i>{{ $course->duration_text }}</span>
-                  @if ($course->rating)
-                    <span><i class="bi bi-star-fill" style="color:var(--warn)"></i>{{ $course->rating }} ({{ $course->rating_count }})</span>
+                  @if ($course->averageRating())
+                    <span><i class="bi bi-star-fill" style="color:var(--warn)"></i>{{ $course->averageRating() }} ({{ $course->reviewCount() }})</span>
                   @endif
                 </div>
               </div>
