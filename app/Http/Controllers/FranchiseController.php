@@ -61,6 +61,7 @@ class FranchiseController extends Controller
             'email' => ['required', 'email'],
             'phone' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:255'],
+            'terms' => ['accepted'],
         ];
 
         if (!Auth::check()) {

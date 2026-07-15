@@ -18,7 +18,10 @@
               Issued to <strong style="color:#fff">{{ auth()->user()->name }}</strong><br>
               on {{ $row['certificate']->issued_date->format('d M Y') }} &middot; Cert No. {{ $row['certificate']->cert_code }}
             </div>
-            <a class="bcontinue" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;padding:11px 24px;margin-top:20px" href="{{ route('student.certificates.download', $row['certificate']) }}"><i class="bi bi-download"></i>Download PDF</a>
+            <div class="d-flex gap-2 flex-wrap" style="margin-top:20px">
+              <a class="bcontinue" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;padding:11px 24px;margin:0" href="{{ route('student.certificates.download', $row['certificate']) }}"><i class="bi bi-download"></i>Download PDF</a>
+              <a class="bcontinue" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;padding:11px 24px;margin:0;background:rgba(255,255,255,.12)" href="{{ route('certificates.verify', ['code' => $row['certificate']->cert_code]) }}" target="_blank"><i class="bi bi-patch-check-fill"></i>Verify</a>
+            </div>
           </div>
         @else
           <div class="mcc" style="padding:24px;height:100%">

@@ -19,7 +19,7 @@
                     <span style="font-size:10px;background:rgba(40,180,90,.12);color:var(--ok);border:1px solid rgba(125,220,160,.25);padding:3px 9px;border-radius:10px;font-weight:700">R-Tech Official</span>
                   @endif
                 </div>
-                <h3>{{ $course->name }}</h3>
+                <h3><a href="{{ route('courses.show', $course) }}" style="color:inherit;text-decoration:none">{{ $course->name }}</a></h3>
                 <p>{{ $course->description }}</p>
                 <div class="cc-meta">
                   <span><i class="bi bi-clock-fill"></i>{{ $course->duration_text }}</span>
@@ -30,7 +30,8 @@
               </div>
               <div class="cc-ft">
                 <div class="price-big">₹{{ number_format($course->price, 0) }}<span class="price-sub">All-inclusive · Certificate</span></div>
-                <div>
+                <div class="d-flex gap-2">
+                  <a class="btn-dm" href="{{ route('courses.show', $course) }}">Details</a>
                   @auth
                     <a class="btn-enr" href="{{ route('enroll.create', $course) }}">Enroll Now</a>
                   @else

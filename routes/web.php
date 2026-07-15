@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CertificateVerificationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
@@ -73,6 +74,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/courses', [CourseController::class, 'index'])->name('courses');
+Route::get('/courses/{course:slug}', [CourseController::class, 'show'])->name('courses.show');
 Route::get('/free-demo', [PageController::class, 'freeDemo'])->name('free-demo');
 
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
@@ -83,6 +85,8 @@ Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.sho
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/refund-policy', [PageController::class, 'refundPolicy'])->name('refund-policy');
+
+Route::get('/certificates/verify', [CertificateVerificationController::class, 'show'])->name('certificates.verify');
 
 // URL must be a valid, unexpired signature (see Video::fileUrl()) AND, for
 // non-demo videos, the requester must be authorized — see VideoStreamController.

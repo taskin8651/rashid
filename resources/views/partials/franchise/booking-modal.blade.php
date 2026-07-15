@@ -21,6 +21,13 @@
                   <div class="mb-3"><label class="fl">Set a Password</label><input class="mi" type="password" name="password" placeholder="Min 8 characters" required /></div>
                   <div class="mb-0"><label class="fl">Confirm Password</label><input class="mi" type="password" name="password_confirmation" placeholder="Repeat password" required /></div>
                 @endguest
+                <div class="mt-3 form-check">
+                  <input class="form-check-input" type="checkbox" name="terms" id="fbmTerms" value="1" required />
+                  <label class="form-check-label" for="fbmTerms" style="font-size:12px;color:var(--muted)">
+                    I agree to the <a href="{{ route('terms') }}" target="_blank" style="color:var(--orange)">Terms of Service</a> and <a href="{{ route('privacy-policy') }}" target="_blank" style="color:var(--orange)">Privacy Policy</a>
+                  </label>
+                  @error('terms')<div class="text-danger" style="font-size:12px">{{ $message }}</div>@enderror
+                </div>
               </div>
               <div class="col-md-6">
                 <h6 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">Payment</h6>

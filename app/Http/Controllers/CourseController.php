@@ -23,4 +23,38 @@ class CourseController extends Controller
 
         return view('courses', compact('courses', 'categories', 'search', 'categoryId'));
     }
+
+    public function show(Course $course)
+    {
+        abort_unless($course->status === 'active', 404);
+
+        $course->load([
+            'category',
+            'franchiseBooking',
+            'modules.videos' => fn ($q) => $q->where('status', 'active'),
+        ]);
+
+        $demoVideos = $course->videos()->where('type', 'demo')->where('status', 'active')->whereHas('media')->get();
+
+        $batches = $course->batches()->where('status', '!=', 'closed')->get();
+
+        $reviews = $course->approvedReviews()->with('user')->latest()->take(10)->get();
+
+        $ratingBreakdown = [];
+        for ($star = 5; $star >= 1; $star--) {
+            $ratingBreakdown[$star] = $course->approvedReviews()->where('rating', $star)->count();
+        }
+
+        $relatedCourses = Course::where('status', 'active')
+            ->where('category_id', $course->category_id)
+            ->where('id', '!=', $course->id)
+            ->take(3)
+            ->get();
+
+        $isEnrolled = auth()->check()
+            ? $course->enrollments()->where('user_id', auth()->id())->whereIn('status', ['paid', 'completed'])->exists()
+            : false;
+
+        return view('course-show', compact('course', 'demoVideos', 'batches', 'reviews', 'ratingBreakdown', 'relatedCourses', 'isEnrolled'));
+    }
 }

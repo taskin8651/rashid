@@ -3052,3 +3052,62 @@ footer::after {
   line-height: 1.6;
   margin: 0;
 }
+
+/* CERTIFICATE VERIFY */
+.cert-verify-result {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 16px;
+}
+
+.cert-verify-result.ok {
+  background: rgba(21, 128, 61, .08);
+  border: 1px solid rgba(21, 128, 61, .22);
+}
+
+.cert-verify-result.fail {
+  background: rgba(220, 38, 38, .07);
+  border: 1px solid rgba(220, 38, 38, .2);
+}
+
+.cert-verify-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.cert-verify-result.ok .cert-verify-icon {
+  color: var(--ok);
+}
+
+.cert-verify-result.fail .cert-verify-icon {
+  color: var(--danger);
+}
+
+.cert-verify-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.cert-verify-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.cert-verify-row:last-child {
+  border-bottom: none;
+}
+
+.cert-verify-row b {
+  color: var(--text);
+  text-align: right;
+}

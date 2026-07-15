@@ -4,6 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>@yield('title', 'R-Tech Computer') | Skill Se Placement Tak</title>
+  @hasSection('meta_description')
+    <meta name="description" content="@yield('meta_description')" />
+  @endif
+  @hasSection('meta_title')
+    <meta property="og:title" content="@yield('meta_title')" />
+    <meta name="twitter:title" content="@yield('meta_title')" />
+  @endif
+  @hasSection('meta_description')
+    <meta property="og:description" content="@yield('meta_description')" />
+    <meta name="twitter:description" content="@yield('meta_description')" />
+  @endif
+  @hasSection('meta_image')
+    <meta property="og:image" content="@yield('meta_image')" />
+    <meta name="twitter:image" content="@yield('meta_image')" />
+    <meta name="twitter:card" content="summary_large_image" />
+  @endif
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ url()->current() }}" />
   @include('partials.theme-init')
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />

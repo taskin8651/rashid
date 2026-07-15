@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -20,6 +21,24 @@ class Course extends Model implements HasMedia
     protected $casts = [
         'price' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        // SEO title/description are never form fields — they're derived
+        // automatically from the course name and description whenever either
+        // changes, so admins/franchisees never have to think about SEO.
+        static::saving(function (Course $course) {
+            if ($course->isDirty('name') || !$course->meta_title) {
+                $course->meta_title = $course->name . ' Course | R-Tech Computer';
+            }
+
+            if ($course->isDirty('description') || !$course->meta_description) {
+                $course->meta_description = $course->description
+                    ? Str::limit(strip_tags($course->description), 155)
+                    : 'Learn ' . $course->name . ' with R-Tech Computer — practical, job-oriented training with live projects and placement support.';
+            }
+        });
+    }
 
     public function registerMediaCollections(): void
     {
@@ -107,5 +126,20 @@ class Course extends Model implements HasMedia
         $count = $this->approvedReviews()->count();
 
         return $count > 0 ? $count : (int) $this->rating_count;
+    }
+
+    public function seoTitle(): string
+    {
+        return $this->meta_title ?: $this->name . ' Course | R-Tech Computer';
+    }
+
+    public function seoDescription(): string
+    {
+        return $this->meta_description ?: Str::limit(strip_tags((string) $this->description), 155);
+    }
+
+    public function seoImage(): ?string
+    {
+        return $this->thumbnailUrl();
     }
 }

@@ -49,6 +49,13 @@
                 <div class="mb-3"><label class="fl">Phone</label><input class="mi" type="tel" name="phone" value="{{ old('phone') }}" placeholder="+91 XXXXX XXXXX" /></div>
                 <div class="mb-3"><label class="fl">Password</label><input class="mi" type="password" name="password" placeholder="Min 8 characters" required />@error('password')<div class="text-danger" style="font-size:12px">{{ $message }}</div>@enderror</div>
                 <div class="mb-4"><label class="fl">Confirm Password</label><input class="mi" type="password" name="password_confirmation" placeholder="Repeat password" required /></div>
+                <div class="mb-4 form-check">
+                  <input class="form-check-input" type="checkbox" name="terms" id="signupTerms" value="1" required />
+                  <label class="form-check-label" for="signupTerms" style="font-size:12px;color:var(--muted)">
+                    I agree to the <a href="{{ route('terms') }}" target="_blank" style="color:var(--orange)">Terms of Service</a> and <a href="{{ route('privacy-policy') }}" target="_blank" style="color:var(--orange)">Privacy Policy</a>
+                  </label>
+                  @error('terms')<div class="text-danger" style="font-size:12px">{{ $message }}</div>@enderror
+                </div>
                 <button class="btn-p w-100 justify-content-center" type="submit"><i class="bi bi-person-plus-fill"></i>Create Account</button>
               </form>
             </div>
