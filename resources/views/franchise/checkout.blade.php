@@ -15,21 +15,60 @@
     <div class="container">
       <div class="nav-inner">
         <a class="brand" href="{{ route('home') }}">
-          <div class="brand-logo-wrap"><img src="{{ asset('"assets/img/logo.png"') }}" alt="R-Tech Computer" class="brand-logo"></div>
+          <div class="brand-logo-wrap"><img src="{{ asset('assets/img/logo.png') }}" alt="R-Tech Computer" class="brand-logo"></div>
         </a>
+        <div class="pay-nav-trust"><i class="bi bi-lock-fill"></i>Secure Checkout</div>
       </div>
     </div>
   </nav>
 
-  <section class="sec" style="padding-top:120px">
-    <div class="container" style="max-width:560px">
-      <div class="cbox text-center">
-        <h5 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;margin-bottom:20px">Reserve {{ $booking->city }}</h5>
-        <div class="sbox text-start mb-4">
-          <div class="sr"><span>Franchise Registration Fee</span><span>₹{{ number_format($booking->amount, 0) }}</span></div>
-          <div class="st"><span>Total</span><span style="color:var(--orange)">₹{{ number_format($booking->amount, 0) }}</span></div>
+  <section class="pay-wrap">
+    <div class="pay-glow"></div>
+    <div class="container" style="max-width:520px;position:relative;z-index:1">
+
+      <div class="pay-steps">
+        <div class="pay-step done"><div class="pay-step-dot"><i class="bi bi-check-lg"></i></div>Details</div>
+        <div class="pay-step-line"></div>
+        <div class="pay-step active"><div class="pay-step-dot">2</div>Payment</div>
+        <div class="pay-step-line"></div>
+        <div class="pay-step"><div class="pay-step-dot">3</div>Confirmed</div>
+      </div>
+
+      <div class="pay-card">
+        <div class="pay-card-top"></div>
+        <div class="pay-card-body">
+          <div class="pay-badge"><i class="bi bi-shop-window"></i>Franchise Registration</div>
+
+          <div class="pay-item">
+            <div class="pay-thumb-fallback"><i class="bi bi-geo-alt-fill"></i></div>
+            <div>
+              <h6>{{ $booking->city }} Franchise</h6>
+              <span>Reserved for {{ $booking->name }}</span>
+            </div>
+          </div>
+
+          <div class="sbox text-start mb-0">
+            <div class="sr"><span>Franchise Registration Fee</span><span>₹{{ number_format($booking->amount, 0) }}</span></div>
+            <div class="sr"><span>Refundable</span><span style="color:var(--ok)">Yes</span></div>
+          </div>
+
+          <div class="pay-total-box">
+            <div class="pay-total-row">
+              <span class="lbl">Amount Payable</span>
+              <span class="amt">₹{{ number_format($booking->amount, 0) }}</span>
+            </div>
+          </div>
+
+          <button class="pay-btn" id="payBtn"><i class="bi bi-shield-lock-fill"></i>Pay Securely with Razorpay</button>
+
+          <div class="pay-trust">
+            <div class="pay-trust-item"><i class="bi bi-patch-check-fill"></i>256-bit SSL Secured</div>
+            <div class="pay-trust-item"><i class="bi bi-arrow-counterclockwise"></i>Refundable Fee</div>
+            <div class="pay-trust-item"><i class="bi bi-shield-check"></i>Trusted by Razorpay</div>
+          </div>
+
+          <p class="pay-secure-note">Your payment is processed securely by Razorpay. R-Tech Computer never stores your card details.</p>
         </div>
-        <button class="btn-enr w-100 justify-content-center" style="font-size:14px;padding:12px" id="payBtn"><i class="bi bi-shield-lock-fill me-2"></i>Pay Securely with Razorpay</button>
       </div>
     </div>
   </section>

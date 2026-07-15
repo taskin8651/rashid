@@ -15,22 +15,66 @@
     <div class="container">
       <div class="nav-inner">
         <a class="brand" href="{{ route('home') }}">
-          <div class="brand-logo-wrap"><img src="{{ asset('"assets/img/logo.png"') }}" alt="R-Tech Computer" class="brand-logo"></div>
+          <div class="brand-logo-wrap"><img src="{{ asset('assets/img/logo.png') }}" alt="R-Tech Computer" class="brand-logo"></div>
         </a>
+        <div class="pay-nav-trust"><i class="bi bi-lock-fill"></i>Secure Checkout</div>
       </div>
     </div>
   </nav>
 
-  <section class="sec" style="padding-top:120px">
-    <div class="container" style="max-width:560px">
-      <div class="cbox text-center">
-        <h5 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;margin-bottom:20px">Complete Your Payment</h5>
-        <div class="sbox text-start mb-4">
-          <div class="sr"><span>Course</span><span>{{ $course->name }}</span></div>
-          <div class="sr"><span>Discount</span><span style="color:var(--ok)">−₹{{ number_format($discount, 0) }}</span></div>
-          <div class="st"><span>Total</span><span style="color:var(--orange)">₹{{ number_format($finalAmount, 0) }}</span></div>
+  <section class="pay-wrap">
+    <div class="pay-glow"></div>
+    <div class="container" style="max-width:520px;position:relative;z-index:1">
+
+      <div class="pay-steps">
+        <div class="pay-step done"><div class="pay-step-dot"><i class="bi bi-check-lg"></i></div>Details</div>
+        <div class="pay-step-line"></div>
+        <div class="pay-step active"><div class="pay-step-dot">2</div>Payment</div>
+        <div class="pay-step-line"></div>
+        <div class="pay-step"><div class="pay-step-dot">3</div>Confirmed</div>
+      </div>
+
+      <div class="pay-card">
+        <div class="pay-card-top"></div>
+        <div class="pay-card-body">
+          <div class="pay-badge"><i class="bi bi-mortarboard-fill"></i>Course Enrollment</div>
+
+          <div class="pay-item">
+            @if ($course->thumbnailUrl())
+              <img src="{{ $course->thumbnailUrl() }}" class="pay-thumb" alt="{{ $course->name }}">
+            @else
+              <div class="pay-thumb-fallback"><i class="bi bi-mortarboard-fill"></i></div>
+            @endif
+            <div>
+              <h6>{{ $course->name }}</h6>
+              <span>{{ $course->duration_text ?? 'Self-paced' }}</span>
+            </div>
+          </div>
+
+          <div class="sbox text-start mb-0">
+            <div class="sr"><span>Course Fee</span><span>₹{{ number_format($course->price, 0) }}</span></div>
+            @if ($discount > 0)
+              <div class="sr"><span>Discount</span><span style="color:var(--ok)">−₹{{ number_format($discount, 0) }}</span></div>
+            @endif
+          </div>
+
+          <div class="pay-total-box">
+            <div class="pay-total-row">
+              <span class="lbl">Amount Payable</span>
+              <span class="amt">₹{{ number_format($finalAmount, 0) }}</span>
+            </div>
+          </div>
+
+          <button class="pay-btn" id="payBtn"><i class="bi bi-shield-lock-fill"></i>Pay Securely with Razorpay</button>
+
+          <div class="pay-trust">
+            <div class="pay-trust-item"><i class="bi bi-patch-check-fill"></i>256-bit SSL Secured</div>
+            <div class="pay-trust-item"><i class="bi bi-lightning-charge-fill"></i>Instant Access</div>
+            <div class="pay-trust-item"><i class="bi bi-shield-check"></i>Trusted by Razorpay</div>
+          </div>
+
+          <p class="pay-secure-note">Your payment is processed securely by Razorpay. R-Tech Computer never stores your card details.</p>
         </div>
-        <button class="btn-enr w-100 justify-content-center" style="font-size:14px;padding:12px" id="payBtn"><i class="bi bi-shield-lock-fill me-2"></i>Pay Securely with Razorpay</button>
       </div>
     </div>
   </section>

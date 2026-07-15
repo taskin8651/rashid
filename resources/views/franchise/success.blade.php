@@ -15,7 +15,7 @@
     <div class="container">
       <div class="nav-inner">
         <a class="brand" href="{{ route('home') }}">
-          <div class="brand-logo-wrap"><img src="{{ asset('"assets/img/logo.png"') }}" alt="R-Tech Computer" class="brand-logo"></div>
+          <div class="brand-logo-wrap"><img src="{{ asset('assets/img/logo.png') }}" alt="R-Tech Computer" class="brand-logo"></div>
         </a>
       </div>
     </div>
