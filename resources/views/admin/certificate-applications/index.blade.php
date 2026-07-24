@@ -51,9 +51,13 @@
                     @csrf
                     <div class="modal-body">
                       <p style="font-size:13px;color:var(--muted)">Issuing a certificate to <b style="color:var(--text)">{{ $app->user->name }}</b> for <b style="color:var(--text)">{{ $app->course->name }}</b>.</p>
+
+                      <label class="flbl">Certificate Number</label>
+                      <input class="fctrl mb-3" type="text" name="cert_code" placeholder="e.g. RTC-2026-00123" required />
+
                       <label class="flbl">Upload Signed Certificate PDF (optional)</label>
                       <input class="fctrl" type="file" name="certificate_pdf" accept="application/pdf" />
-                      <p style="font-size:11px;color:var(--muted);margin:6px 0 0"><i class="bi bi-info-circle me-1"></i>Leave empty to auto-generate the standard R-Tech certificate instead.</p>
+                      <p style="font-size:11px;color:var(--muted);margin:6px 0 0"><i class="bi bi-info-circle me-1"></i>Leave the PDF empty to auto-generate the standard R-Tech certificate design instead.</p>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>

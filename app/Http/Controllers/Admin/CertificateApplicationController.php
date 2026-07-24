@@ -12,6 +12,7 @@ use App\Notifications\CertificateIssuedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class CertificateApplicationController extends Controller
 {
@@ -41,7 +42,10 @@ class CertificateApplicationController extends Controller
     {
         abort_unless($application->status === 'pending', 422);
 
+        $certificate = Certificate::firstOrNew(['user_id' => $application->user_id, 'course_id' => $application->course_id]);
+
         $validated = $request->validate([
+            'cert_code' => ['required', 'string', 'max:255', Rule::unique('certificates', 'cert_code')->ignore($certificate->id)],
             'certificate_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
@@ -60,8 +64,7 @@ class CertificateApplicationController extends Controller
             $enrollment->save();
         }
 
-        $certificate = Certificate::firstOrNew(['user_id' => $application->user_id, 'course_id' => $application->course_id]);
-        $certificate->cert_code = $certificate->cert_code ?: Certificate::generateCode();
+        $certificate->cert_code = $validated['cert_code'];
         $certificate->status = 'issued';
         $certificate->issued_date = now();
         $certificate->save();
