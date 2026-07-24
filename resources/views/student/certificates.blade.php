@@ -3,7 +3,10 @@
 @section('title', 'Certificates')
 
 @section('content')
-  <div class="shead"><h4>Certificates</h4><p>Earned on completing 100% of a course's videos</p></div>
+  <div class="shead d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div><h4>Certificates</h4><p>Earned on completing 100% of a course's videos</p></div>
+    <a href="{{ route('certificate-applications.status') }}" class="bghost" style="text-decoration:none"><i class="bi bi-patch-question-fill me-1"></i>Trained Offline? Apply Here</a>
+  </div>
 
   <div class="row g-4">
     @forelse ($rows as $row)

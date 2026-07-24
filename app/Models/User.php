@@ -128,6 +128,11 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Review::class);
     }
 
+    public function certificateApplications()
+    {
+        return $this->hasMany(CertificateApplication::class);
+    }
+
     public function referralsMade()
     {
         return $this->hasMany(Referral::class, 'referrer_id');

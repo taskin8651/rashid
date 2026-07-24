@@ -23,6 +23,7 @@
             <li><a href="{{ route('gallery') }}">Gallery</a></li>
             <li><a href="{{ route('blog') }}">Blog</a></li>
             <li><a href="{{ route('certificates.verify') }}">Verify Certificate</a></li>
+            <li><a href="{{ route('certificate-applications.create') }}">Apply for Certificate</a></li>
             <li><a href="{{ route('franchise') }}">Franchise</a></li>
             <li><a href="{{ route('contact') }}">Contact</a></li>
           </ul>

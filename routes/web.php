@@ -16,8 +16,10 @@ use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
+use App\Http\Controllers\Admin\CertificateApplicationController as AdminCertificateApplicationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CertificateApplicationController;
 use App\Http\Controllers\CertificateVerificationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
@@ -88,6 +90,9 @@ Route::get('/refund-policy', [PageController::class, 'refundPolicy'])->name('ref
 
 Route::get('/certificates/verify', [CertificateVerificationController::class, 'show'])->name('certificates.verify');
 
+Route::get('/apply-certificate', [CertificateApplicationController::class, 'create'])->name('certificate-applications.create');
+Route::post('/apply-certificate', [CertificateApplicationController::class, 'store'])->name('certificate-applications.store')->middleware('throttle:5,1');
+
 // URL must be a valid, unexpired signature (see Video::fileUrl()) AND, for
 // non-demo videos, the requester must be authorized — see VideoStreamController.
 Route::get('/videos/{video}/stream', [VideoStreamController::class, 'stream'])
@@ -129,6 +134,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    Route::get('/certificate-applications', [CertificateApplicationController::class, 'status'])->name('certificate-applications.status');
 
     Route::prefix('student')->middleware('role:student')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
@@ -284,6 +291,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('admin.reviews.reject');
         Route::post('/reviews/{review}/feature', [AdminReviewController::class, 'toggleFeature'])->name('admin.reviews.feature');
         Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+
+        Route::get('/certificate-applications', [AdminCertificateApplicationController::class, 'index'])->name('admin.certificate-applications.index');
+        Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
+        Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
+        Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
 
         Route::get('/faqs', [AdminFaqController::class, 'index'])->name('admin.faqs.index');
         Route::post('/faqs', [AdminFaqController::class, 'store'])->name('admin.faqs.store');
