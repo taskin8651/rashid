@@ -41,6 +41,10 @@ class CertificateApplicationController extends Controller
     {
         abort_unless($application->status === 'pending', 422);
 
+        $validated = $request->validate([
+            'certificate_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
         $application->load(['user', 'course']);
 
         $enrollment = Enrollment::firstOrNew(['user_id' => $application->user_id, 'course_id' => $application->course_id]);
@@ -61,6 +65,10 @@ class CertificateApplicationController extends Controller
         $certificate->status = 'issued';
         $certificate->issued_date = now();
         $certificate->save();
+
+        if ($request->hasFile('certificate_pdf')) {
+            $certificate->addMediaFromRequest('certificate_pdf')->toMediaCollection('pdf');
+        }
 
         $application->update([
             'status' => 'approved',

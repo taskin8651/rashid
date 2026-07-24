@@ -19,7 +19,19 @@ class Certificate extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('pdf')->singleFile();
+        // Private disk: served only through the authorized download route,
+        // same pattern as assignment submissions.
+        $this->addMediaCollection('pdf')->singleFile()->useDisk('local');
+    }
+
+    public function hasUploadedPdf(): bool
+    {
+        return $this->getFirstMedia('pdf') !== null;
+    }
+
+    public function uploadedPdfPath(): ?string
+    {
+        return $this->getFirstMedia('pdf')?->getPath();
     }
 
     public function user()

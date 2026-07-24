@@ -32,10 +32,7 @@
             <td><span class="badge-rt {{ $app->status === 'approved' ? 'bg-active' : ($app->status === 'pending' ? 'bg-pending' : 'bg-failed') }}">{{ ucfirst($app->status) }}</span></td>
             <td>
               @if ($app->status === 'pending')
-                <form method="POST" action="{{ route('admin.certificate-applications.approve', $app) }}" class="d-inline" onsubmit="return confirm('Issue a certificate to {{ $app->user->name }} for {{ $app->course->name }}?')">
-                  @csrf
-                  <button type="submit" class="action-btn" title="Approve &amp; Issue Certificate"><i class="bi bi-check-lg"></i></button>
-                </form>
+                <button class="action-btn" style="border:none;background:none" title="Approve &amp; Issue Certificate" data-bs-toggle="modal" data-bs-target="#approveApp{{ $app->id }}"><i class="bi bi-check-lg"></i></button>
                 <button class="action-btn danger" style="border:none;background:none" title="Reject" data-bs-toggle="modal" data-bs-target="#rejectApp{{ $app->id }}"><i class="bi bi-x-lg"></i></button>
               @elseif ($app->status === 'approved' && $app->certificate)
                 <span style="font-size:11px;color:var(--muted)">Cert: {{ $app->certificate->cert_code }}</span>
@@ -46,6 +43,27 @@
           </tr>
 
           @if ($app->status === 'pending')
+            <div class="modal fade" id="approveApp{{ $app->id }}" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header"><h5 class="modal-title">Approve &amp; Issue Certificate</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                  <form method="POST" action="{{ route('admin.certificate-applications.approve', $app) }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                      <p style="font-size:13px;color:var(--muted)">Issuing a certificate to <b style="color:var(--text)">{{ $app->user->name }}</b> for <b style="color:var(--text)">{{ $app->course->name }}</b>.</p>
+                      <label class="flbl">Upload Signed Certificate PDF (optional)</label>
+                      <input class="fctrl" type="file" name="certificate_pdf" accept="application/pdf" />
+                      <p style="font-size:11px;color:var(--muted);margin:6px 0 0"><i class="bi bi-info-circle me-1"></i>Leave empty to auto-generate the standard R-Tech certificate instead.</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="bsave">Approve &amp; Issue</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
             <div class="modal fade" id="rejectApp{{ $app->id }}" tabindex="-1">
               <div class="modal-dialog">
                 <div class="modal-content">

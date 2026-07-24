@@ -65,11 +65,17 @@ class CertificateController extends Controller
         abort_unless($certificate->user_id === auth()->id(), 403);
         abort_unless($certificate->status === 'issued', 404);
 
+        $filename = 'RTech-Certificate-' . $certificate->cert_code . '.pdf';
+
+        if ($certificate->hasUploadedPdf()) {
+            return response()->download($certificate->uploadedPdfPath(), $filename);
+        }
+
         $certificate->load(['user', 'course']);
 
         $pdf = Pdf::loadView('certificates.pdf', ['certificate' => $certificate])
             ->setPaper('a4', 'landscape');
 
-        return $pdf->download('RTech-Certificate-' . $certificate->cert_code . '.pdf');
+        return $pdf->download($filename);
     }
 }
