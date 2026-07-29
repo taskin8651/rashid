@@ -29,7 +29,8 @@
     <a class="slink {{ request()->routeIs('franchise.courses.*') ? 'act' : '' }}" href="{{ route('franchise.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
     <a class="slink {{ request()->routeIs('franchise.students.*') ? 'act' : '' }}" href="{{ route('franchise.students.index') }}"><i class="bi bi-people-fill"></i>My Students</a>
     <a class="slink {{ request()->routeIs('franchise.gallery.*') ? 'act' : '' }}" href="{{ route('franchise.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
-    <a class="slink {{ request()->routeIs('franchise.attendance.*') ? 'act' : '' }}" href="{{ route('franchise.attendance.index') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
+    <a class="slink {{ request()->routeIs('franchise.attendance.records') ? 'act' : '' }}" href="{{ route('franchise.attendance.records') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
+    <a class="slink {{ request()->routeIs('franchise.attendance.manage') ? 'act' : '' }}" href="{{ route('franchise.attendance.manage') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Setup</a>
     <div class="nsec">Account</div>
     <a class="slink {{ request()->routeIs('franchise.profile.*') ? 'act' : '' }}" href="{{ route('franchise.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
     <div class="nsec">More</div>

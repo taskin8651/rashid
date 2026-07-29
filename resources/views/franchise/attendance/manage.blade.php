@@ -3,14 +3,17 @@
 @section('title', 'Attendance')
 
 @section('content')
-  <div class="shead"><h4>Attendance</h4><p>Your institute's QR check-in point and recent student attendance</p></div>
+  <div class="shead d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div><h4>Attendance</h4><p>Your institute's QR check-in point, location and WiFi settings</p></div>
+    <a href="{{ route('franchise.attendance.records') }}" class="bghost" style="text-decoration:none"><i class="bi bi-list-check me-1"></i>View Check-in Records</a>
+  </div>
 
   @if ($locations->isEmpty())
-    <div class="card-rt" style="padding:24px">
+    <div class="card-rt mt-4" style="padding:24px">
       <p style="font-size:13px;color:var(--muted);margin:0">No attendance point has been set up for your institute yet. Contact R-Tech admin to get one configured.</p>
     </div>
   @else
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mt-1">
       @foreach ($locations as $loc)
         <div class="col-md-6">
           <div class="card-rt">
@@ -18,6 +21,7 @@
               <h6 style="font-size:14px;font-weight:700;margin:0">{{ $loc->name }}</h6>
               <span class="badge-rt {{ $loc->status === 'active' ? 'bg-active' : 'bg-inactive' }}">{{ ucfirst($loc->status) }}</span>
             </div>
+            <p style="font-size:11.5px;color:var(--muted);margin-bottom:14px"><i class="bi bi-people-fill me-1"></i>{{ $loc->attendances_count }} check-ins recorded</p>
             <div id="qrcanvas{{ $loc->id }}" class="d-flex justify-content-center my-3"></div>
             <p style="font-size:11px;color:var(--muted);word-break:break-all;text-align:center;margin-bottom:16px">{{ $loc->scanUrl() }}</p>
 
@@ -34,32 +38,6 @@
           </div>
         </div>
       @endforeach
-    </div>
-
-    <div class="card-rt">
-      <div class="card-title">Recent Check-ins</div>
-      <div class="table-wrap"><table class="table-rt">
-        <thead><tr><th>Student</th><th>Date</th><th>Punch In</th><th>Punch Out</th><th>Duration</th></tr></thead>
-        <tbody>
-          @forelse ($attendances as $a)
-            <tr>
-              <td>{{ $a->user->name }}</td>
-              <td>{{ $a->date->format('d M Y') }}</td>
-              <td>{{ $a->marked_at->format('h:i A') }} <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
-              <td>
-                @if ($a->isPunchedOut())
-                  {{ $a->check_out_at->format('h:i A') }} <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span>
-                @else
-                  <span style="color:var(--muted)">—</span>
-                @endif
-              </td>
-              <td>{{ $a->durationLabel() ?? '—' }}</td>
-            </tr>
-          @empty
-            <tr><td colspan="5" style="color:var(--muted)">No check-ins yet.</td></tr>
-          @endforelse
-        </tbody>
-      </table></div>
     </div>
   @endif
 @endsection

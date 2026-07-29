@@ -21,7 +21,8 @@
     <div class="nsec">Management</div>
     <a class="slink {{ request()->routeIs('admin.students.*') ? 'act' : '' }}" href="{{ route('admin.students.index') }}"><i class="bi bi-people-fill"></i>Students</a>
     <a class="slink {{ request()->routeIs('admin.certificate-applications.*') ? 'act' : '' }}" href="{{ route('admin.certificate-applications.index') }}"><i class="bi bi-patch-question-fill"></i>Certificate Applications</a>
-    <a class="slink {{ request()->routeIs('admin.attendance.*') || request()->routeIs('admin.attendance-locations.*') ? 'act' : '' }}" href="{{ route('admin.attendance.index') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
+    <a class="slink {{ request()->routeIs('admin.attendance.*') ? 'act' : '' }}" href="{{ route('admin.attendance.index') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
+    <a class="slink {{ request()->routeIs('admin.attendance-locations.*') ? 'act' : '' }}" href="{{ route('admin.attendance-locations.index') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Locations</a>
     <a class="slink {{ request()->routeIs('admin.courses.*') ? 'act' : '' }}" href="{{ route('admin.courses.index') }}"><i class="bi bi-collection-play-fill"></i>Courses</a>
     <a class="slink {{ request()->routeIs('admin.categories.*') ? 'act' : '' }}" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags-fill"></i>Categories</a>
     <div class="nsec">Commerce</div>

@@ -9,21 +9,33 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    public function index(Request $request)
+    public function manage(Request $request)
+    {
+        $locations = AttendanceLocation::with('franchiseBooking')
+            ->withCount('attendances')
+            ->whereIn('franchise_booking_id', $request->user()->franchiseBookings()->where('status', 'paid')->pluck('id'))
+            ->get();
+
+        return view('franchise.attendance.manage', compact('locations'));
+    }
+
+    public function records(Request $request)
     {
         $bookingIds = $request->user()->franchiseBookings()->where('status', 'paid')->pluck('id');
 
-        $locations = AttendanceLocation::with('franchiseBooking')
-            ->whereIn('franchise_booking_id', $bookingIds)
-            ->get();
+        $locations = AttendanceLocation::whereIn('franchise_booking_id', $bookingIds)->get();
+        $locationId = $request->query('location');
+        $date = $request->query('date');
 
         $attendances = Attendance::with(['user', 'location'])
             ->whereIn('attendance_location_id', $locations->pluck('id'))
+            ->when($locationId, fn ($q) => $q->where('attendance_location_id', $locationId))
+            ->when($date, fn ($q) => $q->whereDate('date', $date))
             ->latest('marked_at')
-            ->take(50)
-            ->get();
+            ->paginate(30)
+            ->withQueryString();
 
-        return view('franchise.attendance', compact('locations', 'attendances'));
+        return view('franchise.attendance.records', compact('attendances', 'locations', 'locationId', 'date'));
     }
 
     public function update(Request $request, AttendanceLocation $location)

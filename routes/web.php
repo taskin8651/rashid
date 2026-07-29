@@ -227,7 +227,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/gallery', [FranchiseGalleryController::class, 'store'])->name('franchise.gallery.store');
         Route::delete('/gallery/{gallery}', [FranchiseGalleryController::class, 'destroy'])->name('franchise.gallery.destroy');
 
-        Route::get('/attendance', [FranchiseAttendanceController::class, 'index'])->name('franchise.attendance.index');
+        Route::get('/attendance', [FranchiseAttendanceController::class, 'manage'])->name('franchise.attendance.manage');
+        Route::get('/attendance/records', [FranchiseAttendanceController::class, 'records'])->name('franchise.attendance.records');
         Route::post('/attendance/{location}', [FranchiseAttendanceController::class, 'update'])->name('franchise.attendance.update');
 
         Route::get('/profile', [FranchiseProfileController::class, 'edit'])->name('franchise.profile.edit');
