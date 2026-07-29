@@ -75,7 +75,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">Edit {{ $loc->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form method="POST" action="{{ route('admin.attendance-locations.update', $loc) }}">
+            <form method="POST" action="{{ route('admin.attendance-locations.update', $loc) }}" id="editLocForm{{ $loc->id }}">
               @csrf
               <div class="modal-body">
                 <div class="mb-3"><label class="flbl">Name</label><input class="fctrl" name="name" value="{{ $loc->name }}" required/></div>
@@ -96,15 +96,20 @@
                 </div>
                 <div class="mt-3"><label class="flbl">WiFi Network Name</label><input class="fctrl" name="wifi_ssid" value="{{ $loc->wifi_ssid }}"/></div>
               </div>
-              <div class="modal-footer">
-                <form method="POST" action="{{ route('admin.attendance-locations.destroy', $loc) }}" onsubmit="return confirm('Delete this location? Its attendance history will also be removed.')">
-                  @csrf @method('DELETE')
-                  <button type="submit" class="bghost" style="color:var(--danger);border-color:rgba(239,68,68,.3)">Delete</button>
-                </form>
-                <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="bsave">Save Changes</button>
-              </div>
             </form>
+            <!-- Kept as a sibling of the edit form above, not nested inside it —
+                 nesting one form inside another is invalid HTML and browsers
+                 silently misattribute submit buttons when it happens, which
+                 was causing "Save Changes" to trigger the delete instead.
+                 Both buttons below target their form explicitly via form=. -->
+            <form method="POST" action="{{ route('admin.attendance-locations.destroy', $loc) }}" id="deleteLocForm{{ $loc->id }}" onsubmit="return confirm('Delete this location? Its attendance history will also be removed.')">
+              @csrf @method('DELETE')
+            </form>
+            <div class="modal-footer">
+              <button type="submit" form="deleteLocForm{{ $loc->id }}" class="bghost" style="color:var(--danger);border-color:rgba(239,68,68,.3)">Delete</button>
+              <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" form="editLocForm{{ $loc->id }}" class="bsave">Save Changes</button>
+            </div>
           </div>
         </div>
       </div>
