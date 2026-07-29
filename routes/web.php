@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
+use App\Http\Controllers\Admin\AttendanceLocationController as AdminAttendanceLocationController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CourseAssignmentController as AdminCourseAssignmentController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\CertificateApplicationController as AdminCertificateApplicationController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CertificateApplicationController;
@@ -24,6 +27,7 @@ use App\Http\Controllers\CertificateVerificationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\Franchise\AttendanceController as FranchiseAttendanceController;
 use App\Http\Controllers\Franchise\CourseAssignmentController as FranchiseCourseAssignmentController;
 use App\Http\Controllers\Franchise\CourseController as FranchiseCourseController;
 use App\Http\Controllers\Franchise\CourseNoteController as FranchiseCourseNoteController;
@@ -42,6 +46,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NoteDownloadController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
+use App\Http\Controllers\Student\AttendanceController as StudentAttendanceController;
 use App\Http\Controllers\Student\CertificateController as StudentCertificateController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
@@ -137,6 +142,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/certificate-applications', [CertificateApplicationController::class, 'status'])->name('certificate-applications.status');
 
+    Route::middleware('role:student')->group(function () {
+        Route::get('/attendance/scan/{qrToken}', [AttendanceController::class, 'scan'])->name('attendance.scan');
+        Route::post('/attendance/mark', [AttendanceController::class, 'store'])->name('attendance.mark');
+    });
+
     Route::prefix('student')->middleware('role:student')->group(function () {
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
 
@@ -171,6 +181,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/courses/{course}/review', [StudentReviewController::class, 'store'])->name('student.courses.review.store');
 
         Route::get('/referrals', [StudentReferralController::class, 'index'])->name('student.referrals.index');
+
+        Route::get('/attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance.index');
     });
 
     Route::prefix('franchise')->middleware('role:franchisee')->group(function () {
@@ -214,6 +226,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/gallery', [FranchiseGalleryController::class, 'index'])->name('franchise.gallery.index');
         Route::post('/gallery', [FranchiseGalleryController::class, 'store'])->name('franchise.gallery.store');
         Route::delete('/gallery/{gallery}', [FranchiseGalleryController::class, 'destroy'])->name('franchise.gallery.destroy');
+
+        Route::get('/attendance', [FranchiseAttendanceController::class, 'index'])->name('franchise.attendance.index');
+        Route::post('/attendance/{location}', [FranchiseAttendanceController::class, 'update'])->name('franchise.attendance.update');
 
         Route::get('/profile', [FranchiseProfileController::class, 'edit'])->name('franchise.profile.edit');
         Route::post('/profile', [FranchiseProfileController::class, 'update'])->name('franchise.profile.update');
@@ -296,6 +311,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
         Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
         Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
+
+        Route::get('/attendance-locations', [AdminAttendanceLocationController::class, 'index'])->name('admin.attendance-locations.index');
+        Route::post('/attendance-locations', [AdminAttendanceLocationController::class, 'store'])->name('admin.attendance-locations.store');
+        Route::post('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'update'])->name('admin.attendance-locations.update');
+        Route::delete('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'destroy'])->name('admin.attendance-locations.destroy');
+
+        Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
+        Route::get('/attendance/export', [AdminAttendanceController::class, 'export'])->name('admin.attendance.export');
 
         Route::get('/faqs', [AdminFaqController::class, 'index'])->name('admin.faqs.index');
         Route::post('/faqs', [AdminFaqController::class, 'store'])->name('admin.faqs.store');

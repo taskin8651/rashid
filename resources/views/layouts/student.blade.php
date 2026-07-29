@@ -24,6 +24,7 @@
     <div class="nsec">Main</div>
     <a class="slink {{ request()->routeIs('student.dashboard') ? 'act' : '' }}" href="{{ route('student.dashboard') }}"><i class="bi bi-grid-fill"></i>Dashboard</a>
     <a class="slink {{ request()->routeIs('student.courses.*') ? 'act' : '' }}" href="{{ route('student.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
+    <a class="slink {{ request()->routeIs('student.attendance.*') ? 'act' : '' }}" href="{{ route('student.attendance.index') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
     <div class="nsec">Learning</div>
     <a class="slink {{ request()->routeIs('student.certificates.*') ? 'act' : '' }}" href="{{ route('student.certificates.index') }}"><i class="bi bi-award-fill"></i>Certificates</a>
     <a class="slink {{ request()->routeIs('student.wishlist.*') ? 'act' : '' }}" href="{{ route('student.wishlist.index') }}"><i class="bi bi-heart-fill"></i>Wishlist</a>
@@ -65,5 +66,6 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @include('partials.theme-toggle-script')
+@yield('scripts')
 </body>
 </html>

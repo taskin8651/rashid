@@ -29,6 +29,7 @@
     <a class="slink {{ request()->routeIs('franchise.courses.*') ? 'act' : '' }}" href="{{ route('franchise.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
     <a class="slink {{ request()->routeIs('franchise.students.*') ? 'act' : '' }}" href="{{ route('franchise.students.index') }}"><i class="bi bi-people-fill"></i>My Students</a>
     <a class="slink {{ request()->routeIs('franchise.gallery.*') ? 'act' : '' }}" href="{{ route('franchise.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
+    <a class="slink {{ request()->routeIs('franchise.attendance.*') ? 'act' : '' }}" href="{{ route('franchise.attendance.index') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
     <div class="nsec">Account</div>
     <a class="slink {{ request()->routeIs('franchise.profile.*') ? 'act' : '' }}" href="{{ route('franchise.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
     <div class="nsec">More</div>
@@ -65,5 +66,6 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @include('partials.theme-toggle-script')
+@yield('scripts')
 </body>
 </html>

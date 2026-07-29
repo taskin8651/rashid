@@ -32,19 +32,23 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        // redirect()->intended() sends the user back to whatever protected
+        // page they were trying to reach before being bounced to login (e.g.
+        // a QR attendance scan link) — falling back to their role's
+        // dashboard when there was no such page.
         if ($user->hasRole('admin')) {
-            return redirect()->route('admin.dashboard');
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         if ($user->hasRole('student')) {
-            return redirect()->route('student.dashboard');
+            return redirect()->intended(route('student.dashboard'));
         }
 
         if ($user->hasRole('franchisee')) {
-            return redirect()->route('franchise.dashboard');
+            return redirect()->intended(route('franchise.dashboard'));
         }
 
-        return redirect()->route('home');
+        return redirect()->intended(route('home'));
     }
 
     public function signup(Request $request)
@@ -80,7 +84,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('student.dashboard')->with('status', 'Account created successfully!');
+        return redirect()->intended(route('student.dashboard'))->with('status', 'Account created successfully!');
     }
 
     public function logout(Request $request)
