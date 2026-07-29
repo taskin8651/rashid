@@ -64,6 +64,6 @@ class AttendanceController extends Controller
 
         Attendance::create($attendance);
 
-        return redirect()->route('attendance.scan', $location->qr_token)->with('status', 'Attendance marked! See you in class.');
+        return back()->with('status', 'Attendance marked! See you in class.');
     }
 }

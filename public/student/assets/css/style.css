@@ -239,3 +239,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var
 .notif-view-all{display:block;text-align:center;padding:12px;font-size:12px;font-weight:600;color:var(--orange);text-decoration:none}
 .notif-view-all:hover{background:rgba(var(--text-rgb),.04)}
 .star-picker input:checked~label,.star-picker label:hover,.star-picker label:hover~label{color:var(--warn)}
+
+.att-divider{display:flex;align-items:center;gap:12px;margin:20px 0;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.att-divider::before,.att-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+#qr-reader video{border-radius:12px}
