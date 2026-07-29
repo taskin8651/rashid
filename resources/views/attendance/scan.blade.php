@@ -20,15 +20,27 @@
         @endif
 
         @if ($today)
-          <div class="att-marked">
+          <div class="att-marked mb-3">
             <i class="bi bi-check-circle-fill"></i>
             <div>
-              <div class="att-marked-title">Attendance Marked</div>
-              <div class="att-marked-sub">You checked in at {{ $today->marked_at->format('h:i A') }} via {{ strtoupper($today->method) }}</div>
+              <div class="att-marked-title">Punched In</div>
+              <div class="att-marked-sub">{{ $today->marked_at->format('h:i A') }} via {{ strtoupper($today->method) }}</div>
+            </div>
+          </div>
+        @endif
+
+        @if ($today && $today->isPunchedOut())
+          <div class="att-marked">
+            <i class="bi bi-flag-fill"></i>
+            <div>
+              <div class="att-marked-title">Punched Out</div>
+              <div class="att-marked-sub">{{ $today->check_out_at->format('h:i A') }} via {{ strtoupper($today->check_out_method) }} &middot; Total time: {{ $today->durationLabel() }}</div>
             </div>
           </div>
         @else
-          <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Tap below to mark your attendance using your phone's location.</p>
+          <p style="font-size:13px;color:var(--muted);margin:20px 0">
+            {{ $today ? "Tap below when you're leaving to punch out." : "Tap below to punch in using your phone's location." }}
+          </p>
 
           <form method="POST" action="{{ route('attendance.mark') }}" id="gpsForm">
             @csrf
@@ -36,13 +48,13 @@
             <input type="hidden" name="method" value="gps">
             <input type="hidden" name="latitude" id="gpsLat">
             <input type="hidden" name="longitude" id="gpsLng">
-            <button type="button" class="btn-enr w-100 justify-content-center" style="padding:14px" id="gpsBtn"><i class="bi bi-geo-alt-fill me-2"></i>Mark Attendance (GPS)</button>
+            <button type="button" class="btn-enr w-100 justify-content-center" style="padding:14px" id="gpsBtn"><i class="bi bi-geo-alt-fill me-2"></i>{{ $today ? 'Punch Out (GPS)' : 'Punch In (GPS)' }}</button>
           </form>
           <p id="gpsStatus" style="font-size:12px;color:var(--muted);margin-top:10px"></p>
 
           <div class="att-divider"><span>or</span></div>
 
-          <button class="bghost w-100" type="button" data-bs-toggle="collapse" data-bs-target="#wifiForm"><i class="bi bi-wifi me-1"></i>Mark via Institute WiFi Instead</button>
+          <button class="bghost w-100" type="button" data-bs-toggle="collapse" data-bs-target="#wifiForm"><i class="bi bi-wifi me-1"></i>{{ $today ? 'Punch Out via WiFi Instead' : 'Punch In via WiFi Instead' }}</button>
 
           <form method="POST" action="{{ route('attendance.mark') }}" class="collapse mt-3" id="wifiForm">
             @csrf
@@ -50,7 +62,7 @@
             <input type="hidden" name="method" value="wifi">
             <label class="fl">Institute WiFi Network Name</label>
             <input class="mi mb-3" type="text" name="wifi_ssid" placeholder="Check your phone's WiFi settings" required>
-            <button class="btn-enr w-100 justify-content-center" type="submit"><i class="bi bi-wifi me-2"></i>Mark Attendance (WiFi)</button>
+            <button class="btn-enr w-100 justify-content-center" type="submit"><i class="bi bi-wifi me-2"></i>{{ $today ? 'Punch Out (WiFi)' : 'Punch In (WiFi)' }}</button>
           </form>
         @endif
       </div>

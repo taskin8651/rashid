@@ -24,17 +24,24 @@
 
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">
-      <thead><tr><th>Date</th><th>Location</th><th>Time</th><th>Method</th></tr></thead>
+      <thead><tr><th>Date</th><th>Location</th><th>Punch In</th><th>Punch Out</th><th>Duration</th></tr></thead>
       <tbody>
         @forelse ($attendances as $a)
           <tr>
             <td>{{ $a->date->format('d M Y') }}</td>
             <td>{{ $a->location->name }}</td>
-            <td>{{ $a->marked_at->format('h:i A') }}</td>
-            <td><span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
+            <td>{{ $a->marked_at->format('h:i A') }} <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
+            <td>
+              @if ($a->isPunchedOut())
+                {{ $a->check_out_at->format('h:i A') }} <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span>
+              @else
+                <span style="color:var(--muted)">Still in class</span>
+              @endif
+            </td>
+            <td>{{ $a->durationLabel() ?? '—' }}</td>
           </tr>
         @empty
-          <tr><td colspan="4" style="color:var(--muted)">No attendance marked yet. Scan the QR code at your institute to check in.</td></tr>
+          <tr><td colspan="5" style="color:var(--muted)">No attendance marked yet. Scan the QR code at your institute to check in.</td></tr>
         @endforelse
       </tbody>
     </table></div>

@@ -34,36 +34,78 @@ class AttendanceController extends Controller
         $location = AttendanceLocation::where('qr_token', $validated['qr_token'])->where('status', 'active')->firstOrFail();
         $user = $request->user();
 
-        if (Attendance::where('user_id', $user->id)->where('attendance_location_id', $location->id)->whereDate('date', now()->toDateString())->exists()) {
-            return back()->with('status', 'Attendance already marked for today.');
+        [$verified, $error] = $this->verifyPresence($location, $validated);
+        if ($error) {
+            return back()->withErrors(['location' => $error]);
         }
 
-        $attendance = ['user_id' => $user->id, 'attendance_location_id' => $location->id, 'date' => now()->toDateString(), 'marked_at' => now(), 'method' => $validated['method']];
+        $today = Attendance::where('user_id', $user->id)
+            ->where('attendance_location_id', $location->id)
+            ->whereDate('date', now()->toDateString())
+            ->first();
 
+        // No record yet today: this scan is a punch-in.
+        if (!$today) {
+            Attendance::create(array_merge([
+                'user_id' => $user->id,
+                'attendance_location_id' => $location->id,
+                'date' => now()->toDateString(),
+                'marked_at' => now(),
+                'method' => $validated['method'],
+            ], $verified));
+
+            return back()->with('status', 'Punched in! Have a great session.');
+        }
+
+        // Already punched in and out: nothing left to do today.
+        if ($today->isPunchedOut()) {
+            return back()->with('status', 'You already punched in and out today.');
+        }
+
+        // Punched in but not out yet: this scan is the punch-out.
+        $today->update(array_merge([
+            'check_out_at' => now(),
+            'check_out_method' => $validated['method'],
+        ], $this->prefixCheckOut($verified)));
+
+        return back()->with('status', 'Punched out! Total time: ' . $today->fresh()->durationLabel() . '.');
+    }
+
+    /**
+     * Confirms the scan happened at (or near) the given location, either via
+     * GPS geofence or a matching WiFi network. Returns the fields to persist
+     * on success, or an error message to show the student.
+     */
+    protected function verifyPresence(AttendanceLocation $location, array $validated): array
+    {
         if ($validated['method'] === 'gps') {
             $distance = $location->distanceTo((float) $validated['latitude'], (float) $validated['longitude']);
 
             if (!$location->isWithinRadius((float) $validated['latitude'], (float) $validated['longitude'])) {
-                return back()->withErrors([
-                    'location' => "You're {$distance}m away from {$location->name}. You must be within {$location->radius_meters}m to mark attendance, or use the WiFi option instead.",
-                ]);
+                return [null, "You're {$distance}m away from {$location->name}. You must be within {$location->radius_meters}m to mark attendance, or use the WiFi option instead."];
             }
 
-            $attendance['latitude'] = $validated['latitude'];
-            $attendance['longitude'] = $validated['longitude'];
-            $attendance['distance_meters'] = $distance;
-        } else {
-            if (!$location->matchesWifi($validated['wifi_ssid'])) {
-                return back()->withErrors([
-                    'location' => "That WiFi network doesn't match {$location->name}'s registered network. Please check you're connected to the institute WiFi, or use GPS instead.",
-                ]);
-            }
-
-            $attendance['wifi_ssid'] = $validated['wifi_ssid'];
+            return [[
+                'latitude' => $validated['latitude'],
+                'longitude' => $validated['longitude'],
+                'distance_meters' => $distance,
+            ], null];
         }
 
-        Attendance::create($attendance);
+        if (!$location->matchesWifi($validated['wifi_ssid'])) {
+            return [null, "That WiFi network doesn't match {$location->name}'s registered network. Please check you're connected to the institute WiFi, or use GPS instead."];
+        }
 
-        return back()->with('status', 'Attendance marked! See you in class.');
+        return [['wifi_ssid' => $validated['wifi_ssid']], null];
+    }
+
+    protected function prefixCheckOut(array $fields): array
+    {
+        $out = [];
+        foreach ($fields as $key => $value) {
+            $out['check_out_' . $key] = $value;
+        }
+
+        return $out;
     }
 }

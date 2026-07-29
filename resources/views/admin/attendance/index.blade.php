@@ -27,25 +27,40 @@
 
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">
-      <thead><tr><th>Student</th><th>Location</th><th>Date</th><th>Time</th><th>Method</th><th>Details</th></tr></thead>
+      <thead><tr><th>Student</th><th>Location</th><th>Date</th><th>Punch In</th><th>Punch Out</th><th>Duration</th><th>Details</th></tr></thead>
       <tbody>
         @forelse ($attendances as $a)
           <tr>
             <td>{{ $a->user->name }}</td>
             <td>{{ $a->location->name }}</td>
             <td>{{ $a->date->format('d M Y') }}</td>
-            <td>{{ $a->marked_at->format('h:i A') }}</td>
-            <td><span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
+            <td>{{ $a->marked_at->format('h:i A') }} <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
+            <td>
+              @if ($a->isPunchedOut())
+                {{ $a->check_out_at->format('h:i A') }} <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span>
+              @else
+                <span style="color:var(--muted)">—</span>
+              @endif
+            </td>
+            <td>{{ $a->durationLabel() ?? '—' }}</td>
             <td style="font-size:11.5px;color:var(--muted)">
               @if ($a->method === 'gps')
-                {{ $a->distance_meters }}m from location
+                In: {{ $a->distance_meters }}m
               @else
-                {{ $a->wifi_ssid }}
+                In: {{ $a->wifi_ssid }}
+              @endif
+              @if ($a->isPunchedOut())
+                <br>
+                @if ($a->check_out_method === 'gps')
+                  Out: {{ $a->check_out_distance_meters }}m
+                @else
+                  Out: {{ $a->check_out_wifi_ssid }}
+                @endif
               @endif
             </td>
           </tr>
         @empty
-          <tr><td colspan="6" style="color:var(--muted)">No attendance records found.</td></tr>
+          <tr><td colspan="7" style="color:var(--muted)">No attendance records found.</td></tr>
         @endforelse
       </tbody>
     </table></div>

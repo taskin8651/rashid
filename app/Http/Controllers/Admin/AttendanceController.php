@@ -38,7 +38,7 @@ class AttendanceController extends Controller
             ->latest('marked_at')
             ->get();
 
-        $rows = ["Student,Location,Date,Time,Method,Distance (m),WiFi\n"];
+        $rows = ["Student,Location,Date,Punch In,Punch In Method,Punch Out,Punch Out Method,Duration (min)\n"];
         foreach ($attendances as $a) {
             $rows[] = implode(',', [
                 '"' . str_replace('"', '""', $a->user->name) . '"',
@@ -46,8 +46,9 @@ class AttendanceController extends Controller
                 $a->date->format('Y-m-d'),
                 $a->marked_at->format('H:i'),
                 $a->method,
-                $a->distance_meters ?? '',
-                $a->wifi_ssid ?? '',
+                $a->isPunchedOut() ? $a->check_out_at->format('H:i') : '',
+                $a->check_out_method ?? '',
+                $a->durationMinutes() ?? '',
             ]) . "\n";
         }
 
