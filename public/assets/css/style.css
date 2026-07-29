@@ -94,6 +94,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 72px;
+  overflow-x: hidden;
 }
 
 body {
@@ -1937,6 +1938,15 @@ footer::after {
 }
 
 @media(max-width:991px) {
+  /* Bootstrap's g-5 gutter (48px) is wider than .container's fixed 12px
+     padding, so row.g-5 bleeds past the viewport edge and causes horizontal
+     scroll on mobile. Shrink it back to the default gutter below the
+     breakpoint where these two-column layouts stack to a single column
+     anyway, so nothing changes visually. */
+  .g-5 {
+    --bs-gutter-x: 1.5rem;
+  }
+
   .hero {
     padding: 88px 0 52px;
   }
