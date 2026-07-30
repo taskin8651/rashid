@@ -75,6 +75,48 @@
     @endforelse
   </div>
 
+  <div class="card-rt mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="card-title mb-0">Today's Attendance</div>
+      @if ($hasAttendanceLocation)
+        <a href="{{ route('franchise.attendance.records') }}" style="font-size:12px;color:var(--orange);text-decoration:none;font-weight:600">View All &rarr;</a>
+      @endif
+    </div>
+    @if (!$hasAttendanceLocation)
+      <p style="font-size:13px;color:var(--muted);margin:0">Set up an attendance location to start tracking student check-ins. <a href="{{ route('franchise.attendance.manage') }}" style="color:var(--orange)">Set up now &rarr;</a></p>
+    @else
+      <div class="d-flex gap-4 mb-3">
+        <div><div style="font-size:20px;font-weight:700;color:var(--ok)">{{ $presentTodayCount }}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Checked In</div></div>
+        <div><div style="font-size:20px;font-weight:700;color:var(--muted)">{{ $notMarkedTodayCount }}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Not Yet</div></div>
+        <div><div style="font-size:20px;font-weight:700">{{ $stats['students'] }}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Total Students</div></div>
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <p style="font-size:11px;font-weight:700;color:var(--ok);text-transform:uppercase;margin-bottom:6px">Checked In</p>
+          @forelse ($presentTodayList as $u)
+            <div style="font-size:12px;padding:3px 0">{{ $u->name }}</div>
+          @empty
+            <p style="font-size:12px;color:var(--muted);margin:0">No one yet.</p>
+          @endforelse
+          @if ($presentTodayCount > $presentTodayList->count())
+            <div style="font-size:11px;color:var(--muted)">+{{ $presentTodayCount - $presentTodayList->count() }} more</div>
+          @endif
+        </div>
+        <div class="col-6">
+          <p style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Not Marked Yet</p>
+          @forelse ($notMarkedTodayList as $u)
+            <div style="font-size:12px;padding:3px 0;color:var(--muted)">{{ $u->name }}</div>
+          @empty
+            <p style="font-size:12px;color:var(--muted);margin:0">Everyone's checked in!</p>
+          @endforelse
+          @if ($notMarkedTodayCount > $notMarkedTodayList->count())
+            <div style="font-size:11px;color:var(--muted)">+{{ $notMarkedTodayCount - $notMarkedTodayList->count() }} more</div>
+          @endif
+        </div>
+      </div>
+    @endif
+  </div>
+
   <div class="row g-4 mb-4">
     <div class="col-lg-6">
       <div class="card-rt h-100">

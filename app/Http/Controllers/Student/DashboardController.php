@@ -59,12 +59,14 @@ class DashboardController extends Controller
             'referrals_count' => $user->referralsMade()->count(),
         ];
 
+        $markedAttendanceToday = $user->attendances()->whereDate('date', today())->exists();
+
         // Aggregate only — no names, to keep other students' presence private.
         $activeLearnersNow = User::role('student')->activeNow()->count();
 
         return view('student.dashboard', compact(
             'stats', 'myCourses', 'progressSegments', 'totalSpent', 'totalPaid', 'recentPayments',
-            'extraStats', 'activeLearnersNow'
+            'extraStats', 'activeLearnersNow', 'markedAttendanceToday'
         ));
     }
 }

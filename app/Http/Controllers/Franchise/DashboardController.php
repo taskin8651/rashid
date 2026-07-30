@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Franchise;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use App\Models\AttendanceLocation;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Expense;
@@ -87,10 +89,27 @@ class DashboardController extends Controller
         $activeUsersNow = User::whereIn('id', $relevantUserIds)->activeNow()->orderByDesc('last_seen_at')->take(12)->get();
         $activeUsersCount = User::whereIn('id', $relevantUserIds)->activeNow()->count();
 
+        // Today's attendance — who from this institute checked in today.
+        // Attendance is opt-in (no fixed roster per session), so "not marked"
+        // means "hasn't checked in yet today," not "absent from class."
+        $attendanceLocationIds = AttendanceLocation::whereIn('franchise_booking_id', $paidBookingIds)->pluck('id');
+        $hasAttendanceLocation = $attendanceLocationIds->isNotEmpty();
+
+        $presentTodayIds = Attendance::whereIn('attendance_location_id', $attendanceLocationIds)
+            ->whereIn('user_id', $studentIds)
+            ->whereDate('date', today())
+            ->distinct()
+            ->pluck('user_id');
+        $presentTodayCount = $presentTodayIds->count();
+        $notMarkedTodayCount = max(0, $studentIds->count() - $presentTodayCount);
+        $presentTodayList = User::whereIn('id', $presentTodayIds)->orderBy('name')->take(10)->get();
+        $notMarkedTodayList = User::whereIn('id', $studentIds)->whereNotIn('id', $presentTodayIds)->orderBy('name')->take(10)->get();
+
         return view('franchise.dashboard', compact(
             'bookings', 'stages', 'stats', 'revenueSegments', 'totalRevenue', 'recentPayments',
             'totalLeads', 'pendingLeads', 'totalExpenses', 'netProfit',
-            'activeUsersNow', 'activeUsersCount'
+            'activeUsersNow', 'activeUsersCount',
+            'hasAttendanceLocation', 'presentTodayCount', 'notMarkedTodayCount', 'presentTodayList', 'notMarkedTodayList'
         ));
     }
 }

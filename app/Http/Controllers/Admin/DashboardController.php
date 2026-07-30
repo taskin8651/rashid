@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\Certificate;
 use App\Models\CertificateApplication;
 use App\Models\Course;
@@ -57,12 +58,26 @@ class DashboardController extends Controller
         $activeUsersNow = User::activeNow()->with('roles')->orderByDesc('last_seen_at')->take(12)->get();
         $activeUsersCount = User::activeNow()->count();
 
+        // Today's attendance — who checked in vs who hasn't, platform-wide.
+        // Attendance is opt-in (no fixed per-day roster in this system), so
+        // "not marked" means "hasn't checked in anywhere today," not "absent
+        // from a scheduled session."
+        $presentTodayIds = Attendance::whereDate('date', today())
+            ->whereHas('user', fn ($q) => $q->role('student'))
+            ->distinct()
+            ->pluck('user_id');
+        $presentTodayCount = $presentTodayIds->count();
+        $notMarkedTodayCount = max(0, $totalStudents - $presentTodayCount);
+        $presentTodayList = User::whereIn('id', $presentTodayIds)->orderBy('name')->take(10)->get();
+        $notMarkedTodayList = User::role('student')->whereNotIn('id', $presentTodayIds)->orderBy('name')->take(10)->get();
+
         return view('admin.dashboard', compact(
             'totalStudents', 'activeCourses', 'totalRevenue', 'certificatesIssued', 'recentEnrollments',
             'coursePopularity', 'revenueSegments', 'recentPayments',
             'totalFranchises', 'pendingFranchiseApplications', 'totalLeads', 'pendingLeads',
             'totalExpenses', 'netProfit', 'pendingCertApplications',
-            'activeUsersNow', 'activeUsersCount'
+            'activeUsersNow', 'activeUsersCount',
+            'presentTodayCount', 'notMarkedTodayCount', 'presentTodayList', 'notMarkedTodayList'
         ));
     }
 }

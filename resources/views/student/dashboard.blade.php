@@ -42,6 +42,15 @@
     </div>
   </div>
 
+  <div class="card-rt mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2" style="padding:16px 20px">
+    @if ($markedAttendanceToday)
+      <div style="font-size:13px;font-weight:600;color:var(--ok)"><i class="bi bi-check-circle-fill me-2"></i>You've checked in today. Nice!</div>
+    @else
+      <div style="font-size:13px;font-weight:600;color:var(--muted)"><i class="bi bi-qr-code-scan me-2"></i>You haven't checked in today yet.</div>
+    @endif
+    <a href="{{ route('student.attendance.index') }}" class="bghost" style="text-decoration:none;font-size:12px;padding:8px 16px">{{ $markedAttendanceToday ? 'View Attendance' : 'Mark Attendance' }}</a>
+  </div>
+
   <div class="row g-4 mb-4">
     <div class="col-lg-6">
       <div class="card-rt h-100">
