@@ -119,8 +119,38 @@
               <div style="font-size:13px;font-weight:600">{{ $cert->course->name }}</div>
               <div style="font-size:11px;color:var(--muted)">{{ $cert->cert_code }}</div>
             </div>
-            <span class="badge-rt {{ $cert->status === 'issued' ? 'bg-active' : 'bg-pending' }}">{{ ucfirst($cert->status) }}</span>
+            <div class="d-flex align-items-center gap-2">
+              @if ($cert->status === 'issued')
+                <span style="font-size:11px;color:{{ $cert->hasUploadedPdf() ? 'var(--ok)' : 'var(--muted)' }}" title="Certificate PDF {{ $cert->hasUploadedPdf() ? 'uploaded' : 'not uploaded' }}"><i class="bi bi-file-earmark-check-fill"></i></span>
+                <span style="font-size:11px;color:{{ $cert->hasUploadedMarksheet() ? 'var(--ok)' : 'var(--muted)' }}" title="Marksheet {{ $cert->hasUploadedMarksheet() ? 'uploaded' : 'not uploaded' }}"><i class="bi bi-file-earmark-text-fill"></i></span>
+                <button class="action-btn" style="border:none;background:none" title="Upload/Replace Documents" data-bs-toggle="modal" data-bs-target="#certDocs{{ $cert->id }}"><i class="bi bi-upload"></i></button>
+              @endif
+              <span class="badge-rt {{ $cert->status === 'issued' ? 'bg-active' : 'bg-pending' }}">{{ ucfirst($cert->status) }}</span>
+            </div>
           </div>
+
+          @if ($cert->status === 'issued')
+            <div class="modal fade" id="certDocs{{ $cert->id }}" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header"><h5 class="modal-title">Documents — {{ $cert->course->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                  <form method="POST" action="{{ route('admin.certificates.documents.update', $cert) }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                      <label class="flbl">Certificate PDF {{ $cert->hasUploadedPdf() ? '(replace)' : '(upload)' }}</label>
+                      <input class="fctrl mb-3" type="file" name="certificate_pdf" accept="application/pdf"/>
+                      <label class="flbl">Marksheet {{ $cert->hasUploadedMarksheet() ? '(replace)' : '(upload)' }}</label>
+                      <input class="fctrl" type="file" name="marksheet" accept="application/pdf"/>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="bsave">Save Documents</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          @endif
         @empty
           <p style="font-size:13px;color:var(--muted);margin:0">No certificates yet.</p>
         @endforelse

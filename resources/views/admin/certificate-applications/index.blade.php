@@ -35,7 +35,10 @@
                 <button class="action-btn" style="border:none;background:none" title="Approve &amp; Issue Certificate" data-bs-toggle="modal" data-bs-target="#approveApp{{ $app->id }}"><i class="bi bi-check-lg"></i></button>
                 <button class="action-btn danger" style="border:none;background:none" title="Reject" data-bs-toggle="modal" data-bs-target="#rejectApp{{ $app->id }}"><i class="bi bi-x-lg"></i></button>
               @elseif ($app->status === 'approved' && $app->certificate)
-                <span style="font-size:11px;color:var(--muted)">Cert: {{ $app->certificate->cert_code }}</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span style="font-size:11px;color:var(--muted)">Cert: {{ $app->certificate->cert_code }}</span>
+                  <button class="action-btn" style="border:none;background:none" title="Update Certificate/Marksheet" data-bs-toggle="modal" data-bs-target="#docs{{ $app->certificate->id }}"><i class="bi bi-file-earmark-arrow-up-fill"></i></button>
+                </div>
               @elseif ($app->admin_notes)
                 <span style="font-size:11px;color:var(--muted)">{{ $app->admin_notes }}</span>
               @endif
@@ -56,8 +59,12 @@
                       <input class="fctrl mb-3" type="text" name="cert_code" placeholder="e.g. RTC-2026-00123" required />
 
                       <label class="flbl">Upload Signed Certificate PDF (optional)</label>
-                      <input class="fctrl" type="file" name="certificate_pdf" accept="application/pdf" />
-                      <p style="font-size:11px;color:var(--muted);margin:6px 0 0"><i class="bi bi-info-circle me-1"></i>Leave the PDF empty to auto-generate the standard R-Tech certificate design instead.</p>
+                      <input class="fctrl mb-1" type="file" name="certificate_pdf" accept="application/pdf" />
+                      <p style="font-size:11px;color:var(--muted);margin:0 0 12px"><i class="bi bi-info-circle me-1"></i>Leave empty to auto-generate the standard R-Tech certificate design instead.</p>
+
+                      <label class="flbl">Upload Marksheet (optional)</label>
+                      <input class="fctrl" type="file" name="marksheet" accept="application/pdf" />
+                      <p style="font-size:11px;color:var(--muted);margin:6px 0 0"><i class="bi bi-info-circle me-1"></i>Both files can also be added later from this page once issued.</p>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
@@ -82,6 +89,28 @@
                     <div class="modal-footer">
                       <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
                       <button type="submit" class="bsave" style="background:var(--danger)">Reject Application</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          @elseif ($app->status === 'approved' && $app->certificate)
+            <div class="modal fade" id="docs{{ $app->certificate->id }}" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header"><h5 class="modal-title">Certificate &amp; Marksheet — {{ $app->user->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                  <form method="POST" action="{{ route('admin.certificates.documents.update', $app->certificate) }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                      <label class="flbl">Certificate PDF {{ $app->certificate->hasUploadedPdf() ? '(replace)' : '(upload)' }}</label>
+                      <input class="fctrl mb-3" type="file" name="certificate_pdf" accept="application/pdf" />
+
+                      <label class="flbl">Marksheet {{ $app->certificate->hasUploadedMarksheet() ? '(replace)' : '(upload)' }}</label>
+                      <input class="fctrl" type="file" name="marksheet" accept="application/pdf" />
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="bsave">Save Documents</button>
                     </div>
                   </form>
                 </div>

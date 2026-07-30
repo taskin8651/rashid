@@ -47,6 +47,7 @@ class CertificateApplicationController extends Controller
         $validated = $request->validate([
             'cert_code' => ['required', 'string', 'max:255', Rule::unique('certificates', 'cert_code')->ignore($certificate->id)],
             'certificate_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'marksheet' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         $application->load(['user', 'course']);
@@ -73,6 +74,10 @@ class CertificateApplicationController extends Controller
             $certificate->addMediaFromRequest('certificate_pdf')->toMediaCollection('pdf');
         }
 
+        if ($request->hasFile('marksheet')) {
+            $certificate->addMediaFromRequest('marksheet')->toMediaCollection('marksheet');
+        }
+
         $application->update([
             'status' => 'approved',
             'certificate_id' => $certificate->id,
@@ -91,6 +96,24 @@ class CertificateApplicationController extends Controller
         $application->user->notify(new CertificateIssuedNotification($certificate));
 
         return back()->with('status', 'Certificate issued to ' . $application->user->name . '.');
+    }
+
+    public function updateDocuments(Request $request, Certificate $certificate)
+    {
+        $request->validate([
+            'certificate_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'marksheet' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        if ($request->hasFile('certificate_pdf')) {
+            $certificate->addMediaFromRequest('certificate_pdf')->toMediaCollection('pdf');
+        }
+
+        if ($request->hasFile('marksheet')) {
+            $certificate->addMediaFromRequest('marksheet')->toMediaCollection('marksheet');
+        }
+
+        return back()->with('status', 'Documents updated.');
     }
 
     public function reject(Request $request, CertificateApplication $application)

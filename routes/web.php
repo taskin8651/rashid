@@ -172,6 +172,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/certificates', [StudentCertificateController::class, 'index'])->name('student.certificates.index');
         Route::get('/certificates/{certificate}/download', [StudentCertificateController::class, 'download'])->name('student.certificates.download');
+        Route::get('/certificates/{certificate}/marksheet', [StudentCertificateController::class, 'downloadMarksheet'])->name('student.certificates.marksheet');
 
         Route::get('/wishlist', [StudentWishlistController::class, 'index'])->name('student.wishlist.index');
         Route::post('/wishlist/toggle', [StudentWishlistController::class, 'toggle'])->name('student.wishlist.toggle');
@@ -394,6 +395,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
             Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
             Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
+            Route::post('/certificates/{certificate}/documents', [AdminCertificateApplicationController::class, 'updateDocuments'])->name('admin.certificates.documents.update');
         });
 
         Route::middleware('permission:manage-attendance-locations')->group(function () {

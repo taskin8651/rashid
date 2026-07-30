@@ -22,6 +22,7 @@ class Certificate extends Model implements HasMedia
         // Private disk: served only through the authorized download route,
         // same pattern as assignment submissions.
         $this->addMediaCollection('pdf')->singleFile()->useDisk('local');
+        $this->addMediaCollection('marksheet')->singleFile()->useDisk('local');
     }
 
     public function hasUploadedPdf(): bool
@@ -32,6 +33,16 @@ class Certificate extends Model implements HasMedia
     public function uploadedPdfPath(): ?string
     {
         return $this->getFirstMedia('pdf')?->getPath();
+    }
+
+    public function hasUploadedMarksheet(): bool
+    {
+        return $this->getFirstMedia('marksheet') !== null;
+    }
+
+    public function uploadedMarksheetPath(): ?string
+    {
+        return $this->getFirstMedia('marksheet')?->getPath();
     }
 
     public function user()

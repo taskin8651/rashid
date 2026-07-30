@@ -78,4 +78,15 @@ class CertificateController extends Controller
 
         return $pdf->download($filename);
     }
+
+    public function downloadMarksheet(Certificate $certificate)
+    {
+        abort_unless($certificate->user_id === auth()->id(), 403);
+        abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->hasUploadedMarksheet(), 404);
+
+        $filename = 'RTech-Marksheet-' . $certificate->cert_code . '.pdf';
+
+        return response()->download($certificate->uploadedMarksheetPath(), $filename);
+    }
 }
