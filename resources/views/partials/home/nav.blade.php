@@ -6,15 +6,14 @@
         </a>
         <div class="nav-links" id="navLinks">
           <a class="nav-link-item {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Home</a>
+          <a class="nav-link-item {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">About</a>
           <a class="nav-link-item {{ request()->routeIs('courses') ? 'active' : '' }}" href="{{ route('courses') }}">Courses</a>
           <a class="nav-link-item {{ request()->routeIs('free-demo') ? 'active' : '' }}" href="{{ route('free-demo') }}">Free Demo</a>
           <a class="nav-link-item {{ request()->routeIs('why-rtech') ? 'active' : '' }}" href="{{ route('why-rtech') }}">Why R-Tech</a>
           <a class="nav-link-item {{ request()->routeIs('gallery') ? 'active' : '' }}" href="{{ route('gallery') }}">Gallery</a>
           <a class="nav-link-item {{ request()->routeIs('franchise') ? 'active' : '' }}" href="{{ route('franchise') }}">Franchise</a>
           <a class="nav-link-item {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Contact</a>
-          @auth
-            <a class="nav-link-item" href="{{ auth()->user()->hasRole('admin') ? route('admin.dashboard') : route('student.dashboard') }}">Dashboard</a>
-          @endauth
+         
         </div>
 
         <div class="nav-actions">

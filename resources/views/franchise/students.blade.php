@@ -27,6 +27,50 @@
         @if ($canManage)
           <div style="flex:1;text-align:right">
             <button class="action-btn" data-bs-toggle="modal" data-bs-target="#feePay{{ $enrollment->id }}" title="Record Payment"><i class="bi bi-cash-coin"></i></button>
+            <button class="action-btn" data-bs-toggle="modal" data-bs-target="#allotCourse{{ $enrollment->user_id }}" title="Allot Another Course"><i class="bi bi-mortarboard-fill"></i></button>
+          </div>
+
+          <div class="modal fade" id="allotCourse{{ $enrollment->user_id }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Allot Course — {{ $enrollment->user->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <form method="POST" action="{{ route('franchise.students.allot-course', $enrollment->user) }}">
+                  @csrf
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="flbl">Course</label>
+                      <select class="fctrl allot-course-select" name="course_id" data-target="allotFee{{ $enrollment->user_id }}" required>
+                        <option value="">Select course…</option>
+                        @foreach ($courses as $c)
+                          <option value="{{ $c->id }}" data-price="{{ $c->price }}">{{ $c->name }} — ₹{{ number_format($c->price, 0) }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="mb-3"><label class="flbl">Total Fee Agreed (₹)</label><input class="fctrl" type="number" step="0.01" min="0" name="total_fee" id="allotFee{{ $enrollment->user_id }}" required/></div>
+                    <hr style="border-color:var(--border)">
+                    <p style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">First Installment (optional)</p>
+                    <div class="row g-3 mb-3">
+                      <div class="col-6"><label class="flbl">Amount Paid Now (₹)</label><input class="fctrl" type="number" step="0.01" min="0" name="first_payment_amount"/></div>
+                      <div class="col-6">
+                        <label class="flbl">Method</label>
+                        <select class="fctrl" name="first_payment_method">
+                          <option value="cash">Cash</option>
+                          <option value="upi">UPI</option>
+                          <option value="bank_transfer">Bank Transfer</option>
+                          <option value="cheque">Cheque</option>
+                          <option value="card">Card</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="mb-1"><label class="flbl">Note</label><input class="fctrl" name="first_payment_note" placeholder="e.g. 1st installment paid at center"/></div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="bsave">Allot Course</button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
 
           <div class="modal fade" id="feePay{{ $enrollment->id }}" tabindex="-1">
@@ -125,4 +169,14 @@
       });
     </script>
   @endif
+
+  <script>
+    document.querySelectorAll('.allot-course-select').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        const price = this.options[this.selectedIndex]?.dataset.price;
+        const target = document.getElementById(this.dataset.target);
+        if (price && target) { target.value = price; }
+      });
+    });
+  </script>
 @endsection

@@ -12,7 +12,14 @@
 
   <div class="shead d-flex justify-content-between align-items-start flex-wrap gap-2">
     <div>
-      <h4>{{ $lead->name }}</h4>
+      <div class="d-flex align-items-center gap-2">
+        <h4 class="mb-0">{{ $lead->name }}</h4>
+        <a href="tel:{{ $lead->phone }}" class="action-btn" title="Call {{ $lead->phone }}"><i class="bi bi-telephone-fill"></i></a>
+        <a href="https://wa.me/{{ $lead->whatsappNumber() }}" target="_blank" class="action-btn" title="WhatsApp {{ $lead->phone }}"><i class="bi bi-whatsapp"></i></a>
+        @if ($lead->email)
+          <a href="mailto:{{ $lead->email }}" class="action-btn" title="Email {{ $lead->email }}"><i class="bi bi-envelope-fill"></i></a>
+        @endif
+      </div>
       <p>{{ $lead->phone }}{{ $lead->email ? ' · '.$lead->email : '' }} &middot; Received {{ $lead->created_at->format('d M Y') }}</p>
     </div>
     <span class="badge-rt {{ $statusBadge[$lead->status] }}" style="font-size:13px">{{ $statusLabel($lead->status) }}</span>

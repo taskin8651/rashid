@@ -116,6 +116,7 @@ Route::get('/notes/{note}/download', [NoteDownloadController::class, 'download']
     ->name('notes.download')
     ->middleware('auth');
 Route::get('/why-rtech', [PageController::class, 'whyRtech'])->name('why-rtech');
+Route::get('/about', [PageController::class, 'about'])->name('about');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.submit')->middleware('throttle:5,1');
@@ -236,6 +237,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/students', [FranchiseStudentController::class, 'index'])->name('franchise.students.index');
         Route::post('/students/offline-enroll', [FranchiseStudentController::class, 'storeOffline'])->name('franchise.students.offline-enroll');
+        Route::post('/students/{student}/allot-course', [FranchiseStudentController::class, 'allotCourse'])->name('franchise.students.allot-course');
         Route::post('/enrollments/{enrollment}/payments', [FranchiseStudentController::class, 'storePayment'])->name('franchise.enrollments.payments.store');
         Route::post('/enrollments/{enrollment}/fee', [FranchiseStudentController::class, 'updateFee'])->name('franchise.enrollments.fee.update');
 
@@ -288,6 +290,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
             Route::get('/students/export', [AdminStudentController::class, 'export'])->name('admin.students.export');
             Route::post('/students/offline-enroll', [AdminStudentController::class, 'storeOffline'])->name('admin.students.offline-enroll');
+            Route::post('/students/{student}/allot-course', [AdminStudentController::class, 'allotCourse'])->name('admin.students.allot-course');
             Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
             Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCardView'])->name('admin.students.id-card.view');
             Route::get('/students/{student}/id-card/download', [AdminStudentController::class, 'idCardDownload'])->name('admin.students.id-card.download');

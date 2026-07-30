@@ -12,7 +12,16 @@
 
   <div class="ov-banner">
     <div class="ov-ribbon"><i class="bi bi-person-lines-fill"></i>Lead</div>
-    <h4>{{ $lead->name }}</h4>
+    <div class="d-flex align-items-center flex-wrap gap-3">
+      <h4 class="mb-0">{{ $lead->name }}</h4>
+      <div class="d-flex gap-2">
+        <a href="tel:{{ $lead->phone }}" title="Call {{ $lead->phone }}" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none"><i class="bi bi-telephone-fill" style="font-size:14px"></i></a>
+        <a href="https://wa.me/{{ $lead->whatsappNumber() }}" target="_blank" title="WhatsApp {{ $lead->phone }}" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none"><i class="bi bi-whatsapp" style="font-size:14px"></i></a>
+        @if ($lead->email)
+          <a href="mailto:{{ $lead->email }}" title="Email {{ $lead->email }}" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none"><i class="bi bi-envelope-fill" style="font-size:14px"></i></a>
+        @endif
+      </div>
+    </div>
     <p>{{ $lead->phone }}{{ $lead->email ? ' · '.$lead->email : '' }} &middot; {{ $lead->franchiseBooking->city ?? 'Head Office' }} &middot; Received {{ $lead->created_at->format('d M Y') }}</p>
     <div class="ov-banner-stats">
       <div><b>{{ $statusLabel($lead->status) }}</b><span>Status</span></div>

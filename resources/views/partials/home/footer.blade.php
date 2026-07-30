@@ -19,6 +19,7 @@
           <div class="ftt">Quick Links</div>
           <ul class="flinks">
             <li><a href="{{ route('home') }}">Home</a></li>
+            <li><a href="{{ route('about') }}">About Us</a></li>
             <li><a href="{{ route('courses') }}">Courses</a></li>
             <li><a href="{{ route('gallery') }}">Gallery</a></li>
             <li><a href="{{ route('blog') }}">Blog</a></li>

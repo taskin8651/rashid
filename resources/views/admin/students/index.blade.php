@@ -28,12 +28,57 @@
             <td><span class="badge-rt {{ $s->is_active ? 'bg-active' : 'bg-inactive' }}">{{ $s->is_active ? 'Active' : 'Inactive' }}</span></td>
             <td>
               <a href="{{ route('admin.students.show', $s) }}" class="action-btn" title="View"><i class="bi bi-eye-fill"></i></a>
+              <button class="action-btn" style="border:none;background:none" title="Allot Course" data-bs-toggle="modal" data-bs-target="#allotCourse{{ $s->id }}"><i class="bi bi-mortarboard-fill"></i></button>
               <form method="POST" action="{{ route('admin.students.destroy', $s) }}" onsubmit="return confirm('Delete this student? This cannot be undone.')" class="d-inline">
                 @csrf @method('DELETE')
                 <button type="submit" class="action-btn danger" style="border:none;background:none"><i class="bi bi-trash-fill"></i></button>
               </form>
             </td>
           </tr>
+
+          <!-- Allot Course Modal -->
+          <div class="modal fade" id="allotCourse{{ $s->id }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Allot Course — {{ $s->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <form method="POST" action="{{ route('admin.students.allot-course', $s) }}">
+                  @csrf
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="flbl">Course</label>
+                      <select class="fctrl allot-course-select" name="course_id" data-target="allotFee{{ $s->id }}" required>
+                        <option value="">Select course…</option>
+                        @foreach ($courses as $c)
+                          <option value="{{ $c->id }}" data-price="{{ $c->price }}">{{ $c->name }} — ₹{{ number_format($c->price, 0) }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="mb-3"><label class="flbl">Total Fee Agreed (₹)</label><input class="fctrl" type="number" step="0.01" min="0" name="total_fee" id="allotFee{{ $s->id }}" required/></div>
+                    <hr style="border-color:var(--border)">
+                    <p style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">First Installment (optional)</p>
+                    <div class="row g-3 mb-3">
+                      <div class="col-6"><label class="flbl">Amount Paid Now (₹)</label><input class="fctrl" type="number" step="0.01" min="0" name="first_payment_amount"/></div>
+                      <div class="col-6">
+                        <label class="flbl">Method</label>
+                        <select class="fctrl" name="first_payment_method">
+                          <option value="cash">Cash</option>
+                          <option value="upi">UPI</option>
+                          <option value="bank_transfer">Bank Transfer</option>
+                          <option value="cheque">Cheque</option>
+                          <option value="card">Card</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="mb-1"><label class="flbl">Note</label><input class="fctrl" name="first_payment_note" placeholder="e.g. 1st installment paid at center"/></div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="bsave">Allot Course</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         @empty
           <tr><td colspan="6" style="color:var(--muted)">No students found.</td></tr>
         @endforelse
@@ -97,6 +142,13 @@
     document.getElementById('offlineCourse')?.addEventListener('change', function () {
       const price = this.options[this.selectedIndex]?.dataset.price;
       if (price) { document.getElementById('offlineTotalFee').value = price; }
+    });
+    document.querySelectorAll('.allot-course-select').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        const price = this.options[this.selectedIndex]?.dataset.price;
+        const target = document.getElementById(this.dataset.target);
+        if (price && target) { target.value = price; }
+      });
     });
   </script>
 @endsection

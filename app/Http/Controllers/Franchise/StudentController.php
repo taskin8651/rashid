@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
@@ -70,6 +71,34 @@ class StudentController extends Controller
         ], $request->user()->id);
 
         return back()->with('status', 'Student registered and allotted to ' . $course->name . '.');
+    }
+
+    public function allotCourse(Request $request, User $student)
+    {
+        abort_unless($student->hasRole('student'), 404);
+
+        $validated = $request->validate([
+            'course_id' => ['required', 'exists:courses,id'],
+            'total_fee' => ['required', 'numeric', 'min:0'],
+            'first_payment_amount' => ['nullable', 'numeric', 'min:0.01'],
+            'first_payment_method' => ['nullable', 'string', 'max:30'],
+            'first_payment_note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user = $request->user();
+        $bookingIds = $user->accessibleFranchiseBookingsQuery()->where('status', 'paid')->pluck('id')
+            ->filter(fn ($id) => $user->hasFranchisePermission($id, 'manage-students'))
+            ->values();
+
+        $course = Course::whereIn('franchise_booking_id', $bookingIds)->findOrFail($validated['course_id']);
+
+        $this->enrollStudentOffline($student, $course, (float) $validated['total_fee'], [
+            'amount' => $validated['first_payment_amount'] ?? null,
+            'method' => $validated['first_payment_method'] ?? null,
+            'note' => $validated['first_payment_note'] ?? null,
+        ], $request->user()->id);
+
+        return back()->with('status', $course->name . ' allotted to ' . $student->name . '.');
     }
 
     public function storePayment(Request $request, Enrollment $enrollment)

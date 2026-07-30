@@ -52,4 +52,15 @@ class StudentLead extends Model
     {
         return $this->hasMany(StudentLeadNote::class)->latest();
     }
+
+    /**
+     * Digits-only phone number, prefixed with the India country code when the
+     * number looks local (10 digits) — wa.me links require the full code.
+     */
+    public function whatsappNumber(): string
+    {
+        $digits = preg_replace('/\D/', '', $this->phone ?? '');
+
+        return strlen($digits) === 10 ? '91' . $digits : $digits;
+    }
 }
