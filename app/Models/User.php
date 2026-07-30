@@ -98,6 +98,62 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(FranchiseBooking::class);
     }
 
+    public function franchiseTeamMemberships()
+    {
+        return $this->hasMany(FranchiseTeamMember::class);
+    }
+
+    /**
+     * Every franchise booking this user can act on — ones they own outright,
+     * plus ones a franchise owner has added them to as a team member. Owners
+     * always have full access; team members are further limited by their
+     * FranchiseRole's permissions (see hasFranchisePermission()). Returns a
+     * real query builder — chain ->where()/->with()/->get() etc. on it
+     * exactly like the old franchiseBookings() relation.
+     */
+    public function accessibleFranchiseBookingsQuery()
+    {
+        $memberBookingIds = $this->franchiseTeamMemberships()->pluck('franchise_booking_id');
+
+        return FranchiseBooking::where('user_id', $this->id)
+            ->when($memberBookingIds->isNotEmpty(), fn ($q) => $q->orWhereIn('id', $memberBookingIds));
+    }
+
+    public function ownsFranchiseBooking(int $franchiseBookingId): bool
+    {
+        return $this->franchiseBookings()->where('id', $franchiseBookingId)->exists();
+    }
+
+    public function hasFranchisePermission(int $franchiseBookingId, string $permission): bool
+    {
+        if ($this->ownsFranchiseBooking($franchiseBookingId)) {
+            return true;
+        }
+
+        $membership = $this->franchiseTeamMemberships()
+            ->where('franchise_booking_id', $franchiseBookingId)
+            ->with('role')
+            ->first();
+
+        return $membership?->role?->hasPermission($permission) ?? false;
+    }
+
+    /**
+     * True if this permission applies to at least one franchise booking the
+     * user can reach — used to decide whether a sidebar link is worth
+     * showing at all, without pinning it to one specific booking.
+     */
+    public function hasAnyFranchisePermission(string $permission): bool
+    {
+        if ($this->franchiseBookings()->exists()) {
+            return true;
+        }
+
+        return $this->franchiseTeamMemberships()
+            ->whereHas('role', fn ($q) => $q->whereJsonContains('permissions', $permission))
+            ->exists();
+    }
+
     public function wishlist()
     {
         return $this->belongsToMany(Course::class, 'wishlist')->withTimestamps();

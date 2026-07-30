@@ -47,4 +47,23 @@ class Enrollment extends Model
     {
         return $this->hasOne(Payment::class, 'payable_id')->where('payable_type', 'course_enrollment');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'payable_id')->where('payable_type', 'course_enrollment');
+    }
+
+    public function getAmountPaidAttribute(): float
+    {
+        if ($this->relationLoaded('payments')) {
+            return (float) $this->payments->where('status', 'paid')->sum('amount');
+        }
+
+        return (float) $this->payments()->where('status', 'paid')->sum('amount');
+    }
+
+    public function getBalanceDueAttribute(): float
+    {
+        return max(0, (float) $this->final_amount - $this->amount_paid);
+    }
 }

@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers\Franchise;
 
+use App\Http\Controllers\Concerns\AuthorizesFranchiseAccess;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\CourseModule;
-use App\Models\FranchiseBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class CourseController extends Controller
 {
+    use AuthorizesFranchiseAccess;
+
     public function index(Request $request)
     {
-        $bookings = $request->user()->franchiseBookings()->with(['courses.category', 'courses.modules'])->latest()->get();
+        $this->authorizeAnyFranchisePermission($request, 'manage-courses');
+
+        $bookings = $request->user()->accessibleFranchiseBookingsQuery()->with(['courses.category', 'courses.modules'])->latest()->get();
         $courses = \Illuminate\Database\Eloquent\Collection::make($bookings->flatMap->courses);
         $courses->loadCount(['videos', 'enrollments' => fn ($q) => $q->where('status', 'paid')]);
         $categories = Category::where('status', 'active')->get();
@@ -32,10 +36,12 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
-        $booking = FranchiseBooking::where('id', $request->input('franchise_booking_id'))
-            ->where('user_id', $request->user()->id)
+        $booking = $request->user()->accessibleFranchiseBookingsQuery()
+            ->where('id', $request->input('franchise_booking_id'))
             ->where('status', 'paid')
             ->firstOrFail();
+
+        $this->authorizeFranchisePermission($request, $booking->id, 'manage-courses');
 
         $validated = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
@@ -103,7 +109,7 @@ class CourseController extends Controller
     protected function authorizeOwnership(Request $request, Course $course): void
     {
         abort_unless(
-            $course->franchise_booking_id && $course->franchiseBooking->user_id === $request->user()->id,
+            $course->franchise_booking_id && $request->user()->hasFranchisePermission($course->franchise_booking_id, 'manage-courses'),
             403
         );
     }

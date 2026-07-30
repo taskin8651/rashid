@@ -20,17 +20,37 @@
       <div><div class="t1">R-Tech Computer</div><div class="t2">Franchise Partner</div></div>
     </div>
   </div>
+  @php
+    $isFranchiseOwner = auth()->user()->franchiseBookings()->exists();
+  @endphp
   <nav class="sb-nav">
     <div class="nsec">Main</div>
     <a class="slink {{ request()->routeIs('franchise.dashboard') ? 'act' : '' }}" href="{{ route('franchise.dashboard') }}"><i class="bi bi-grid-fill"></i>Overview</a>
-    <a class="slink {{ request()->routeIs('franchise.documents.*') ? 'act' : '' }}" href="{{ route('franchise.documents.index') }}"><i class="bi bi-file-earmark-text-fill"></i>Documents</a>
+    @if (auth()->user()->hasAnyFranchisePermission('manage-documents'))
+      <a class="slink {{ request()->routeIs('franchise.documents.*') ? 'act' : '' }}" href="{{ route('franchise.documents.index') }}"><i class="bi bi-file-earmark-text-fill"></i>Documents</a>
+    @endif
     <a class="slink {{ request()->routeIs('franchise.resources.*') ? 'act' : '' }}" href="{{ route('franchise.resources.index') }}"><i class="bi bi-folder2-open"></i>Training &amp; Marketing Kit</a>
     <div class="nsec">My Institute</div>
-    <a class="slink {{ request()->routeIs('franchise.courses.*') ? 'act' : '' }}" href="{{ route('franchise.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
-    <a class="slink {{ request()->routeIs('franchise.students.*') ? 'act' : '' }}" href="{{ route('franchise.students.index') }}"><i class="bi bi-people-fill"></i>My Students</a>
-    <a class="slink {{ request()->routeIs('franchise.gallery.*') ? 'act' : '' }}" href="{{ route('franchise.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
-    <a class="slink {{ request()->routeIs('franchise.attendance.records') ? 'act' : '' }}" href="{{ route('franchise.attendance.records') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
-    <a class="slink {{ request()->routeIs('franchise.attendance.manage') ? 'act' : '' }}" href="{{ route('franchise.attendance.manage') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Setup</a>
+    @if (auth()->user()->hasAnyFranchisePermission('manage-leads') || auth()->user()->hasAnyFranchisePermission('follow-up-leads'))
+      <a class="slink {{ request()->routeIs('franchise.leads.*') ? 'act' : '' }}" href="{{ route('franchise.leads.index') }}"><i class="bi bi-person-lines-fill"></i>Leads</a>
+    @endif
+    @if (auth()->user()->hasAnyFranchisePermission('manage-courses'))
+      <a class="slink {{ request()->routeIs('franchise.courses.*') ? 'act' : '' }}" href="{{ route('franchise.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
+    @endif
+    @if (auth()->user()->hasAnyFranchisePermission('view-students'))
+      <a class="slink {{ request()->routeIs('franchise.students.*') ? 'act' : '' }}" href="{{ route('franchise.students.index') }}"><i class="bi bi-people-fill"></i>My Students</a>
+    @endif
+    @if (auth()->user()->hasAnyFranchisePermission('manage-gallery'))
+      <a class="slink {{ request()->routeIs('franchise.gallery.*') ? 'act' : '' }}" href="{{ route('franchise.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
+    @endif
+    @if (auth()->user()->hasAnyFranchisePermission('manage-attendance'))
+      <a class="slink {{ request()->routeIs('franchise.attendance.records') ? 'act' : '' }}" href="{{ route('franchise.attendance.records') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
+      <a class="slink {{ request()->routeIs('franchise.attendance.manage') ? 'act' : '' }}" href="{{ route('franchise.attendance.manage') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Setup</a>
+    @endif
+    @if ($isFranchiseOwner)
+      <div class="nsec">Organization</div>
+      <a class="slink {{ request()->routeIs('franchise.team.*') ? 'act' : '' }}" href="{{ route('franchise.team.index') }}"><i class="bi bi-people-fill"></i>Team &amp; Roles</a>
+    @endif
     <div class="nsec">Account</div>
     <a class="slink {{ request()->routeIs('franchise.profile.*') ? 'act' : '' }}" href="{{ route('franchise.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
     <div class="nsec">More</div>
@@ -40,7 +60,7 @@
       <button type="submit" class="slink" style="background:none;border:none;width:100%;text-align:left"><i class="bi bi-box-arrow-right"></i>Logout</button>
     </form>
   </nav>
-  <div class="sb-bot"><div class="uinfo"><div class="uav">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div><div><div class="un">{{ auth()->user()->name }}</div><div class="ur">Franchise Partner</div></div></div></div>
+  <div class="sb-bot"><div class="uinfo"><div class="uav">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div><div><div class="un">{{ auth()->user()->name }}</div><div class="ur">{{ $isFranchiseOwner ? 'Franchise Owner' : 'Team Member' }}</div></div></div></div>
 </aside>
 
 <div class="main">

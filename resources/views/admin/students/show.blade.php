@@ -23,6 +23,74 @@
     </div>
   </div>
 
+  <div class="shead mb-3"><h4 style="font-size:16px">Fee &amp; Installments</h4></div>
+  <div class="row g-3 mb-4">
+    @forelse ($courses as $c)
+      @php $e = $c['enrollment']; @endphp
+      <div class="col-md-6">
+        <div class="card-rt">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 style="font-size:13px;font-weight:700;margin:0">{{ $c['course']->name }}</h6>
+            <button class="action-btn" data-bs-toggle="modal" data-bs-target="#feePay{{ $e->id }}" title="Record Payment"><i class="bi bi-cash-coin"></i></button>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size:12px;color:var(--muted)">
+            <span>Total Fee</span><span style="font-weight:700;color:var(--text)">₹{{ number_format($e->final_amount, 0) }}</span>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size:12px;color:var(--muted)">
+            <span>Paid So Far</span><span style="font-weight:700;color:var(--ok)">₹{{ number_format($e->amount_paid, 0) }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2" style="font-size:12px;color:var(--muted)">
+            <span>Balance Due</span><span style="font-weight:700;color:{{ $e->balance_due > 0 ? 'var(--danger)' : 'var(--ok)' }}">₹{{ number_format($e->balance_due, 0) }}</span>
+          </div>
+          <div class="ptrack mb-2"><div class="pfill" style="width:{{ $e->final_amount > 0 ? min(100, round(($e->amount_paid / $e->final_amount) * 100)) : 100 }}%"></div></div>
+          @if ($e->payments->isNotEmpty())
+            <div style="font-size:11px;color:var(--muted);max-height:90px;overflow-y:auto">
+              @foreach ($e->payments->where('status', 'paid')->sortByDesc('paid_at') as $p)
+                <div class="d-flex justify-content-between py-1" style="border-bottom:1px solid var(--border)">
+                  <span>{{ optional($p->paid_at)->format('d M Y') ?? $p->created_at->format('d M Y') }} &middot; {{ ucfirst(str_replace('_',' ', $p->method ?? '—')) }}</span>
+                  <span style="font-weight:600">₹{{ number_format($p->amount, 0) }}</span>
+                </div>
+              @endforeach
+            </div>
+          @endif
+        </div>
+      </div>
+
+      <div class="modal fade" id="feePay{{ $e->id }}" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Record Payment — {{ $c['course']->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form method="POST" action="{{ route('admin.enrollments.payments.store', $e) }}">
+              @csrf
+              <div class="modal-body">
+                <p style="font-size:12px;color:var(--muted)">Balance due: ₹{{ number_format($e->balance_due, 2) }}</p>
+                <div class="mb-3"><label class="flbl">Amount (₹)</label><input class="fctrl" type="number" step="0.01" min="0.01" max="{{ $e->balance_due }}" name="amount" required/></div>
+                <div class="mb-3">
+                  <label class="flbl">Method</label>
+                  <select class="fctrl" name="method">
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="cheque">Cheque</option>
+                    <option value="card">Card</option>
+                  </select>
+                </div>
+                <div class="mb-3"><label class="flbl">Date</label><input class="fctrl" type="date" name="paid_at" value="{{ now()->format('Y-m-d') }}"/></div>
+                <div class="mb-1"><label class="flbl">Note</label><input class="fctrl" name="note" placeholder="e.g. 2nd installment"/></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="bsave">Record Payment</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    @empty
+      <div class="col-12"><p style="font-size:13px;color:var(--muted)">Not enrolled in any course.</p></div>
+    @endforelse
+  </div>
+
   <div class="shead mb-3"><h4 style="font-size:16px">Course Progress</h4></div>
   <div class="row g-3 mb-4">
     @forelse ($courses as $c)

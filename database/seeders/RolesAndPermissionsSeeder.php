@@ -8,24 +8,38 @@ use Spatie\Permission\Models\Role;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
+    /**
+     * Permissions an admin-team role can be granted from the Team
+     * Management screen. Kept separate from ADMIN_BASELINE_PERMISSION,
+     * which every admin-side role gets automatically regardless of what's
+     * toggled — it's what actually lets them into /admin at all.
+     */
+    public const ADMIN_PERMISSIONS = [
+        'view-admin-dashboard',
+        'manage-leads',
+        'follow-up-leads',
+        'manage-students',
+        'manage-courses',
+        'manage-categories',
+        'manage-coupons',
+        'manage-payments',
+        'manage-franchise-leads',
+        'manage-franchise-resources',
+        'manage-gallery',
+        'manage-reviews',
+        'manage-certificate-applications',
+        'manage-attendance',
+        'manage-attendance-locations',
+        'manage-faqs',
+        'manage-blog',
+        'manage-team',
+    ];
+
+    public const ADMIN_BASELINE_PERMISSION = 'access-admin-panel';
+
     public function run(): void
     {
-        $permissions = [
-            'manage-courses',
-            'manage-categories',
-            'manage-batches',
-            'manage-coupons',
-            'manage-students',
-            'manage-payments',
-            'manage-videos',
-            'manage-assignments',
-            'manage-quizzes',
-            'manage-notes',
-            'manage-certificates',
-            'manage-franchise-leads',
-            'manage-contact-messages',
-            'view-admin-dashboard',
-        ];
+        $permissions = array_merge(self::ADMIN_PERMISSIONS, [self::ADMIN_BASELINE_PERMISSION]);
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);

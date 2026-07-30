@@ -30,11 +30,13 @@
               <span class="badge-rt {{ $badge }}">{{ ucfirst($p->status) }}</span>
             </td>
             <td>
-              @if ($p->status === 'paid')
+              @if ($p->status === 'paid' && $p->razorpay_payment_id)
                 <form method="POST" action="{{ route('admin.payments.refund', $p) }}" onsubmit="return confirm('Refund ₹{{ number_format($p->amount, 0) }} to {{ $p->user->name ?? 'this customer' }} via Razorpay?')">
                   @csrf
                   <button type="submit" class="bghost" style="font-size:11px;padding:5px 10px;color:var(--danger);border-color:rgba(239,68,68,.3)"><i class="bi bi-arrow-counterclockwise me-1"></i>Refund</button>
                 </form>
+              @elseif ($p->status === 'paid')
+                <span style="font-size:11px;color:var(--muted)">Offline</span>
               @endif
             </td>
           </tr>

@@ -88,7 +88,7 @@ class CourseAssignmentController extends Controller
     protected function authorizeOwnership(Request $request, Course $course): void
     {
         abort_unless(
-            $course->franchise_booking_id && $course->franchiseBooking->user_id === $request->user()->id,
+            $course->franchise_booking_id && $request->user()->hasFranchisePermission($course->franchise_booking_id, 'manage-courses'),
             403
         );
     }

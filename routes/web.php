@@ -13,11 +13,13 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FranchiseController as AdminFranchiseController;
 use App\Http\Controllers\Admin\FranchiseResourceController as AdminFranchiseResourceController;
 use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
+use App\Http\Controllers\Admin\LeadController as AdminLeadController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
+use App\Http\Controllers\Admin\TeamController as AdminTeamController;
 use App\Http\Controllers\Admin\CertificateApplicationController as AdminCertificateApplicationController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
@@ -36,9 +38,11 @@ use App\Http\Controllers\Franchise\CourseVideoController as FranchiseCourseVideo
 use App\Http\Controllers\Franchise\DashboardController as FranchiseDashboardController;
 use App\Http\Controllers\Franchise\DocumentController as FranchiseDocumentController;
 use App\Http\Controllers\Franchise\GalleryController as FranchiseGalleryController;
+use App\Http\Controllers\Franchise\LeadController as FranchiseLeadController;
 use App\Http\Controllers\Franchise\ProfileController as FranchiseProfileController;
 use App\Http\Controllers\Franchise\ResourceController as FranchiseResourceController;
 use App\Http\Controllers\Franchise\StudentController as FranchiseStudentController;
+use App\Http\Controllers\Franchise\TeamController as FranchiseTeamController;
 use App\Http\Controllers\FranchiseController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HomeController;
@@ -221,7 +225,19 @@ Route::middleware('auth')->group(function () {
         Route::post('/courses/{course}/notes/{note}', [FranchiseCourseNoteController::class, 'update'])->name('franchise.courses.notes.update');
         Route::delete('/courses/{course}/notes/{note}', [FranchiseCourseNoteController::class, 'destroy'])->name('franchise.courses.notes.destroy');
 
+        Route::get('/leads', [FranchiseLeadController::class, 'index'])->name('franchise.leads.index');
+        Route::post('/leads', [FranchiseLeadController::class, 'store'])->name('franchise.leads.store');
+        Route::get('/leads/{lead}', [FranchiseLeadController::class, 'show'])->name('franchise.leads.show');
+        Route::post('/leads/{lead}', [FranchiseLeadController::class, 'update'])->name('franchise.leads.update');
+        Route::post('/leads/{lead}/status', [FranchiseLeadController::class, 'updateStatus'])->name('franchise.leads.status.update');
+        Route::post('/leads/{lead}/notes', [FranchiseLeadController::class, 'addNote'])->name('franchise.leads.notes.store');
+        Route::post('/leads/{lead}/convert', [FranchiseLeadController::class, 'convert'])->name('franchise.leads.convert');
+        Route::delete('/leads/{lead}', [FranchiseLeadController::class, 'destroy'])->name('franchise.leads.destroy');
+
         Route::get('/students', [FranchiseStudentController::class, 'index'])->name('franchise.students.index');
+        Route::post('/students/offline-enroll', [FranchiseStudentController::class, 'storeOffline'])->name('franchise.students.offline-enroll');
+        Route::post('/enrollments/{enrollment}/payments', [FranchiseStudentController::class, 'storePayment'])->name('franchise.enrollments.payments.store');
+        Route::post('/enrollments/{enrollment}/fee', [FranchiseStudentController::class, 'updateFee'])->name('franchise.enrollments.fee.update');
 
         Route::get('/gallery', [FranchiseGalleryController::class, 'index'])->name('franchise.gallery.index');
         Route::post('/gallery', [FranchiseGalleryController::class, 'store'])->name('franchise.gallery.store');
@@ -231,104 +247,174 @@ Route::middleware('auth')->group(function () {
         Route::get('/attendance/records', [FranchiseAttendanceController::class, 'records'])->name('franchise.attendance.records');
         Route::post('/attendance/{location}', [FranchiseAttendanceController::class, 'update'])->name('franchise.attendance.update');
 
+        Route::get('/team', [FranchiseTeamController::class, 'index'])->name('franchise.team.index');
+        Route::post('/team/roles', [FranchiseTeamController::class, 'storeRole'])->name('franchise.team.roles.store');
+        Route::post('/team/roles/{role}', [FranchiseTeamController::class, 'updateRole'])->name('franchise.team.roles.update');
+        Route::delete('/team/roles/{role}', [FranchiseTeamController::class, 'destroyRole'])->name('franchise.team.roles.destroy');
+        Route::post('/team/members', [FranchiseTeamController::class, 'storeMember'])->name('franchise.team.members.store');
+        Route::post('/team/members/{member}', [FranchiseTeamController::class, 'updateMember'])->name('franchise.team.members.update');
+        Route::delete('/team/members/{member}', [FranchiseTeamController::class, 'destroyMember'])->name('franchise.team.members.destroy');
+
         Route::get('/profile', [FranchiseProfileController::class, 'edit'])->name('franchise.profile.edit');
         Route::post('/profile', [FranchiseProfileController::class, 'update'])->name('franchise.profile.update');
         Route::post('/change-password', [FranchiseProfileController::class, 'changePassword'])->name('franchise.password.update');
     });
 
-    Route::prefix('admin')->middleware('role:admin')->group(function () {
+    Route::prefix('admin')->middleware('permission:access-admin-panel')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-        Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
-        Route::get('/students/export', [AdminStudentController::class, 'export'])->name('admin.students.export');
-        Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
-        Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCardView'])->name('admin.students.id-card.view');
-        Route::get('/students/{student}/id-card/download', [AdminStudentController::class, 'idCardDownload'])->name('admin.students.id-card.download');
-        Route::post('/students/{student}', [AdminStudentController::class, 'update'])->name('admin.students.update');
-        Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
+        Route::middleware('permission:manage-leads')->group(function () {
+            Route::get('/leads/export', [AdminLeadController::class, 'export'])->name('admin.leads.export');
+            Route::post('/leads', [AdminLeadController::class, 'store'])->name('admin.leads.store');
+        });
 
-        Route::get('/courses', [AdminCourseController::class, 'index'])->name('admin.courses.index');
-        Route::post('/courses', [AdminCourseController::class, 'store'])->name('admin.courses.store');
-        Route::post('/courses/{course}', [AdminCourseController::class, 'update'])->name('admin.courses.update');
-        Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])->name('admin.courses.destroy');
+        // Viewing + follow-up (notes, status) is open to the lighter
+        // follow-up-leads permission too — e.g. a telecaller role. Editing
+        // core details, converting, and deleting stay manage-leads only.
+        Route::middleware('permission:manage-leads|follow-up-leads')->group(function () {
+            Route::get('/leads', [AdminLeadController::class, 'index'])->name('admin.leads.index');
+            Route::get('/leads/{lead}', [AdminLeadController::class, 'show'])->name('admin.leads.show');
+            Route::post('/leads/{lead}/status', [AdminLeadController::class, 'updateStatus'])->name('admin.leads.status.update');
+            Route::post('/leads/{lead}/notes', [AdminLeadController::class, 'addNote'])->name('admin.leads.notes.store');
+        });
 
-        Route::get('/courses/{course}/videos', [AdminCourseVideoController::class, 'index'])->name('admin.courses.videos.index');
-        Route::post('/courses/{course}/videos', [AdminCourseVideoController::class, 'store'])->name('admin.courses.videos.store');
-        Route::post('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'update'])->name('admin.courses.videos.update');
-        Route::delete('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'destroy'])->name('admin.courses.videos.destroy');
+        Route::middleware('permission:manage-leads')->group(function () {
+            Route::post('/leads/{lead}', [AdminLeadController::class, 'update'])->name('admin.leads.update');
+            Route::post('/leads/{lead}/convert', [AdminLeadController::class, 'convert'])->name('admin.leads.convert');
+            Route::delete('/leads/{lead}', [AdminLeadController::class, 'destroy'])->name('admin.leads.destroy');
+        });
 
-        Route::get('/courses/{course}/quiz', [AdminCourseQuizController::class, 'index'])->name('admin.courses.quiz.index');
-        Route::post('/courses/{course}/quiz', [AdminCourseQuizController::class, 'store'])->name('admin.courses.quiz.store');
-        Route::post('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'update'])->name('admin.courses.quiz.update');
-        Route::delete('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'destroy'])->name('admin.courses.quiz.destroy');
+        Route::middleware('permission:manage-students')->group(function () {
+            Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
+            Route::get('/students/export', [AdminStudentController::class, 'export'])->name('admin.students.export');
+            Route::post('/students/offline-enroll', [AdminStudentController::class, 'storeOffline'])->name('admin.students.offline-enroll');
+            Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
+            Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCardView'])->name('admin.students.id-card.view');
+            Route::get('/students/{student}/id-card/download', [AdminStudentController::class, 'idCardDownload'])->name('admin.students.id-card.download');
+            Route::post('/students/{student}', [AdminStudentController::class, 'update'])->name('admin.students.update');
+            Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
+            Route::post('/enrollments/{enrollment}/payments', [AdminStudentController::class, 'storePayment'])->name('admin.enrollments.payments.store');
+            Route::post('/enrollments/{enrollment}/fee', [AdminStudentController::class, 'updateFee'])->name('admin.enrollments.fee.update');
+        });
 
-        Route::get('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'index'])->name('admin.courses.assignments.index');
-        Route::post('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'store'])->name('admin.courses.assignments.store');
-        Route::post('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'update'])->name('admin.courses.assignments.update');
-        Route::delete('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'destroy'])->name('admin.courses.assignments.destroy');
-        Route::post('/courses/{course}/submissions/{submission}/grade', [AdminCourseAssignmentController::class, 'grade'])->name('admin.courses.assignments.grade');
+        Route::middleware('permission:manage-courses')->group(function () {
+            Route::get('/courses', [AdminCourseController::class, 'index'])->name('admin.courses.index');
+            Route::post('/courses', [AdminCourseController::class, 'store'])->name('admin.courses.store');
+            Route::post('/courses/{course}', [AdminCourseController::class, 'update'])->name('admin.courses.update');
+            Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])->name('admin.courses.destroy');
 
-        Route::get('/courses/{course}/notes', [AdminCourseNoteController::class, 'index'])->name('admin.courses.notes.index');
-        Route::post('/courses/{course}/notes', [AdminCourseNoteController::class, 'store'])->name('admin.courses.notes.store');
-        Route::post('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'update'])->name('admin.courses.notes.update');
-        Route::delete('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'destroy'])->name('admin.courses.notes.destroy');
+            Route::get('/courses/{course}/videos', [AdminCourseVideoController::class, 'index'])->name('admin.courses.videos.index');
+            Route::post('/courses/{course}/videos', [AdminCourseVideoController::class, 'store'])->name('admin.courses.videos.store');
+            Route::post('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'update'])->name('admin.courses.videos.update');
+            Route::delete('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'destroy'])->name('admin.courses.videos.destroy');
 
-        Route::get('/categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
-        Route::post('/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
-        Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+            Route::get('/courses/{course}/quiz', [AdminCourseQuizController::class, 'index'])->name('admin.courses.quiz.index');
+            Route::post('/courses/{course}/quiz', [AdminCourseQuizController::class, 'store'])->name('admin.courses.quiz.store');
+            Route::post('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'update'])->name('admin.courses.quiz.update');
+            Route::delete('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'destroy'])->name('admin.courses.quiz.destroy');
 
-        Route::get('/coupons', [AdminCouponController::class, 'index'])->name('admin.coupons.index');
-        Route::post('/coupons', [AdminCouponController::class, 'store'])->name('admin.coupons.store');
-        Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('admin.coupons.destroy');
+            Route::get('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'index'])->name('admin.courses.assignments.index');
+            Route::post('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'store'])->name('admin.courses.assignments.store');
+            Route::post('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'update'])->name('admin.courses.assignments.update');
+            Route::delete('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'destroy'])->name('admin.courses.assignments.destroy');
+            Route::post('/courses/{course}/submissions/{submission}/grade', [AdminCourseAssignmentController::class, 'grade'])->name('admin.courses.assignments.grade');
 
-        Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
-        Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');
-        Route::post('/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('admin.payments.refund');
+            Route::get('/courses/{course}/notes', [AdminCourseNoteController::class, 'index'])->name('admin.courses.notes.index');
+            Route::post('/courses/{course}/notes', [AdminCourseNoteController::class, 'store'])->name('admin.courses.notes.store');
+            Route::post('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'update'])->name('admin.courses.notes.update');
+            Route::delete('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'destroy'])->name('admin.courses.notes.destroy');
+        });
 
-        Route::get('/franchise', [AdminFranchiseController::class, 'index'])->name('admin.franchise.index');
-        Route::get('/franchise/export', [AdminFranchiseController::class, 'export'])->name('admin.franchise.export');
-        Route::post('/franchise/leads/{lead}', [AdminFranchiseController::class, 'updateLead'])->name('admin.franchise.leads.update');
-        Route::post('/franchise/bookings/{booking}', [AdminFranchiseController::class, 'updateBooking'])->name('admin.franchise.bookings.update');
-        Route::post('/franchise/bookings/{booking}/documents', [AdminFranchiseController::class, 'uploadAgreement'])->name('admin.franchise.bookings.upload');
-        Route::get('/franchise/documents/{document}/download', [AdminFranchiseController::class, 'downloadDocument'])->name('admin.franchise.documents.download');
+        Route::middleware('permission:manage-categories')->group(function () {
+            Route::get('/categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
+            Route::post('/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
+            Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+        });
 
-        Route::get('/franchise/resources', [AdminFranchiseResourceController::class, 'index'])->name('admin.franchise.resources.index');
-        Route::post('/franchise/resources', [AdminFranchiseResourceController::class, 'store'])->name('admin.franchise.resources.store');
-        Route::delete('/franchise/resources/{resource}', [AdminFranchiseResourceController::class, 'destroy'])->name('admin.franchise.resources.destroy');
+        Route::middleware('permission:manage-coupons')->group(function () {
+            Route::get('/coupons', [AdminCouponController::class, 'index'])->name('admin.coupons.index');
+            Route::post('/coupons', [AdminCouponController::class, 'store'])->name('admin.coupons.store');
+            Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('admin.coupons.destroy');
+        });
 
-        Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('admin.gallery.index');
-        Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('admin.gallery.store');
-        Route::post('/gallery/{gallery}/approve', [AdminGalleryController::class, 'approve'])->name('admin.gallery.approve');
-        Route::post('/gallery/{gallery}/reject', [AdminGalleryController::class, 'reject'])->name('admin.gallery.reject');
-        Route::delete('/gallery/{gallery}', [AdminGalleryController::class, 'destroy'])->name('admin.gallery.destroy');
+        Route::middleware('permission:manage-payments')->group(function () {
+            Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
+            Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');
+            Route::post('/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('admin.payments.refund');
+        });
 
-        Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
-        Route::post('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('admin.reviews.approve');
-        Route::post('/reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('admin.reviews.reject');
-        Route::post('/reviews/{review}/feature', [AdminReviewController::class, 'toggleFeature'])->name('admin.reviews.feature');
-        Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+        Route::middleware('permission:manage-franchise-leads')->group(function () {
+            Route::get('/franchise', [AdminFranchiseController::class, 'index'])->name('admin.franchise.index');
+            Route::get('/franchise/export', [AdminFranchiseController::class, 'export'])->name('admin.franchise.export');
+            Route::post('/franchise/leads/{lead}', [AdminFranchiseController::class, 'updateLead'])->name('admin.franchise.leads.update');
+            Route::post('/franchise/bookings/{booking}', [AdminFranchiseController::class, 'updateBooking'])->name('admin.franchise.bookings.update');
+            Route::post('/franchise/bookings/{booking}/documents', [AdminFranchiseController::class, 'uploadAgreement'])->name('admin.franchise.bookings.upload');
+            Route::get('/franchise/documents/{document}/download', [AdminFranchiseController::class, 'downloadDocument'])->name('admin.franchise.documents.download');
+        });
 
-        Route::get('/certificate-applications', [AdminCertificateApplicationController::class, 'index'])->name('admin.certificate-applications.index');
-        Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
-        Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
-        Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
+        Route::middleware('permission:manage-franchise-resources')->group(function () {
+            Route::get('/franchise/resources', [AdminFranchiseResourceController::class, 'index'])->name('admin.franchise.resources.index');
+            Route::post('/franchise/resources', [AdminFranchiseResourceController::class, 'store'])->name('admin.franchise.resources.store');
+            Route::delete('/franchise/resources/{resource}', [AdminFranchiseResourceController::class, 'destroy'])->name('admin.franchise.resources.destroy');
+        });
 
-        Route::get('/attendance-locations', [AdminAttendanceLocationController::class, 'index'])->name('admin.attendance-locations.index');
-        Route::post('/attendance-locations', [AdminAttendanceLocationController::class, 'store'])->name('admin.attendance-locations.store');
-        Route::post('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'update'])->name('admin.attendance-locations.update');
-        Route::delete('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'destroy'])->name('admin.attendance-locations.destroy');
+        Route::middleware('permission:manage-gallery')->group(function () {
+            Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('admin.gallery.index');
+            Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('admin.gallery.store');
+            Route::post('/gallery/{gallery}/approve', [AdminGalleryController::class, 'approve'])->name('admin.gallery.approve');
+            Route::post('/gallery/{gallery}/reject', [AdminGalleryController::class, 'reject'])->name('admin.gallery.reject');
+            Route::delete('/gallery/{gallery}', [AdminGalleryController::class, 'destroy'])->name('admin.gallery.destroy');
+        });
 
-        Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
-        Route::get('/attendance/export', [AdminAttendanceController::class, 'export'])->name('admin.attendance.export');
+        Route::middleware('permission:manage-reviews')->group(function () {
+            Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
+            Route::post('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('admin.reviews.approve');
+            Route::post('/reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('admin.reviews.reject');
+            Route::post('/reviews/{review}/feature', [AdminReviewController::class, 'toggleFeature'])->name('admin.reviews.feature');
+            Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+        });
 
-        Route::get('/faqs', [AdminFaqController::class, 'index'])->name('admin.faqs.index');
-        Route::post('/faqs', [AdminFaqController::class, 'store'])->name('admin.faqs.store');
-        Route::post('/faqs/{faq}', [AdminFaqController::class, 'update'])->name('admin.faqs.update');
-        Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])->name('admin.faqs.destroy');
+        Route::middleware('permission:manage-certificate-applications')->group(function () {
+            Route::get('/certificate-applications', [AdminCertificateApplicationController::class, 'index'])->name('admin.certificate-applications.index');
+            Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
+            Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
+            Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
+        });
 
-        Route::get('/posts', [AdminPostController::class, 'index'])->name('admin.posts.index');
-        Route::post('/posts', [AdminPostController::class, 'store'])->name('admin.posts.store');
-        Route::post('/posts/{post}', [AdminPostController::class, 'update'])->name('admin.posts.update');
-        Route::delete('/posts/{post}', [AdminPostController::class, 'destroy'])->name('admin.posts.destroy');
+        Route::middleware('permission:manage-attendance-locations')->group(function () {
+            Route::get('/attendance-locations', [AdminAttendanceLocationController::class, 'index'])->name('admin.attendance-locations.index');
+            Route::post('/attendance-locations', [AdminAttendanceLocationController::class, 'store'])->name('admin.attendance-locations.store');
+            Route::post('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'update'])->name('admin.attendance-locations.update');
+            Route::delete('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'destroy'])->name('admin.attendance-locations.destroy');
+        });
+
+        Route::middleware('permission:manage-attendance')->group(function () {
+            Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
+            Route::get('/attendance/export', [AdminAttendanceController::class, 'export'])->name('admin.attendance.export');
+        });
+
+        Route::middleware('permission:manage-faqs')->group(function () {
+            Route::get('/faqs', [AdminFaqController::class, 'index'])->name('admin.faqs.index');
+            Route::post('/faqs', [AdminFaqController::class, 'store'])->name('admin.faqs.store');
+            Route::post('/faqs/{faq}', [AdminFaqController::class, 'update'])->name('admin.faqs.update');
+            Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])->name('admin.faqs.destroy');
+        });
+
+        Route::middleware('permission:manage-blog')->group(function () {
+            Route::get('/posts', [AdminPostController::class, 'index'])->name('admin.posts.index');
+            Route::post('/posts', [AdminPostController::class, 'store'])->name('admin.posts.store');
+            Route::post('/posts/{post}', [AdminPostController::class, 'update'])->name('admin.posts.update');
+            Route::delete('/posts/{post}', [AdminPostController::class, 'destroy'])->name('admin.posts.destroy');
+        });
+
+        Route::middleware('permission:manage-team')->group(function () {
+            Route::get('/team', [AdminTeamController::class, 'index'])->name('admin.team.index');
+            Route::post('/team/roles', [AdminTeamController::class, 'storeRole'])->name('admin.team.roles.store');
+            Route::post('/team/roles/{role}', [AdminTeamController::class, 'updateRole'])->name('admin.team.roles.update');
+            Route::delete('/team/roles/{role}', [AdminTeamController::class, 'destroyRole'])->name('admin.team.roles.destroy');
+            Route::post('/team/members', [AdminTeamController::class, 'storeMember'])->name('admin.team.members.store');
+            Route::post('/team/members/{member}', [AdminTeamController::class, 'updateMember'])->name('admin.team.members.update');
+            Route::delete('/team/members/{member}', [AdminTeamController::class, 'destroyMember'])->name('admin.team.members.destroy');
+        });
     });
 });

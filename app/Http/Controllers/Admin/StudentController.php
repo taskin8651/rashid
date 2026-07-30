@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\EnrollsStudentsOffline;
 use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\VideoProgress;
@@ -13,6 +16,8 @@ use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
+    use EnrollsStudentsOffline;
+
     public function index(Request $request)
     {
         $query = User::role('student')->with(['enrollments.course']);
@@ -22,8 +27,82 @@ class StudentController extends Controller
         }
 
         $students = $query->latest()->paginate(20)->withQueryString();
+        $courses = Course::where('status', 'active')->orderBy('name')->get();
 
-        return view('admin.students.index', compact('students', 'search'));
+        return view('admin.students.index', compact('students', 'search', 'courses'));
+    }
+
+    public function storeOffline(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'password' => ['nullable', 'string', 'min:6'],
+            'course_id' => ['required', 'exists:courses,id'],
+            'total_fee' => ['required', 'numeric', 'min:0'],
+            'first_payment_amount' => ['nullable', 'numeric', 'min:0.01'],
+            'first_payment_method' => ['nullable', 'string', 'max:30'],
+            'first_payment_note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $course = Course::findOrFail($validated['course_id']);
+
+        $student = $this->createOrFindStudent($validated);
+
+        $this->enrollStudentOffline($student, $course, (float) $validated['total_fee'], [
+            'amount' => $validated['first_payment_amount'] ?? null,
+            'method' => $validated['first_payment_method'] ?? null,
+            'note' => $validated['first_payment_note'] ?? null,
+        ], $request->user()->id);
+
+        return back()->with('status', 'Student registered and allotted to ' . $course->name . '.');
+    }
+
+    public function storePayment(Request $request, Enrollment $enrollment)
+    {
+        $validated = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'method' => ['required', 'string', 'max:30'],
+            'note' => ['nullable', 'string', 'max:255'],
+            'paid_at' => ['nullable', 'date'],
+        ]);
+
+        if ($validated['amount'] > $enrollment->balance_due + 0.01) {
+            return back()->withErrors(['amount' => 'Amount exceeds the remaining balance of ₹' . number_format($enrollment->balance_due, 2) . '.']);
+        }
+
+        Payment::create([
+            'payable_type' => 'course_enrollment',
+            'payable_id' => $enrollment->id,
+            'user_id' => $enrollment->user_id,
+            'amount' => $validated['amount'],
+            'method' => $validated['method'],
+            'note' => $validated['note'] ?? null,
+            'recorded_by' => $request->user()->id,
+            'paid_at' => $validated['paid_at'] ?? now(),
+            'status' => 'paid',
+        ]);
+
+        return back()->with('status', 'Payment recorded.');
+    }
+
+    public function updateFee(Request $request, Enrollment $enrollment)
+    {
+        $validated = $request->validate([
+            'total_fee' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        if ($validated['total_fee'] < $enrollment->amount_paid) {
+            return back()->withErrors(['total_fee' => 'Total fee cannot be less than the amount already paid (₹' . number_format($enrollment->amount_paid, 2) . ').']);
+        }
+
+        $enrollment->update([
+            'final_amount' => $validated['total_fee'],
+            'discount_amount' => max(0, $enrollment->base_price - $validated['total_fee']),
+        ]);
+
+        return back()->with('status', 'Fee updated.');
     }
 
     public function export()
@@ -52,7 +131,7 @@ class StudentController extends Controller
     {
         abort_unless($student->hasRole('student'), 404);
 
-        $enrollments = $student->enrollments()->with(['course', 'payment'])->latest('enrolled_at')->get();
+        $enrollments = $student->enrollments()->with(['course', 'payment', 'payments'])->latest('enrolled_at')->get();
 
         $courses = $enrollments->map(function ($e) use ($student) {
             $totalVideos = $e->course->videos()->where('status', 'active')->whereHas('media')->count();

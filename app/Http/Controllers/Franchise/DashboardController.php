@@ -16,7 +16,7 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $bookings = $request->user()->franchiseBookings()
+        $bookings = $request->user()->accessibleFranchiseBookingsQuery()
             ->withCount('courses')
             ->with('documents')
             ->latest()

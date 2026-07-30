@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"use App\\\\\\\\\\\\\\\\Http\\\\\\\\\\\\\\\\Controllers\\\\\\\\\\\\\\\\Admin\\\\\\\\\\\\\\\\StudentController\" routes/web.php)",
+      "Bash(php -l app/Http/Controllers/Admin/TeamController.php)"
+    ]
+  }
+}

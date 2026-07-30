@@ -43,7 +43,11 @@ class PaymentController extends Controller
 
     public function refund(Payment $payment, RazorpayService $razorpay)
     {
-        abort_unless($payment->status === 'paid' && $payment->razorpay_payment_id, 422);
+        abort_unless($payment->status === 'paid', 422);
+
+        if (! $payment->razorpay_payment_id) {
+            return back()->withErrors(['refund' => 'This was an offline payment — refund it manually and update the fee record instead.']);
+        }
 
         try {
             $refundId = $razorpay->refund($payment->razorpay_payment_id, (float) $payment->amount);

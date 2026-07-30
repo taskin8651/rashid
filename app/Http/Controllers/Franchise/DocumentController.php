@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Franchise;
 
+use App\Http\Controllers\Concerns\AuthorizesFranchiseAccess;
 use App\Http\Controllers\Controller;
 use App\Models\FranchiseBooking;
 use App\Models\FranchiseDocument;
@@ -11,9 +12,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DocumentController extends Controller
 {
+    use AuthorizesFranchiseAccess;
+
     public function index(Request $request)
     {
-        $bookings = $request->user()->franchiseBookings()->with('documents')->latest()->get();
+        $this->authorizeAnyFranchisePermission($request, 'manage-documents');
+
+        $bookings = $request->user()->accessibleFranchiseBookingsQuery()->with('documents')->latest()->get();
         $documentTypes = collect(FranchiseDocument::TYPES)->except('agreement');
 
         return view('franchise.documents', compact('bookings', 'documentTypes'));
@@ -28,9 +33,11 @@ class DocumentController extends Controller
             'file' => ['required', 'file', 'max:10240'],
         ]);
 
-        $booking = FranchiseBooking::where('id', $validated['franchise_booking_id'])
-            ->where('user_id', $request->user()->id)
+        $booking = $request->user()->accessibleFranchiseBookingsQuery()
+            ->where('id', $validated['franchise_booking_id'])
             ->firstOrFail();
+
+        $this->authorizeFranchisePermission($request, $booking->id, 'manage-documents');
 
         $path = $request->file('file')->store('franchise-documents');
 
@@ -48,7 +55,7 @@ class DocumentController extends Controller
 
     public function download(Request $request, FranchiseDocument $document): Response
     {
-        abort_unless($document->booking->user_id === $request->user()->id, 403);
+        abort_unless($request->user()->hasFranchisePermission($document->franchise_booking_id, 'manage-documents'), 403);
 
         return response()->download(storage_path('app/' . $document->file_path), $document->original_name);
     }

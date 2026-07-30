@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Franchise;
 
+use App\Http\Controllers\Concerns\AuthorizesFranchiseAccess;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\AttendanceLocation;
@@ -9,11 +10,15 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    use AuthorizesFranchiseAccess;
+
     public function manage(Request $request)
     {
+        $this->authorizeAnyFranchisePermission($request, 'manage-attendance');
+
         $locations = AttendanceLocation::with('franchiseBooking')
             ->withCount('attendances')
-            ->whereIn('franchise_booking_id', $request->user()->franchiseBookings()->where('status', 'paid')->pluck('id'))
+            ->whereIn('franchise_booking_id', $request->user()->accessibleFranchiseBookingsQuery()->where('status', 'paid')->pluck('id'))
             ->get();
 
         return view('franchise.attendance.manage', compact('locations'));
@@ -21,7 +26,9 @@ class AttendanceController extends Controller
 
     public function records(Request $request)
     {
-        $bookingIds = $request->user()->franchiseBookings()->where('status', 'paid')->pluck('id');
+        $this->authorizeAnyFranchisePermission($request, 'manage-attendance');
+
+        $bookingIds = $request->user()->accessibleFranchiseBookingsQuery()->where('status', 'paid')->pluck('id');
 
         $locations = AttendanceLocation::whereIn('franchise_booking_id', $bookingIds)->get();
         $locationId = $request->query('location');
@@ -40,8 +47,9 @@ class AttendanceController extends Controller
 
     public function update(Request $request, AttendanceLocation $location)
     {
-        $bookingIds = $request->user()->franchiseBookings()->pluck('id');
+        $bookingIds = $request->user()->accessibleFranchiseBookingsQuery()->pluck('id');
         abort_unless($bookingIds->contains($location->franchise_booking_id), 403);
+        $this->authorizeFranchisePermission($request, $location->franchise_booking_id, 'manage-attendance');
 
         $validated = $request->validate([
             'latitude' => ['required', 'numeric', 'between:-90,90'],
