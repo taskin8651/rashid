@@ -49,6 +49,7 @@
       @endcan
       @can('manage-payments')
         <a class="slink {{ request()->routeIs('admin.payments.*') ? 'act' : '' }}" href="{{ route('admin.payments.index') }}"><i class="bi bi-credit-card-fill"></i>Payments</a>
+        <a class="slink {{ request()->routeIs('admin.expenses.*') ? 'act' : '' }}" href="{{ route('admin.expenses.index') }}"><i class="bi bi-receipt-cutoff"></i>Expenses</a>
       @endcan
       @can('manage-franchise-leads')
         <a class="slink {{ request()->routeIs('admin.franchise.index') ? 'act' : '' }}" href="{{ route('admin.franchise.index') }}"><i class="bi bi-flag-fill"></i>Franchise Leads</a>

@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $enrollments = $user->enrollments()->with(['course', 'payment'])->whereIn('status', ['paid', 'completed'])->get();
+        $enrollments = $user->enrollments()->with(['course', 'payments'])->whereIn('status', ['paid', 'completed'])->get();
 
         $stats = [
             'courses_enrolled' => $enrollments->count(),
@@ -36,7 +36,6 @@ class DashboardController extends Controller
                 'total_videos' => $totalVideos,
                 'enrolled_at' => optional($e->enrolled_at)->format('d M Y'),
                 'amount' => (float) $e->final_amount,
-                'payment_status' => $e->payment->status ?? $e->status,
             ];
         });
 
@@ -47,9 +46,10 @@ class DashboardController extends Controller
         ];
 
         $totalSpent = $enrollments->sum('final_amount');
+        $totalPaid = $enrollments->sum('amount_paid');
 
         $recentPayments = $enrollments->sortByDesc(fn ($e) => $e->enrolled_at ?? $e->created_at)->take(5);
 
-        return view('student.dashboard', compact('stats', 'myCourses', 'progressSegments', 'totalSpent', 'recentPayments'));
+        return view('student.dashboard', compact('stats', 'myCourses', 'progressSegments', 'totalSpent', 'totalPaid', 'recentPayments'));
     }
 }

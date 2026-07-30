@@ -4,9 +4,11 @@
 
 @section('content')
   <div class="shead mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div><h4>Payment Management</h4><p>View all transactions processed via Razorpay</p></div>
+    <div><h4>Payment Management</h4><p>Income, expenses and net profit at a glance</p></div>
     <a href="{{ route('admin.payments.export') }}" class="bghost" style="text-decoration:none;font-size:12px;padding:8px 16px"><i class="bi bi-download me-1"></i>Export CSV</a>
   </div>
+
+  @include('admin.finance._summary')
 
   @if ($errors->has('refund'))
     <div class="alert alert-danger mb-3">{{ $errors->first('refund') }}</div>

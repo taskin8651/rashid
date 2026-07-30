@@ -37,15 +37,14 @@
           <a href="{{ route('student.payments.index') }}" style="font-size:12px;color:var(--orange);text-decoration:none;font-weight:600">View All &rarr;</a>
         </div>
         <div class="table-wrap"><table class="table-rt">
-          <thead><tr><th>Course</th><th>Amount</th><th>Status</th></tr></thead>
+          <thead><tr><th>Course</th><th>Fee</th><th>Balance</th></tr></thead>
           <tbody>
             @forelse ($recentPayments as $e)
               <tr>
                 <td>{{ \Illuminate\Support\Str::limit($e->course->name, 22) }}</td>
                 <td>₹{{ number_format($e->final_amount, 0) }}</td>
                 <td>
-                  @php $badge = ['paid' => 'bg-paid', 'completed' => 'bg-paid', 'created' => 'bg-pending', 'failed' => 'bg-failed'][$e->payment->status ?? $e->status] ?? 'bg-inactive'; @endphp
-                  <span class="badge-rt {{ $badge }}">{{ ucfirst($e->payment->status ?? $e->status) }}</span>
+                  <span class="badge-rt {{ $e->balance_due > 0 ? 'bg-pending' : 'bg-active' }}">{{ $e->balance_due > 0 ? '₹'.number_format($e->balance_due, 0).' due' : 'Fully Paid' }}</span>
                 </td>
               </tr>
             @empty
@@ -54,7 +53,7 @@
           </tbody>
         </table></div>
         @if ($stats['courses_enrolled'])
-          <p style="font-size:12px;color:var(--muted);margin:14px 0 0">Total spent: <strong style="color:var(--text)">₹{{ number_format($totalSpent, 0) }}</strong></p>
+          <p style="font-size:12px;color:var(--muted);margin:14px 0 0">Paid <strong style="color:var(--ok)">₹{{ number_format($totalPaid, 0) }}</strong> of <strong style="color:var(--text)">₹{{ number_format($totalSpent, 0) }}</strong> total fee</p>
         @endif
       </div>
     </div>

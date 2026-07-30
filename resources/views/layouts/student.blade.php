@@ -31,7 +31,7 @@
     <a class="slink {{ request()->routeIs('student.referrals.*') ? 'act' : '' }}" href="{{ route('student.referrals.index') }}"><i class="bi bi-gift-fill"></i>Refer &amp; Earn</a>
     <div class="nsec">Account</div>
     <a class="slink {{ request()->routeIs('student.profile.*') ? 'act' : '' }}" href="{{ route('student.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
-    <a class="slink {{ request()->routeIs('student.payments.*') ? 'act' : '' }}" href="{{ route('student.payments.index') }}"><i class="bi bi-receipt"></i>Payment History</a>
+    <a class="slink {{ request()->routeIs('student.payments.*') ? 'act' : '' }}" href="{{ route('student.payments.index') }}"><i class="bi bi-receipt"></i>My Fees</a>
     <div class="nsec">More</div>
     <a class="slink" href="{{ route('home') }}"><i class="bi bi-house-fill"></i>Back to Home</a>
     <form method="POST" action="{{ route('logout') }}">

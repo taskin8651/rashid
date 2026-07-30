@@ -47,6 +47,9 @@
       <a class="slink {{ request()->routeIs('franchise.attendance.records') ? 'act' : '' }}" href="{{ route('franchise.attendance.records') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
       <a class="slink {{ request()->routeIs('franchise.attendance.manage') ? 'act' : '' }}" href="{{ route('franchise.attendance.manage') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Setup</a>
     @endif
+    @if (auth()->user()->hasAnyFranchisePermission('manage-expenses'))
+      <a class="slink {{ request()->routeIs('franchise.expenses.*') ? 'act' : '' }}" href="{{ route('franchise.expenses.index') }}"><i class="bi bi-receipt-cutoff"></i>Expenses</a>
+    @endif
     @if ($isFranchiseOwner)
       <div class="nsec">Organization</div>
       <a class="slink {{ request()->routeIs('franchise.team.*') ? 'act' : '' }}" href="{{ route('franchise.team.index') }}"><i class="bi bi-people-fill"></i>Team &amp; Roles</a>

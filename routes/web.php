@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CourseNoteController as AdminCourseNoteController
 use App\Http\Controllers\Admin\CourseQuizController as AdminCourseQuizController;
 use App\Http\Controllers\Admin\CourseVideoController as AdminCourseVideoController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\FranchiseController as AdminFranchiseController;
 use App\Http\Controllers\Admin\FranchiseResourceController as AdminFranchiseResourceController;
 use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
@@ -37,6 +38,7 @@ use App\Http\Controllers\Franchise\CourseQuizController as FranchiseCourseQuizCo
 use App\Http\Controllers\Franchise\CourseVideoController as FranchiseCourseVideoController;
 use App\Http\Controllers\Franchise\DashboardController as FranchiseDashboardController;
 use App\Http\Controllers\Franchise\DocumentController as FranchiseDocumentController;
+use App\Http\Controllers\Franchise\ExpenseController as FranchiseExpenseController;
 use App\Http\Controllers\Franchise\GalleryController as FranchiseGalleryController;
 use App\Http\Controllers\Franchise\LeadController as FranchiseLeadController;
 use App\Http\Controllers\Franchise\ProfileController as FranchiseProfileController;
@@ -238,6 +240,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/students', [FranchiseStudentController::class, 'index'])->name('franchise.students.index');
         Route::post('/students/offline-enroll', [FranchiseStudentController::class, 'storeOffline'])->name('franchise.students.offline-enroll');
         Route::post('/students/{student}/allot-course', [FranchiseStudentController::class, 'allotCourse'])->name('franchise.students.allot-course');
+
+        Route::get('/expenses', [FranchiseExpenseController::class, 'index'])->name('franchise.expenses.index');
+        Route::post('/expenses', [FranchiseExpenseController::class, 'store'])->name('franchise.expenses.store');
+        Route::get('/expenses/{expense}/receipt', [FranchiseExpenseController::class, 'downloadReceipt'])->name('franchise.expenses.receipt');
+        Route::delete('/expenses/{expense}', [FranchiseExpenseController::class, 'destroy'])->name('franchise.expenses.destroy');
         Route::post('/enrollments/{enrollment}/payments', [FranchiseStudentController::class, 'storePayment'])->name('franchise.enrollments.payments.store');
         Route::post('/enrollments/{enrollment}/fee', [FranchiseStudentController::class, 'updateFee'])->name('franchise.enrollments.fee.update');
 
@@ -344,6 +351,11 @@ Route::middleware('auth')->group(function () {
             Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
             Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');
             Route::post('/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('admin.payments.refund');
+            Route::get('/expenses', [AdminExpenseController::class, 'index'])->name('admin.expenses.index');
+            Route::get('/expenses/export', [AdminExpenseController::class, 'export'])->name('admin.expenses.export');
+            Route::post('/expenses', [AdminExpenseController::class, 'store'])->name('admin.expenses.store');
+            Route::get('/expenses/{expense}/receipt', [AdminExpenseController::class, 'downloadReceipt'])->name('admin.expenses.receipt');
+            Route::delete('/expenses/{expense}', [AdminExpenseController::class, 'destroy'])->name('admin.expenses.destroy');
         });
 
         Route::middleware('permission:manage-franchise-leads')->group(function () {

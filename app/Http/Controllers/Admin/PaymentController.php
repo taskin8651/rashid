@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Expense;
 use App\Models\Payment;
 use App\Services\RazorpayService;
 use Illuminate\Support\Facades\Response;
@@ -13,7 +14,10 @@ class PaymentController extends Controller
     {
         $payments = Payment::with('user')->latest()->paginate(20);
 
-        return view('admin.payments.index', compact('payments'));
+        $totalIncome = Payment::where('status', 'paid')->sum('amount');
+        $totalExpenses = Expense::sum('amount');
+
+        return view('admin.payments.index', compact('payments', 'totalIncome', 'totalExpenses'));
     }
 
     public function export()

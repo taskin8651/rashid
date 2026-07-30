@@ -12,6 +12,7 @@
     'manage-gallery' => 'Manage Gallery',
     'manage-attendance' => 'Manage Attendance',
     'manage-documents' => 'Manage Documents',
+    'manage-expenses' => 'Manage Expenses (view income & record expenses)',
   ];
 @endphp
 
