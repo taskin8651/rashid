@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\VideoProgress;
 use Illuminate\Http\Request;
 
@@ -50,6 +51,20 @@ class DashboardController extends Controller
 
         $recentPayments = $enrollments->sortByDesc(fn ($e) => $e->enrolled_at ?? $e->created_at)->take(5);
 
-        return view('student.dashboard', compact('stats', 'myCourses', 'progressSegments', 'totalSpent', 'totalPaid', 'recentPayments'));
+        // Rounding out "everything" on the dashboard with the other bits of
+        // the student's own activity that live elsewhere in the sidebar.
+        $extraStats = [
+            'attendance_this_month' => $user->attendances()->whereMonth('date', now()->month)->whereYear('date', now()->year)->count(),
+            'wishlist_count' => $user->wishlist()->count(),
+            'referrals_count' => $user->referralsMade()->count(),
+        ];
+
+        // Aggregate only — no names, to keep other students' presence private.
+        $activeLearnersNow = User::role('student')->activeNow()->count();
+
+        return view('student.dashboard', compact(
+            'stats', 'myCourses', 'progressSegments', 'totalSpent', 'totalPaid', 'recentPayments',
+            'extraStats', 'activeLearnersNow'
+        ));
     }
 }

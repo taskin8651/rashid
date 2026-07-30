@@ -15,6 +15,33 @@
     </div>
   </div>
 
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <a href="{{ route('student.attendance.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700">{{ $extraStats['attendance_this_month'] }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Attendance This Month</div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ route('student.wishlist.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700">{{ $extraStats['wishlist_count'] }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Wishlist</div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ route('student.referrals.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700">{{ $extraStats['referrals_count'] }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Referrals</div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card-rt text-center" style="padding:16px">
+        <div style="font-size:20px;font-weight:700;color:var(--ok)"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:4px"></span>{{ $activeLearnersNow }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Learning Right Now</div>
+      </div>
+    </div>
+  </div>
+
   <div class="row g-4 mb-4">
     <div class="col-lg-6">
       <div class="card-rt h-100">

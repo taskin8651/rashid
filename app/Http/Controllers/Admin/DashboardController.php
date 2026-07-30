@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
+use App\Models\CertificateApplication;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Expense;
+use App\Models\FranchiseBooking;
 use App\Models\Payment;
+use App\Models\StudentLead;
 use App\Models\User;
 
 class DashboardController extends Controller
@@ -36,9 +40,29 @@ class DashboardController extends Controller
 
         $recentPayments = Payment::with('user')->latest()->take(6)->get();
 
+        // Business-wide "everything at a glance" stats not covered above.
+        $totalFranchises = FranchiseBooking::where('status', 'paid')->count();
+        $pendingFranchiseApplications = FranchiseBooking::where('status', 'pending')->count();
+
+        $totalLeads = StudentLead::count();
+        $pendingLeads = StudentLead::whereIn('status', ['new', 'contacted', 'follow_up', 'interested'])->count();
+
+        $totalExpenses = Expense::sum('amount');
+        $netProfit = $totalRevenue - $totalExpenses;
+
+        $pendingCertApplications = CertificateApplication::where('status', 'pending')->count();
+
+        // Who's active right now — last_seen_at stamped by the track.active
+        // middleware on every authenticated request, 5-minute presence window.
+        $activeUsersNow = User::activeNow()->with('roles')->orderByDesc('last_seen_at')->take(12)->get();
+        $activeUsersCount = User::activeNow()->count();
+
         return view('admin.dashboard', compact(
             'totalStudents', 'activeCourses', 'totalRevenue', 'certificatesIssued', 'recentEnrollments',
-            'coursePopularity', 'revenueSegments', 'recentPayments'
+            'coursePopularity', 'revenueSegments', 'recentPayments',
+            'totalFranchises', 'pendingFranchiseApplications', 'totalLeads', 'pendingLeads',
+            'totalExpenses', 'netProfit', 'pendingCertApplications',
+            'activeUsersNow', 'activeUsersCount'
         ));
     }
 }

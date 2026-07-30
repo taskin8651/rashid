@@ -54,7 +54,18 @@ class User extends Authenticatable implements HasMedia
         'date_of_birth' => 'date',
         'is_active' => 'boolean',
         'password' => 'hashed',
+        'last_seen_at' => 'datetime',
     ];
+
+    public function scopeActiveNow($query)
+    {
+        return $query->whereNotNull('last_seen_at')->where('last_seen_at', '>=', now()->subMinutes(5));
+    }
+
+    public function isOnline(): bool
+    {
+        return $this->last_seen_at && $this->last_seen_at->gte(now()->subMinutes(5));
+    }
 
     public function registerMediaCollections(): void
     {

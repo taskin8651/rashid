@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Franchise;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Expense;
 use App\Models\FranchiseBooking;
 use App\Models\FranchiseResource;
+use App\Models\FranchiseTeamMember;
 use App\Models\Payment;
+use App\Models\StudentLead;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -61,6 +65,32 @@ class DashboardController extends Controller
 
         $stages = FranchiseBooking::STAGES;
 
-        return view('franchise.dashboard', compact('bookings', 'stages', 'stats', 'revenueSegments', 'totalRevenue', 'recentPayments'));
+        // Leads and expenses — everything relevant to this franchise, not
+        // gated by manage-leads/manage-expenses here since the dashboard is
+        // a read-only overview; the dedicated pages still enforce permission
+        // for actually acting on that data.
+        $leadCounts = StudentLead::whereIn('franchise_booking_id', $paidBookingIds)
+            ->selectRaw('status, count(*) as c')->groupBy('status')->pluck('c', 'status');
+        $totalLeads = $leadCounts->sum();
+        $pendingLeads = collect(['new', 'contacted', 'follow_up', 'interested'])->sum(fn ($s) => $leadCounts[$s] ?? 0);
+
+        $totalExpenses = Expense::whereIn('franchise_booking_id', $paidBookingIds)->sum('amount');
+        $netProfit = $totalRevenue - $totalExpenses;
+
+        // Who's active right now among people tied to this franchise —
+        // owner(s), team members, and their enrolled students.
+        $studentIds = Enrollment::whereIn('course_id', $courses->pluck('id'))->where('status', 'paid')->pluck('user_id');
+        $teamIds = FranchiseTeamMember::whereIn('franchise_booking_id', $paidBookingIds)->pluck('user_id');
+        $ownerIds = $bookings->pluck('user_id');
+        $relevantUserIds = $studentIds->merge($teamIds)->merge($ownerIds)->unique();
+
+        $activeUsersNow = User::whereIn('id', $relevantUserIds)->activeNow()->orderByDesc('last_seen_at')->take(12)->get();
+        $activeUsersCount = User::whereIn('id', $relevantUserIds)->activeNow()->count();
+
+        return view('franchise.dashboard', compact(
+            'bookings', 'stages', 'stats', 'revenueSegments', 'totalRevenue', 'recentPayments',
+            'totalLeads', 'pendingLeads', 'totalExpenses', 'netProfit',
+            'activeUsersNow', 'activeUsersCount'
+        ));
     }
 }

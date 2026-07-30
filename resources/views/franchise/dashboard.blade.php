@@ -16,30 +16,63 @@
   </div>
 
   <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <a href="{{ route('franchise.courses.index') }}" class="ov-action">
         <div class="ov-action-icon" style="background:rgba(37,99,235,.14);color:var(--orange)"><i class="bi bi-collection-play-fill"></i></div>
         <div><div class="ov-action-title">My Courses</div><div class="ov-action-sub">Manage &amp; upload</div></div>
       </a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <a href="{{ route('franchise.students.index') }}" class="ov-action">
         <div class="ov-action-icon" style="background:rgba(40,180,90,.14);color:var(--ok)"><i class="bi bi-people-fill"></i></div>
         <div><div class="ov-action-title">My Students</div><div class="ov-action-sub">View enrollments</div></div>
       </a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
+      <a href="{{ route('franchise.leads.index') }}" class="ov-action">
+        <div class="ov-action-icon" style="background:rgba(37,99,235,.14);color:var(--orange)"><i class="bi bi-person-lines-fill"></i></div>
+        <div><div class="ov-action-title">Leads</div><div class="ov-action-sub">{{ $pendingLeads }} open of {{ $totalLeads }}</div></div>
+      </a>
+    </div>
+    <div class="col-6 col-md-4">
+      <a href="{{ route('franchise.expenses.index') }}" class="ov-action">
+        <div class="ov-action-icon" style="background:rgba(220,38,38,.14);color:var(--danger)"><i class="bi bi-receipt-cutoff"></i></div>
+        <div><div class="ov-action-title">Expenses</div><div class="ov-action-sub">₹{{ number_format($totalExpenses, 0) }} · Net ₹{{ number_format($netProfit, 0) }}</div></div>
+      </a>
+    </div>
+    <div class="col-6 col-md-4">
       <a href="{{ route('franchise.documents.index') }}" class="ov-action">
         <div class="ov-action-icon" style="background:rgba(184,134,11,.14);color:#b8860b"><i class="bi bi-file-earmark-text-fill"></i></div>
         <div><div class="ov-action-title">Documents</div><div class="ov-action-sub">Agreements &amp; KYC</div></div>
       </a>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4">
       <a href="{{ route('franchise.resources.index') }}" class="ov-action">
         <div class="ov-action-icon" style="background:rgba(147,51,234,.14);color:var(--purple)"><i class="bi bi-folder2-open"></i></div>
         <div><div class="ov-action-title">Training Kit</div><div class="ov-action-sub">Marketing assets</div></div>
       </a>
     </div>
+  </div>
+
+  <div class="card-rt mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="card-title mb-0">Active Now</div>
+      <span style="font-size:12px;color:var(--ok);font-weight:700"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:5px"></span>{{ $activeUsersCount }} online</span>
+    </div>
+    @forelse ($activeUsersNow as $u)
+      <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--border)">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;position:relative">
+            {{ strtoupper(substr($u->name, 0, 1)) }}
+            <span style="position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-radius:50%;background:var(--ok);border:2px solid var(--card)"></span>
+          </div>
+          <span style="font-size:13px;font-weight:600">{{ $u->name }}</span>
+        </div>
+        <span style="font-size:11px;color:var(--muted);text-transform:capitalize">{{ $u->getRoleNames()->first() ?? '—' }}</span>
+      </div>
+    @empty
+      <p style="font-size:13px;color:var(--muted);margin:0">No one from your institute is online right now.</p>
+    @endforelse
   </div>
 
   <div class="row g-4 mb-4">

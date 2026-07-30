@@ -15,8 +15,62 @@
     </div>
   </div>
 
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg">
+      <a href="{{ route('admin.franchise.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700">{{ $totalFranchises }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Franchises{{ $pendingFranchiseApplications ? ' · '.$pendingFranchiseApplications.' pending' : '' }}</div>
+      </a>
+    </div>
+    <div class="col-6 col-lg">
+      <a href="{{ route('admin.leads.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700">{{ $totalLeads }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Leads · {{ $pendingLeads }} open</div>
+      </a>
+    </div>
+    <div class="col-6 col-lg">
+      <a href="{{ route('admin.certificate-applications.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700">{{ $pendingCertApplications }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Cert. Applications Pending</div>
+      </a>
+    </div>
+    <div class="col-6 col-lg">
+      <a href="{{ route('admin.expenses.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700;color:var(--danger)">₹{{ number_format($totalExpenses, 0) }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Total Expenses</div>
+      </a>
+    </div>
+    <div class="col-6 col-lg">
+      <a href="{{ route('admin.payments.index') }}" class="card-rt text-center d-block" style="padding:16px;text-decoration:none;color:inherit">
+        <div style="font-size:20px;font-weight:700;color:{{ $netProfit >= 0 ? 'var(--ok)' : 'var(--danger)' }}">₹{{ number_format($netProfit, 0) }}</div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Net Profit</div>
+      </a>
+    </div>
+  </div>
+
   <div class="row g-4">
     <div class="col-lg-7">
+      <div class="card-rt mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="card-title mb-0">Active Now</div>
+          <span style="font-size:12px;color:var(--ok);font-weight:700"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:5px"></span>{{ $activeUsersCount }} online</span>
+        </div>
+        @forelse ($activeUsersNow as $u)
+          <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--border)">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:30px;height:30px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;position:relative">
+                {{ strtoupper(substr($u->name, 0, 1)) }}
+                <span style="position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-radius:50%;background:var(--ok);border:2px solid var(--card)"></span>
+              </div>
+              <span style="font-size:13px;font-weight:600">{{ $u->name }}</span>
+            </div>
+            <span style="font-size:11px;color:var(--muted);text-transform:capitalize">{{ $u->getRoleNames()->first() ?? '—' }}</span>
+          </div>
+        @empty
+          <p style="font-size:13px;color:var(--muted);margin:0">No one online right now.</p>
+        @endforelse
+      </div>
+
       <div class="card-rt mb-4">
         <div class="card-title">Recent Enrollments</div>
         <div class="table-wrap"><table class="table-rt">

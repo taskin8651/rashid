@@ -138,7 +138,7 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:10,1');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'track.active'])->group(function () {
     Route::get('/enroll/{course:slug}', [EnrollmentController::class, 'create'])->name('enroll.create');
     Route::post('/enroll/{course:slug}', [EnrollmentController::class, 'store'])->name('enroll.store');
     Route::post('/enroll/{course:slug}/verify', [EnrollmentController::class, 'verify'])->name('enroll.verify');
