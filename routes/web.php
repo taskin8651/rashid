@@ -17,10 +17,12 @@ use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Admin\LeadController as AdminLeadController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TeamController as AdminTeamController;
+use App\Http\Controllers\Admin\TeamMemberController as AdminTeamMemberController;
 use App\Http\Controllers\Admin\CertificateApplicationController as AdminCertificateApplicationController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
@@ -45,6 +47,7 @@ use App\Http\Controllers\Franchise\ProfileController as FranchiseProfileControll
 use App\Http\Controllers\Franchise\ResourceController as FranchiseResourceController;
 use App\Http\Controllers\Franchise\StudentController as FranchiseStudentController;
 use App\Http\Controllers\Franchise\TeamController as FranchiseTeamController;
+use App\Http\Controllers\Franchise\TeamMemberController as FranchiseTeamMemberController;
 use App\Http\Controllers\FranchiseController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HomeController;
@@ -265,6 +268,11 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::post('/team/members/{member}', [FranchiseTeamController::class, 'updateMember'])->name('franchise.team.members.update');
         Route::delete('/team/members/{member}', [FranchiseTeamController::class, 'destroyMember'])->name('franchise.team.members.destroy');
 
+        Route::get('/team-members', [FranchiseTeamMemberController::class, 'index'])->name('franchise.team-members.index');
+        Route::post('/team-members', [FranchiseTeamMemberController::class, 'store'])->name('franchise.team-members.store');
+        Route::post('/team-members/{teamMember}', [FranchiseTeamMemberController::class, 'update'])->name('franchise.team-members.update');
+        Route::delete('/team-members/{teamMember}', [FranchiseTeamMemberController::class, 'destroy'])->name('franchise.team-members.destroy');
+
         Route::get('/profile', [FranchiseProfileController::class, 'edit'])->name('franchise.profile.edit');
         Route::post('/profile', [FranchiseProfileController::class, 'update'])->name('franchise.profile.update');
         Route::post('/change-password', [FranchiseProfileController::class, 'changePassword'])->name('franchise.password.update');
@@ -272,6 +280,10 @@ Route::middleware(['auth', 'track.active'])->group(function () {
 
     Route::prefix('admin')->middleware('permission:access-admin-panel')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+        Route::get('/profile', [AdminProfileController::class, 'edit'])->name('admin.profile.edit');
+        Route::post('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+        Route::post('/change-password', [AdminProfileController::class, 'changePassword'])->name('admin.password.update');
 
         Route::middleware('permission:manage-leads')->group(function () {
             Route::get('/leads/export', [AdminLeadController::class, 'export'])->name('admin.leads.export');
@@ -297,6 +309,7 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::middleware('permission:manage-students')->group(function () {
             Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
             Route::get('/students/export', [AdminStudentController::class, 'export'])->name('admin.students.export');
+            Route::post('/students', [AdminStudentController::class, 'store'])->name('admin.students.store');
             Route::post('/students/offline-enroll', [AdminStudentController::class, 'storeOffline'])->name('admin.students.offline-enroll');
             Route::post('/students/{student}/allot-course', [AdminStudentController::class, 'allotCourse'])->name('admin.students.allot-course');
             Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
@@ -432,6 +445,15 @@ Route::middleware(['auth', 'track.active'])->group(function () {
             Route::post('/team/members', [AdminTeamController::class, 'storeMember'])->name('admin.team.members.store');
             Route::post('/team/members/{member}', [AdminTeamController::class, 'updateMember'])->name('admin.team.members.update');
             Route::delete('/team/members/{member}', [AdminTeamController::class, 'destroyMember'])->name('admin.team.members.destroy');
+        });
+
+        Route::middleware('permission:manage-team-members')->group(function () {
+            Route::get('/team-members', [AdminTeamMemberController::class, 'index'])->name('admin.team-members.index');
+            Route::post('/team-members', [AdminTeamMemberController::class, 'store'])->name('admin.team-members.store');
+            Route::post('/team-members/{teamMember}', [AdminTeamMemberController::class, 'update'])->name('admin.team-members.update');
+            Route::post('/team-members/{teamMember}/approve', [AdminTeamMemberController::class, 'approve'])->name('admin.team-members.approve');
+            Route::post('/team-members/{teamMember}/reject', [AdminTeamMemberController::class, 'reject'])->name('admin.team-members.reject');
+            Route::delete('/team-members/{teamMember}', [AdminTeamMemberController::class, 'destroy'])->name('admin.team-members.destroy');
         });
     });
 });

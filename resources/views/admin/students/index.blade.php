@@ -11,7 +11,8 @@
         <button class="bsave" type="submit">Search</button>
       </form>
       <a href="{{ route('admin.students.export') }}" class="bghost" style="text-decoration:none;font-size:14px;padding:11px 20px"><i class="bi bi-download me-1"></i>Export CSV</a>
-      <button class="bsave" style="font-size:14px;padding:11px 20px" data-bs-toggle="modal" data-bs-target="#offlineEnroll"><i class="bi bi-person-plus-fill me-1"></i>Register Offline Student</button>
+      <button class="bghost" style="font-size:14px;padding:11px 20px" data-bs-toggle="modal" data-bs-target="#addStudent"><i class="bi bi-person-plus-fill me-1"></i>Add Student</button>
+      <button class="bsave" style="font-size:14px;padding:11px 20px" data-bs-toggle="modal" data-bs-target="#offlineEnroll"><i class="bi bi-mortarboard-fill me-1"></i>Register &amp; Allot Course</button>
     </div>
   </div>
 
@@ -86,6 +87,31 @@
     </table></div>
   </div>
   <div class="mt-3">{{ $students->links() }}</div>
+
+  <!-- Add Student Modal -->
+  <div class="modal fade" id="addStudent" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Add Student</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <form method="POST" action="{{ route('admin.students.store') }}">
+          @csrf
+          <div class="modal-body">
+            <p style="font-size:12px;color:var(--muted)">Creates a plain student account with no course — allot one anytime from the list below.</p>
+            <div class="mb-3"><label class="flbl">Full Name</label><input class="fctrl" name="name" required/></div>
+            <div class="row g-3 mb-3">
+              <div class="col-6"><label class="flbl">Email</label><input class="fctrl" type="email" name="email" required/></div>
+              <div class="col-6"><label class="flbl">Phone</label><input class="fctrl" name="phone"/></div>
+            </div>
+            <div class="mb-1"><label class="flbl">Password</label><input class="fctrl" type="password" name="password" minlength="6" required/></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="bsave">Add Student</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <!-- Register Offline Student Modal -->
   <div class="modal fade" id="offlineEnroll" tabindex="-1">

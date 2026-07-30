@@ -13,6 +13,7 @@
     'manage-attendance' => 'Manage Attendance',
     'manage-documents' => 'Manage Documents',
     'manage-expenses' => 'Manage Expenses (view income & record expenses)',
+    'manage-team-members' => 'Our Team (public profiles on the website)',
   ];
 @endphp
 

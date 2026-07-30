@@ -33,6 +33,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'manage-faqs',
         'manage-blog',
         'manage-team',
+        'manage-team-members',
     ];
 
     public const ADMIN_BASELINE_PERMISSION = 'access-admin-panel';

@@ -43,6 +43,9 @@
     @if (auth()->user()->hasAnyFranchisePermission('manage-gallery'))
       <a class="slink {{ request()->routeIs('franchise.gallery.*') ? 'act' : '' }}" href="{{ route('franchise.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
     @endif
+    @if (auth()->user()->hasAnyFranchisePermission('manage-team-members'))
+      <a class="slink {{ request()->routeIs('franchise.team-members.*') ? 'act' : '' }}" href="{{ route('franchise.team-members.index') }}"><i class="bi bi-person-vcard-fill"></i>Our Team</a>
+    @endif
     @if (auth()->user()->hasAnyFranchisePermission('manage-attendance'))
       <a class="slink {{ request()->routeIs('franchise.attendance.records') ? 'act' : '' }}" href="{{ route('franchise.attendance.records') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
       <a class="slink {{ request()->routeIs('franchise.attendance.manage') ? 'act' : '' }}" href="{{ route('franchise.attendance.manage') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Setup</a>

@@ -79,23 +79,25 @@
         <p style="font-size:14px;color:var(--muted);max-width:560px;margin:10px auto 0">A small, hands-on team focused on one goal — your career outcome.</p>
       </div>
       <div class="row g-4">
-        @php
-          $team = [
-            ['name' => 'Rashid Khan', 'role' => 'Founder & Director', 'grad' => 'var(--grad)'],
-            ['name' => 'Ayesha Ansari', 'role' => 'Head of Training', 'grad' => 'linear-gradient(135deg,#9c27b0,#e91e63)'],
-            ['name' => 'Vikram Rao', 'role' => 'Franchise Relations Head', 'grad' => 'linear-gradient(135deg,#009688,#4caf50)'],
-            ['name' => 'Sneha Kapoor', 'role' => 'Placement Coordinator', 'grad' => 'linear-gradient(135deg,#f59e0b,#ef4444)'],
-          ];
-        @endphp
-        @foreach ($team as $member)
+        @php $grads = ['var(--grad)', 'linear-gradient(135deg,#9c27b0,#e91e63)', 'linear-gradient(135deg,#009688,#4caf50)', 'linear-gradient(135deg,#f59e0b,#ef4444)']; @endphp
+        @forelse ($teamMembers as $member)
           <div class="col-6 col-md-3 rv">
             <div class="tc text-center">
-              <div class="ra mx-auto mb-3" style="width:72px;height:72px;font-size:24px;background:{{ $member['grad'] }}">{{ strtoupper(substr($member['name'], 0, 1)) }}</div>
-              <div class="rname" style="font-size:15px">{{ $member['name'] }}</div>
-              <div class="rrole">{{ $member['role'] }}</div>
+              @if ($member->photoUrl())
+                <img src="{{ $member->photoUrl() }}" alt="{{ $member->name }}" class="mx-auto mb-3" style="width:72px;height:72px;border-radius:50%;object-fit:cover;display:block">
+              @else
+                <div class="ra mx-auto mb-3" style="width:72px;height:72px;font-size:24px;background:{{ $grads[$loop->index % 4] }}">{{ strtoupper(substr($member->name, 0, 1)) }}</div>
+              @endif
+              <div class="rname" style="font-size:15px">{{ $member->name }}</div>
+              <div class="rrole">{{ $member->designation }}</div>
+              @if ($member->franchiseBooking)
+                <div style="font-size:11px;color:var(--muted);margin-top:2px"><i class="bi bi-geo-alt-fill me-1"></i>{{ $member->franchiseBooking->city }}</div>
+              @endif
             </div>
           </div>
-        @endforeach
+        @empty
+          <div class="col-12 text-center rv"><p style="font-size:13px;color:var(--muted)">Meet the team soon — profiles are being added.</p></div>
+        @endforelse
       </div>
     </div>
   </section>

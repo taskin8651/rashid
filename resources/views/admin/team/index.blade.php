@@ -22,6 +22,7 @@
     'manage-faqs' => 'FAQs',
     'manage-blog' => 'Blog',
     'manage-team' => 'Team & Roles',
+    'manage-team-members' => 'Our Team (public profiles)',
   ];
 @endphp
 

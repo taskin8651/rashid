@@ -25,6 +25,7 @@ class FranchiseRole extends Model
         'manage-attendance',
         'manage-documents',
         'manage-expenses',
+        'manage-team-members',
     ];
 
     protected $fillable = ['franchise_booking_id', 'name', 'permissions'];

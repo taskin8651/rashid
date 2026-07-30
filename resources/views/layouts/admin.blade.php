@@ -58,10 +58,13 @@
         <a class="slink {{ request()->routeIs('admin.franchise.resources.*') ? 'act' : '' }}" href="{{ route('admin.franchise.resources.index') }}"><i class="bi bi-folder2-open"></i>Franchise Resources</a>
       @endcan
     @endcanany
-    @canany(['manage-gallery', 'manage-reviews', 'manage-faqs', 'manage-blog'])
+    @canany(['manage-gallery', 'manage-reviews', 'manage-faqs', 'manage-blog', 'manage-team-members'])
       <div class="nsec">Content</div>
       @can('manage-gallery')
         <a class="slink {{ request()->routeIs('admin.gallery.*') ? 'act' : '' }}" href="{{ route('admin.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
+      @endcan
+      @can('manage-team-members')
+        <a class="slink {{ request()->routeIs('admin.team-members.*') ? 'act' : '' }}" href="{{ route('admin.team-members.index') }}"><i class="bi bi-person-vcard-fill"></i>Our Team</a>
       @endcan
       @can('manage-reviews')
         <a class="slink {{ request()->routeIs('admin.reviews.*') ? 'act' : '' }}" href="{{ route('admin.reviews.index') }}"><i class="bi bi-star-fill"></i>Reviews</a>
@@ -77,6 +80,8 @@
       <div class="nsec">Organization</div>
       <a class="slink {{ request()->routeIs('admin.team.*') ? 'act' : '' }}" href="{{ route('admin.team.index') }}"><i class="bi bi-people-fill"></i>Team &amp; Roles</a>
     @endcan
+    <div class="nsec">Account</div>
+    <a class="slink {{ request()->routeIs('admin.profile.*') ? 'act' : '' }}" href="{{ route('admin.profile.edit') }}"><i class="bi bi-person-fill"></i>Profile</a>
     <div class="nsec">More</div>
     <a class="slink" href="{{ route('home') }}"><i class="bi bi-house-fill"></i>Back to Website</a>
     <form method="POST" action="{{ route('logout') }}">

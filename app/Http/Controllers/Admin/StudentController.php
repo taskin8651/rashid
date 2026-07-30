@@ -32,6 +32,21 @@ class StudentController extends Controller
         return view('admin.students.index', compact('students', 'search', 'courses'));
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'password' => ['required', 'string', 'min:6'],
+        ]);
+
+        $student = User::create($validated);
+        $student->assignRole('student');
+
+        return back()->with('status', $student->name . ' added. Allot them a course whenever they\'re ready.');
+    }
+
     public function storeOffline(Request $request)
     {
         $validated = $request->validate([
