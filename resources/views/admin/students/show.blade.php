@@ -121,9 +121,8 @@
             </div>
             <div class="d-flex align-items-center gap-2">
               @if ($cert->status === 'issued')
-                <span style="font-size:11px;color:{{ $cert->hasUploadedPdf() ? 'var(--ok)' : 'var(--muted)' }}" title="Certificate PDF {{ $cert->hasUploadedPdf() ? 'uploaded' : 'not uploaded' }}"><i class="bi bi-file-earmark-check-fill"></i></span>
-                <span style="font-size:11px;color:{{ $cert->hasUploadedMarksheet() ? 'var(--ok)' : 'var(--muted)' }}" title="Marksheet {{ $cert->hasUploadedMarksheet() ? 'uploaded' : 'not uploaded' }}"><i class="bi bi-file-earmark-text-fill"></i></span>
-                <button class="action-btn" style="border:none;background:none" title="Upload/Replace Documents" data-bs-toggle="modal" data-bs-target="#certDocs{{ $cert->id }}"><i class="bi bi-upload"></i></button>
+                <span style="font-size:11px;color:{{ $cert->subjects->isNotEmpty() ? 'var(--ok)' : 'var(--muted)' }}" title="Marksheet {{ $cert->subjects->isNotEmpty() ? 'ready' : 'not filled in yet' }}"><i class="bi bi-file-earmark-text-fill"></i></span>
+                <button class="action-btn" style="border:none;background:none" title="Edit Marksheet Details" data-bs-toggle="modal" data-bs-target="#certDocs{{ $cert->id }}"><i class="bi bi-pencil-square"></i></button>
               @endif
               <span class="badge-rt {{ $cert->status === 'issued' ? 'bg-active' : 'bg-pending' }}">{{ ucfirst($cert->status) }}</span>
             </div>
@@ -131,20 +130,38 @@
 
           @if ($cert->status === 'issued')
             <div class="modal fade" id="certDocs{{ $cert->id }}" tabindex="-1">
-              <div class="modal-dialog">
+              <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                  <div class="modal-header"><h5 class="modal-title">Documents — {{ $cert->course->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-                  <form method="POST" action="{{ route('admin.certificates.documents.update', $cert) }}" enctype="multipart/form-data">
+                  <div class="modal-header"><h5 class="modal-title">Marksheet Details — {{ $cert->course->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                  <form method="POST" action="{{ route('admin.certificates.documents.update', $cert) }}">
                     @csrf
                     <div class="modal-body">
-                      <label class="flbl">Certificate PDF {{ $cert->hasUploadedPdf() ? '(replace)' : '(upload)' }}</label>
-                      <input class="fctrl mb-3" type="file" name="certificate_pdf" accept="application/pdf"/>
-                      <label class="flbl">Marksheet {{ $cert->hasUploadedMarksheet() ? '(replace)' : '(upload)' }}</label>
-                      <input class="fctrl" type="file" name="marksheet" accept="application/pdf"/>
+                      <div class="row g-2 mb-1">
+                        <div class="col-md-4"><label class="flbl">Roll No.</label><input class="fctrl" type="text" name="roll_no" value="{{ $cert->roll_no }}" /></div>
+                        <div class="col-md-4"><label class="flbl">Father's Name</label><input class="fctrl" type="text" name="father_name" value="{{ $cert->father_name }}" /></div>
+                        <div class="col-md-4"><label class="flbl">Batch</label><input class="fctrl" type="text" name="batch_name" value="{{ $cert->batch_name }}" /></div>
+                      </div>
+
+                      <label class="flbl mt-2">Subjects &amp; Marks (for Marksheet)</label>
+                      @php
+                        $existingSubjects = $cert->subjects->isNotEmpty() ? $cert->subjects : $cert->course->modules->map(fn ($m) => (object) ['subject' => $m->title, 'max_marks' => 100, 'marks_obtained' => null]);
+                        if ($existingSubjects->isEmpty()) { $existingSubjects = collect([(object) ['subject' => '', 'max_marks' => 100, 'marks_obtained' => null]]); }
+                      @endphp
+                      <div id="subj-certdocs-{{ $cert->id }}" data-next-index="{{ $existingSubjects->count() }}">
+                        @foreach ($existingSubjects as $i => $s)
+                          <div class="d-flex gap-2 mb-2 subj-row">
+                            <input class="fctrl" style="flex:2" type="text" name="subjects[{{ $i }}][subject]" value="{{ $s->subject }}" placeholder="Subject" />
+                            <input class="fctrl" style="flex:1" type="number" min="1" name="subjects[{{ $i }}][max_marks]" value="{{ $s->max_marks }}" placeholder="Max Marks" />
+                            <input class="fctrl" style="flex:1" type="number" min="0" name="subjects[{{ $i }}][marks_obtained]" value="{{ $s->marks_obtained }}" placeholder="Obtained" />
+                            <button type="button" class="action-btn danger" style="border:none;background:none" onclick="this.closest('.subj-row').remove()"><i class="bi bi-trash"></i></button>
+                          </div>
+                        @endforeach
+                      </div>
+                      <button type="button" class="bghost" style="font-size:12px;padding:6px 12px" onclick="addSubjectRow('subj-certdocs-{{ $cert->id }}')"><i class="bi bi-plus-lg me-1"></i>Add Subject</button>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
-                      <button type="submit" class="bsave">Save Documents</button>
+                      <button type="submit" class="bsave">Save Marksheet</button>
                     </div>
                   </form>
                 </div>
@@ -196,4 +213,21 @@
       </div>
     </div>
   </div>
+
+  <script>
+    function addSubjectRow(containerId, subject, maxMarks, obtained) {
+      const container = document.getElementById(containerId);
+      const index = parseInt(container.dataset.nextIndex || '0', 10);
+      container.dataset.nextIndex = index + 1;
+      const row = document.createElement('div');
+      row.className = 'd-flex gap-2 mb-2 subj-row';
+      row.innerHTML = `
+        <input class="fctrl" style="flex:2" type="text" name="subjects[${index}][subject]" value="${subject ?? ''}" placeholder="Subject" />
+        <input class="fctrl" style="flex:1" type="number" min="1" name="subjects[${index}][max_marks]" value="${maxMarks ?? 100}" placeholder="Max Marks" />
+        <input class="fctrl" style="flex:1" type="number" min="0" name="subjects[${index}][marks_obtained]" value="${obtained ?? ''}" placeholder="Obtained" />
+        <button type="button" class="action-btn danger" style="border:none;background:none" onclick="this.closest('.subj-row').remove()"><i class="bi bi-trash"></i></button>
+      `;
+      container.appendChild(row);
+    }
+  </script>
 @endsection

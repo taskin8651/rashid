@@ -3,163 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { margin: 0; size: A4 landscape; }
+  @page { margin: 0; size: 297mm 198mm; }
   * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: 'Helvetica', 'DejaVu Sans', sans-serif;
-    color: #16233f;
-  }
-  .sheet {
-    position: relative;
-    width: 297mm;
-    height: 210mm;
-    background: #fdfcf8;
-  }
-  .border-outer {
-    position: absolute;
-    top: 8mm; left: 8mm; right: 8mm; bottom: 8mm;
-    border: 2.6pt solid #16336e;
-  }
-  .border-inner {
-    position: absolute;
-    top: 11mm; left: 11mm; right: 11mm; bottom: 11mm;
-    border: 0.9pt solid #c9a24b;
-  }
-  .corner {
-    position: absolute;
-    width: 16mm;
-    height: 16mm;
-    border-color: #c9a24b;
-  }
-  .corner-tl { top: 8mm; left: 8mm; border-top: 3pt solid; border-left: 3pt solid; }
-  .corner-tr { top: 8mm; right: 8mm; border-top: 3pt solid; border-right: 3pt solid; }
-  .corner-bl { bottom: 8mm; left: 8mm; border-bottom: 3pt solid; border-left: 3pt solid; }
-  .corner-br { bottom: 8mm; right: 8mm; border-bottom: 3pt solid; border-right: 3pt solid; }
+  body { margin: 0; font-family: 'Helvetica', 'DejaVu Sans', sans-serif; color: #16233f; }
+  .sheet { position: relative; width: 297mm; height: 198mm; }
+  .bg { position: absolute; top: 0; left: 0; width: 297mm; height: 198mm; }
 
-  .content { position: relative; padding: 20mm 26mm 0; text-align: center; }
+  .field { position: absolute; font-weight: bold; color: #17336f; margin: 0; }
+  .field.nowrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .brand-row { margin-bottom: 2mm; }
-  .brand-name { font-size: 20pt; font-weight: bold; color: #16336e; letter-spacing: 1pt; }
-  .brand-tag { font-size: 8pt; color: #b8860b; letter-spacing: 3pt; text-transform: uppercase; margin-top: 1mm; }
+  .f-certno   { left: 29.0mm; top: 79.7mm; width: 36.8mm; height: 5.4mm; line-height: 5.4mm; font-size: 10pt; }
+  .f-issue    { left: 29.0mm; top: 97.7mm; width: 34.8mm; height: 5.8mm; line-height: 5.8mm; font-size: 10pt; }
+  .f-duration { left: 29.0mm; top: 116.6mm; width: 25.1mm; height: 5.8mm; line-height: 5.8mm; font-size: 10pt; }
+  .f-grade    { left: 29.0mm; top: 135.0mm; width: 19.3mm; height: 5.6mm; line-height: 5.6mm; font-size: 10pt; }
 
-  .rule {
-    width: 26mm; height: 0.8pt; background: #c9a24b;
-    margin: 6mm auto;
+  .f-studentname {
+    left: 91.9mm; top: 87.4mm; width: 118.0mm; height: 14.7mm; line-height: 14.7mm;
+    text-align: center; font-size: 22pt; font-weight: bold; font-style: italic; color: #16233f;
   }
 
-  .title { font-size: 27pt; font-weight: bold; color: #16233f; letter-spacing: 1.5pt; margin-bottom: 3mm; }
-  .subtitle { font-size: 10.5pt; color: #5c6a8a; letter-spacing: 3pt; text-transform: uppercase; margin-bottom: 10mm; }
-
-  .lead { font-size: 11.5pt; color: #45516e; margin-bottom: 5mm; }
-  .student-name {
-    font-size: 26pt;
-    font-weight: bold;
-    color: #16336e;
-    padding-bottom: 3mm;
-    margin: 0 auto 6mm;
-    display: inline-block;
-    border-bottom: 1pt solid #c9a24b;
-    min-width: 120mm;
+  .f-ribbon {
+    left: 91.9mm; top: 112.8mm; width: 114.0mm; height: 10.1mm; line-height: 10.1mm;
+    text-align: center; font-size: 15pt; font-weight: bold; letter-spacing: 0.5pt; color: #f1cc67;
   }
 
-  .body-text { font-size: 11.5pt; color: #45516e; line-height: 1.9; margin: 0 auto; max-width: 190mm; }
-  .course-name { font-size: 16pt; font-weight: bold; color: #b8860b; margin: 3mm 0; }
-
-  .footer {
-    position: absolute;
-    left: 26mm; right: 26mm; bottom: 22mm;
-  }
-  .footer-table { width: 100%; border-collapse: collapse; }
-  .footer-table td { width: 33.33%; vertical-align: bottom; font-size: 9pt; color: #5c6a8a; }
-  .sig-line { border-top: 0.8pt solid #45516e; width: 55mm; margin: 0 auto 2mm; padding-top: 2mm; }
-  .meta-label { text-transform: uppercase; letter-spacing: 0.6pt; font-size: 7.5pt; color: #8b96b3; }
-  .meta-value { font-size: 9.5pt; color: #16233f; font-weight: bold; margin-top: 0.5mm; }
-
-  .seal {
-    width: 26mm; height: 26mm;
-    border: 2pt solid #b8860b;
-    border-radius: 13mm;
-    margin: 0 auto;
-    text-align: center;
-    padding-top: 7.5mm;
-  }
-  .seal-inner {
-    font-size: 7.5pt;
-    font-weight: bold;
-    color: #b8860b;
-    letter-spacing: 0.5pt;
-    line-height: 1.5;
-  }
-
-  .credentials {
-    position: absolute;
-    left: 26mm; right: 26mm; bottom: 12.5mm;
-    text-align: center;
-    font-size: 7.5pt;
-    color: #8b96b3;
-    letter-spacing: 0.3pt;
-  }
-  .credentials b { color: #5c6a8a; }
+  .f-qr { position: absolute; left: 240.5mm; top: 75.2mm; width: 27.3mm; height: 27.3mm; }
 </style>
 </head>
 <body>
   <div class="sheet">
-    <div class="border-outer"></div>
-    <div class="border-inner"></div>
-    <div class="corner corner-tl"></div>
-    <div class="corner corner-tr"></div>
-    <div class="corner corner-bl"></div>
-    <div class="corner corner-br"></div>
+    <img class="bg" src="file://{{ str_replace('\\', '/', public_path('assets/img/certificate-bg.jpg')) }}">
 
-    <div class="content">
-      <div class="brand-row">
-        <div class="brand-name">R-TECH COMPUTER</div>
-        <div class="brand-tag">Skill Se Placement Tak</div>
-      </div>
+    <div class="field nowrap f-certno">{{ $certificate->cert_code }}</div>
+    <div class="field nowrap f-issue">{{ $certificate->issued_date->format('d/m/Y') }}</div>
+    <div class="field nowrap f-duration">{{ $certificate->course->duration_text ?: '—' }}</div>
+    <div class="field nowrap f-grade">{{ $certificate->hasMarksheetData() ? $certificate->grade() : '—' }}</div>
 
-      <div class="rule"></div>
+    @php
+      $studentName = $certificate->user->name;
+      $studentNameSize = match (true) {
+        strlen($studentName) <= 20 => '22pt',
+        strlen($studentName) <= 28 => '18pt',
+        strlen($studentName) <= 36 => '15pt',
+        default => '12pt',
+      };
+      $studentName = \Illuminate\Support\Str::limit($studentName, 42, '…');
 
-      <div class="title">CERTIFICATE</div>
-      <div class="subtitle">of Completion</div>
+      $courseName = strtoupper($certificate->course->name);
+      $courseNameSize = match (true) {
+        strlen($courseName) <= 22 => '15pt',
+        strlen($courseName) <= 30 => '12pt',
+        strlen($courseName) <= 40 => '10pt',
+        default => '8.5pt',
+      };
+      $courseName = \Illuminate\Support\Str::limit($courseName, 48, '…');
+    @endphp
 
-      <div class="lead">This is to proudly certify that</div>
-      <div class="student-name">{{ $certificate->user->name }}</div>
+    <div class="field nowrap f-studentname" style="font-size: {{ $studentNameSize }}">{{ $studentName }}</div>
 
-      <div class="body-text">
-        has successfully completed the course
-        <div class="course-name">{{ $certificate->course->name }}</div>
-        with dedication and diligence, meeting all requirements set by R-Tech Computer,
-        and is hereby awarded this certificate of completion.
-      </div>
+    <div class="field nowrap f-ribbon" style="font-size: {{ $courseNameSize }}">{{ $courseName }}</div>
 
-      <div class="footer">
-        <table class="footer-table">
-          <tr>
-            <td style="text-align:left">
-              <div class="meta-label">Certificate No.</div>
-              <div class="meta-value">{{ $certificate->cert_code }}</div>
-              <div class="meta-label" style="margin-top:2.5mm">Date of Issue</div>
-              <div class="meta-value">{{ $certificate->issued_date->format('d F Y') }}</div>
-            </td>
-            <td style="text-align:center">
-              <div class="seal"><div class="seal-inner">R-TECH<br>VERIFIED<br>&#9733;&#9733;&#9733;</div></div>
-            </td>
-            <td style="text-align:right">
-              <div class="sig-line" style="margin-left:auto;margin-right:0"></div>
-              <div class="meta-value" style="text-align:right">Authorized Signatory</div>
-              <div class="meta-label" style="text-align:right">R-Tech Computer</div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="credentials">
-        <b>ISO 9001:2015</b> Certified Institute (UKAF CERT &middot; Cert. No. UK-1370-6420) &nbsp;|&nbsp;
-        <b>Udyam Registered</b> MSME, Govt. of India (UDYAM-BR-24-0042559) &nbsp;|&nbsp;
-        Verify at rtechcomputer.in with Cert No. {{ $certificate->cert_code }}
-      </div>
-    </div>
+    <img class="f-qr" src="{{ $qrDataUri }}">
   </div>
 </body>
 </html>

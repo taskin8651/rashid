@@ -182,7 +182,7 @@ class StudentController extends Controller
             return ['enrollment' => $e, 'course' => $e->course, 'percent' => $percent];
         });
 
-        $certificates = $student->certificates()->with('course')->get();
+        $certificates = $student->certificates()->with(['course.modules', 'subjects'])->get();
         $quizAttempts = $student->quizAttempts()->with('course')->latest('submitted_at')->get();
         $payments = Payment::where('user_id', $student->id)->latest()->get();
 

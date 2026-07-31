@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Mail\CertificateIssued;
 use App\Models\Certificate;
 use App\Models\CertificateApplication;
+use App\Models\CertificateSubject;
 use App\Models\Enrollment;
 use App\Notifications\CertificateApplicationRejectedNotification;
 use App\Notifications\CertificateIssuedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 class CertificateApplicationController extends Controller
 {
@@ -20,7 +20,7 @@ class CertificateApplicationController extends Controller
     {
         $status = $request->query('status');
 
-        $applications = CertificateApplication::with(['user', 'course', 'franchiseBooking'])
+        $applications = CertificateApplication::with(['user', 'course.modules', 'franchiseBooking', 'certificate.subjects'])
             ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
             ->paginate(20)
@@ -45,9 +45,13 @@ class CertificateApplicationController extends Controller
         $certificate = Certificate::firstOrNew(['user_id' => $application->user_id, 'course_id' => $application->course_id]);
 
         $validated = $request->validate([
-            'cert_code' => ['required', 'string', 'max:255', Rule::unique('certificates', 'cert_code')->ignore($certificate->id)],
-            'certificate_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-            'marksheet' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'roll_no' => ['nullable', 'string', 'max:255'],
+            'father_name' => ['nullable', 'string', 'max:255'],
+            'batch_name' => ['nullable', 'string', 'max:255'],
+            'subjects' => ['nullable', 'array'],
+            'subjects.*.subject' => ['nullable', 'string', 'max:255'],
+            'subjects.*.max_marks' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'subjects.*.marks_obtained' => ['nullable', 'integer', 'min:0', 'max:1000'],
         ]);
 
         $application->load(['user', 'course']);
@@ -65,18 +69,15 @@ class CertificateApplicationController extends Controller
             $enrollment->save();
         }
 
-        $certificate->cert_code = $validated['cert_code'];
+        $certificate->cert_code = $certificate->cert_code ?: Certificate::generateCode();
+        $certificate->roll_no = $validated['roll_no'] ?? null;
+        $certificate->father_name = $validated['father_name'] ?? null;
+        $certificate->batch_name = $validated['batch_name'] ?? null;
         $certificate->status = 'issued';
         $certificate->issued_date = now();
         $certificate->save();
 
-        if ($request->hasFile('certificate_pdf')) {
-            $certificate->addMediaFromRequest('certificate_pdf')->toMediaCollection('pdf');
-        }
-
-        if ($request->hasFile('marksheet')) {
-            $certificate->addMediaFromRequest('marksheet')->toMediaCollection('marksheet');
-        }
+        $this->syncSubjects($certificate, $validated['subjects'] ?? []);
 
         $application->update([
             'status' => 'approved',
@@ -100,20 +101,45 @@ class CertificateApplicationController extends Controller
 
     public function updateDocuments(Request $request, Certificate $certificate)
     {
-        $request->validate([
-            'certificate_pdf' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-            'marksheet' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+        $validated = $request->validate([
+            'roll_no' => ['nullable', 'string', 'max:255'],
+            'father_name' => ['nullable', 'string', 'max:255'],
+            'batch_name' => ['nullable', 'string', 'max:255'],
+            'subjects' => ['nullable', 'array'],
+            'subjects.*.subject' => ['nullable', 'string', 'max:255'],
+            'subjects.*.max_marks' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'subjects.*.marks_obtained' => ['nullable', 'integer', 'min:0', 'max:1000'],
         ]);
 
-        if ($request->hasFile('certificate_pdf')) {
-            $certificate->addMediaFromRequest('certificate_pdf')->toMediaCollection('pdf');
-        }
+        $certificate->update([
+            'roll_no' => $validated['roll_no'] ?? null,
+            'father_name' => $validated['father_name'] ?? null,
+            'batch_name' => $validated['batch_name'] ?? null,
+        ]);
 
-        if ($request->hasFile('marksheet')) {
-            $certificate->addMediaFromRequest('marksheet')->toMediaCollection('marksheet');
-        }
+        $this->syncSubjects($certificate, $validated['subjects'] ?? []);
 
-        return back()->with('status', 'Documents updated.');
+        return back()->with('status', 'Marksheet updated.');
+    }
+
+    private function syncSubjects(Certificate $certificate, array $rows): void
+    {
+        $certificate->subjects()->delete();
+
+        $sortOrder = 0;
+        foreach ($rows as $row) {
+            if (empty($row['subject'])) {
+                continue;
+            }
+
+            CertificateSubject::create([
+                'certificate_id' => $certificate->id,
+                'subject' => $row['subject'],
+                'max_marks' => filled($row['max_marks'] ?? null) ? (int) $row['max_marks'] : 100,
+                'marks_obtained' => filled($row['marks_obtained'] ?? null) ? (int) $row['marks_obtained'] : null,
+                'sort_order' => $sortOrder++,
+            ]);
+        }
     }
 
     public function reject(Request $request, CertificateApplication $application)

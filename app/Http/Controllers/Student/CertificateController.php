@@ -8,6 +8,8 @@ use App\Models\Certificate;
 use App\Models\VideoProgress;
 use App\Notifications\CertificateIssuedNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -67,14 +69,12 @@ class CertificateController extends Controller
 
         $filename = 'RTech-Certificate-' . $certificate->cert_code . '.pdf';
 
-        if ($certificate->hasUploadedPdf()) {
-            return response()->download($certificate->uploadedPdfPath(), $filename);
-        }
-
         $certificate->load(['user', 'course']);
 
-        $pdf = Pdf::loadView('certificates.pdf', ['certificate' => $certificate])
-            ->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('certificates.pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+        ])->setPaper([0, 0, 841.89, 561.26]);
 
         return $pdf->download($filename);
     }
@@ -83,10 +83,28 @@ class CertificateController extends Controller
     {
         abort_unless($certificate->user_id === auth()->id(), 403);
         abort_unless($certificate->status === 'issued', 404);
-        abort_unless($certificate->hasUploadedMarksheet(), 404);
+        abort_unless($certificate->hasMarksheetData(), 404);
+
+        $certificate->load(['user', 'course', 'subjects']);
 
         $filename = 'RTech-Marksheet-' . $certificate->cert_code . '.pdf';
 
-        return response()->download($certificate->uploadedMarksheetPath(), $filename);
+        $pdf = Pdf::loadView('certificates.marksheet-pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($filename);
+    }
+
+    private function verificationQrDataUri(Certificate $certificate): string
+    {
+        return Builder::create()
+            ->writer(new PngWriter())
+            ->data(route('certificates.verify', ['code' => $certificate->cert_code]))
+            ->size(300)
+            ->margin(10)
+            ->build()
+            ->getDataUri();
     }
 }
