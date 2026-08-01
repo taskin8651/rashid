@@ -12,6 +12,9 @@ use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
 
 class CertificateController extends Controller
 {
@@ -98,13 +101,17 @@ class CertificateController extends Controller
     }
 
     private function verificationQrDataUri(Certificate $certificate): string
-    {
-        return Builder::create()
-            ->writer(new PngWriter())
-            ->data(route('certificates.verify', ['code' => $certificate->cert_code]))
-            ->size(300)
-            ->margin(10)
-            ->build()
-            ->getDataUri();
-    }
+{
+    $result = new Builder(
+        writer: new PngWriter(),
+        data: route('certificates.verify', ['code' => $certificate->cert_code]),
+        encoding: new Encoding('UTF-8'),
+        errorCorrectionLevel: ErrorCorrectionLevel::Low,
+        size: 300,
+        margin: 10,
+        roundBlockSizeMode: RoundBlockSizeMode::Margin
+    );
+
+    return $result->build()->getDataUri();
+}
 }
