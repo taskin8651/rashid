@@ -10,7 +10,9 @@ class Certificate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'course_id', 'cert_code', 'roll_no', 'father_name', 'batch_name', 'issued_date', 'status',
+        'user_id', 'course_id', 'student_name', 'student_email', 'student_phone',
+        'course_name', 'course_duration_text', 'cert_code', 'roll_no', 'father_name',
+        'batch_name', 'issued_date', 'status', 'source',
     ];
 
     protected $casts = [
@@ -19,12 +21,20 @@ class Certificate extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withDefault(function (User $user, Certificate $certificate) {
+            $user->name = $certificate->student_name ?: 'Student Name';
+            $user->email = $certificate->student_email;
+            $user->phone = $certificate->student_phone;
+            $user->guardian_name = $certificate->father_name;
+        });
     }
 
     public function course()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class)->withDefault(function (Course $course, Certificate $certificate) {
+            $course->name = $certificate->course_name ?: 'Course Name';
+            $course->duration_text = $certificate->course_duration_text;
+        });
     }
 
     public function subjects()
