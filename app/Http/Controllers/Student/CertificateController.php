@@ -77,6 +77,7 @@ class CertificateController extends Controller
         $pdf = Pdf::loadView('certificates.pdf', [
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
         ])->setPaper([0, 0, 841.89, 561.26]);
 
         return $pdf->download($filename);
@@ -95,9 +96,23 @@ class CertificateController extends Controller
         $pdf = Pdf::loadView('certificates.marksheet-pdf', [
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download($filename);
+    }
+
+    private function signatureImageDataUri(): string
+    {
+        $file = public_path('assets/img/sign.png');
+
+        if (!is_file($file)) {
+            return '';
+        }
+
+        $content = file_get_contents($file);
+
+        return $content === false ? '' : 'data:image/png;base64,' . base64_encode($content);
     }
 
     private function verificationQrDataUri(Certificate $certificate): string

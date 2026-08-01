@@ -405,7 +405,10 @@ Route::middleware(['auth', 'track.active'])->group(function () {
 
         Route::middleware('permission:manage-certificate-applications')->group(function () {
             Route::get('/certificate-applications', [AdminCertificateApplicationController::class, 'index'])->name('admin.certificate-applications.index');
+            Route::post('/certificate-applications/manual', [AdminCertificateApplicationController::class, 'storeManual'])->name('admin.certificate-applications.manual-store');
             Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
+            Route::get('/certificates/{certificate}/download', [AdminCertificateApplicationController::class, 'download'])->name('admin.certificates.download');
+            Route::get('/certificates/{certificate}/marksheet', [AdminCertificateApplicationController::class, 'downloadMarksheet'])->name('admin.certificates.marksheet');
             Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
             Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
             Route::post('/certificates/{certificate}/documents', [AdminCertificateApplicationController::class, 'updateDocuments'])->name('admin.certificates.documents.update');

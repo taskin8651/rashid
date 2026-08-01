@@ -407,6 +407,13 @@
         font-size: 8pt;
         line-height: 1.2;
     }
+    .signature img {
+        display: block;
+        width: 34mm;
+        height: 16mm;
+        margin: 0 auto 2mm;
+        object-fit: contain;
+    }
 
     .footer {
         position: absolute;
@@ -531,8 +538,12 @@
         <img src="{{ $qrDataUri }}" alt="Verification QR Code">
         <p>Scan QR Code<br>to Verify Marksheet</p>
     </div>
-    <div class="signature">
-        <div class="sign-name">Renfaaz</div>
+    <div class="signature">    
+        @if(!empty($signatureImageDataUri))
+            <img src="{{ $signatureImageDataUri }}" alt="Signature">
+        @else
+            <div class="sign-name">Md Rashid</div>
+        @endif
         <b>Authorized Signatory<br>R-Tech Computer</b>
     </div>
 

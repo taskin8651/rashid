@@ -7,12 +7,22 @@ use App\Mail\CertificateIssued;
 use App\Models\Certificate;
 use App\Models\CertificateApplication;
 use App\Models\CertificateSubject;
+use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\User;
 use App\Notifications\CertificateApplicationRejectedNotification;
 use App\Notifications\CertificateIssuedNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CertificateApplicationController extends Controller
 {
@@ -27,8 +37,9 @@ class CertificateApplicationController extends Controller
             ->withQueryString();
 
         $pendingCount = CertificateApplication::where('status', 'pending')->count();
+        $courses = Course::where('status', 'active')->orderBy('name')->get();
 
-        return view('admin.certificate-applications.index', compact('applications', 'status', 'pendingCount'));
+        return view('admin.certificate-applications.index', compact('applications', 'status', 'pendingCount', 'courses'));
     }
 
     public function downloadProof(CertificateApplication $application)
@@ -38,6 +49,157 @@ class CertificateApplicationController extends Controller
         return Storage::disk('local')->download($application->proof_path);
     }
 
+    public function download(Certificate $certificate)
+    {
+        abort_unless($certificate->status === 'issued', 404);
+
+        $filename = 'RTech-Certificate-' . $certificate->cert_code . '.pdf';
+        $certificate->load(['user', 'course']);
+
+        $pdf = Pdf::loadView('certificates.pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper([0, 0, 841.89, 561.26]);
+
+        return $pdf->download($filename);
+    }
+
+    public function downloadMarksheet(Certificate $certificate)
+    {
+        abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->hasMarksheetData(), 404);
+
+        $filename = 'RTech-Marksheet-' . $certificate->cert_code . '.pdf';
+        $certificate->load(['user', 'course', 'subjects']);
+
+        $pdf = Pdf::loadView('certificates.marksheet-pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($filename);
+    }
+
+    public function storeManual(Request $request)
+    {
+        $validated = $request->validate([
+            'student_name' => ['required', 'string', 'max:255'],
+            'student_email' => ['nullable', 'email', 'max:255'],
+            'student_phone' => ['nullable', 'string', 'max:20'],
+            'course_id' => ['required', 'exists:courses,id'],
+            'course_name' => ['nullable', 'string', 'max:255'],
+            'course_duration_text' => ['nullable', 'string', 'max:255'],
+            'roll_no' => ['nullable', 'string', 'max:255'],
+            'father_name' => ['nullable', 'string', 'max:255'],
+            'batch_name' => ['nullable', 'string', 'max:255'],
+            'subjects' => ['nullable', 'array'],
+            'subjects.*.subject' => ['nullable', 'string', 'max:255'],
+            'subjects.*.max_marks' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'subjects.*.marks_obtained' => ['nullable', 'integer', 'min:0', 'max:1000'],
+        ]);
+
+        $course = Course::findOrFail($validated['course_id']);
+        $user = null;
+
+        if (!empty($validated['student_email'])) {
+            $user = User::where('email', $validated['student_email'])->first();
+        }
+
+        if (!$user) {
+            $user = User::create([
+                'name' => $validated['student_name'],
+                'email' => $validated['student_email'] ?: 'manual-' . Str::slug($validated['student_name']) . '-' . Str::random(4) . '@example.com',
+                'phone' => $validated['student_phone'] ?? null,
+                'password' => Hash::make(Str::random(16)),
+            ]);
+            if (class_exists(\Spatie\Permission\Models\Role::class) && \Spatie\Permission\Models\Role::where('name', 'student')->exists()) {
+                $user->assignRole('student');
+            }
+        }
+
+        $certificate = Certificate::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'student_name' => $validated['student_name'],
+            'student_email' => $validated['student_email'] ?? $user->email,
+            'student_phone' => $validated['student_phone'] ?? $user->phone,
+            'course_name' => $validated['course_name'] ?? $course->name,
+            'course_duration_text' => $validated['course_duration_text'] ?? $course->duration_text,
+            'roll_no' => $validated['roll_no'] ?? null,
+            'father_name' => $validated['father_name'] ?? null,
+            'batch_name' => $validated['batch_name'] ?? null,
+            'status' => 'issued',
+            'issued_date' => now(),
+            'cert_code' => Certificate::generateCode(),
+            'source' => 'manual',
+        ]);
+
+        $application = CertificateApplication::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'completion_date' => now(),
+            'status' => 'approved',
+            'certificate_id' => $certificate->id,
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $enrollment = Enrollment::firstOrNew(['user_id' => $user->id, 'course_id' => $course->id]);
+        if (!in_array($enrollment->status, ['paid', 'completed'], true)) {
+            $enrollment->fill([
+                'base_price' => $course->price,
+                'discount_amount' => $course->price,
+                'final_amount' => 0,
+                'status' => 'completed',
+                'enrolled_at' => $enrollment->enrolled_at ?? now(),
+                'completed_at' => now(),
+            ]);
+            $enrollment->save();
+        }
+
+        if ($certificate->student_email) {
+            try {
+                Mail::to($certificate->student_email)->send(new CertificateIssued($certificate->fresh(['user', 'course'])));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        $user->notify(new CertificateIssuedNotification($certificate->fresh(['user', 'course'])));
+
+        return redirect()->route('admin.certificate-applications.index')->with('status', 'Certificate created for ' . $validated['student_name'] . '. Add marksheet details from the same page when ready.');
+    }
+
+    private function signatureImageDataUri(): string
+    {
+        $file = public_path('assets/img/sign.png');
+
+        if (!is_file($file)) {
+            return '';
+        }
+
+        $content = file_get_contents($file);
+
+        return $content === false ? '' : 'data:image/png;base64,' . base64_encode($content);
+    }
+
+    private function verificationQrDataUri(Certificate $certificate): string
+    {
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data(route('certificates.verify', ['code' => $certificate->cert_code]))
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(ErrorCorrectionLevel::Low)
+            ->size(300)
+            ->margin(10)
+            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+            ->build();
+
+        return $result->getDataUri();
+    }
+
     public function approve(Request $request, CertificateApplication $application)
     {
         abort_unless($application->status === 'pending', 422);
@@ -45,6 +207,11 @@ class CertificateApplicationController extends Controller
         $certificate = Certificate::firstOrNew(['user_id' => $application->user_id, 'course_id' => $application->course_id]);
 
         $validated = $request->validate([
+            'student_name' => ['nullable', 'string', 'max:255'],
+            'student_email' => ['nullable', 'email', 'max:255'],
+            'student_phone' => ['nullable', 'string', 'max:20'],
+            'course_name' => ['nullable', 'string', 'max:255'],
+            'course_duration_text' => ['nullable', 'string', 'max:255'],
             'roll_no' => ['nullable', 'string', 'max:255'],
             'father_name' => ['nullable', 'string', 'max:255'],
             'batch_name' => ['nullable', 'string', 'max:255'],
@@ -56,25 +223,36 @@ class CertificateApplicationController extends Controller
 
         $application->load(['user', 'course']);
 
-        $enrollment = Enrollment::firstOrNew(['user_id' => $application->user_id, 'course_id' => $application->course_id]);
-        if (!in_array($enrollment->status, ['paid', 'completed'], true)) {
-            $enrollment->fill([
-                'base_price' => $application->course->price,
-                'discount_amount' => $application->course->price,
-                'final_amount' => 0,
-                'status' => 'completed',
-                'enrolled_at' => $enrollment->enrolled_at ?? $application->completion_date,
-                'completed_at' => $application->completion_date,
-            ]);
-            $enrollment->save();
+        $course = $application->course;
+        $user = $application->user;
+
+        if ($application->user_id && $course) {
+            $enrollment = Enrollment::firstOrNew(['user_id' => $application->user_id, 'course_id' => $application->course_id]);
+            if (!in_array($enrollment->status, ['paid', 'completed'], true)) {
+                $enrollment->fill([
+                    'base_price' => $course->price,
+                    'discount_amount' => $course->price,
+                    'final_amount' => 0,
+                    'status' => 'completed',
+                    'enrolled_at' => $enrollment->enrolled_at ?? $application->completion_date,
+                    'completed_at' => $application->completion_date,
+                ]);
+                $enrollment->save();
+            }
         }
 
         $certificate->cert_code = $certificate->cert_code ?: Certificate::generateCode();
+        $certificate->student_name = $validated['student_name'] ?? $user?->name ?? $certificate->student_name;
+        $certificate->student_email = $validated['student_email'] ?? $user?->email ?? $certificate->student_email;
+        $certificate->student_phone = $validated['student_phone'] ?? $user?->phone ?? $certificate->student_phone;
+        $certificate->course_name = $validated['course_name'] ?? $course?->name ?? $certificate->course_name;
+        $certificate->course_duration_text = $validated['course_duration_text'] ?? $course?->duration_text ?? $certificate->course_duration_text;
         $certificate->roll_no = $validated['roll_no'] ?? null;
         $certificate->father_name = $validated['father_name'] ?? null;
         $certificate->batch_name = $validated['batch_name'] ?? null;
         $certificate->status = 'issued';
         $certificate->issued_date = now();
+        $certificate->source = $certificate->source ?: 'manual';
         $certificate->save();
 
         $this->syncSubjects($certificate, $validated['subjects'] ?? []);
@@ -88,15 +266,21 @@ class CertificateApplicationController extends Controller
 
         $certificate = $certificate->fresh(['user', 'course']);
 
-        try {
-            Mail::to($application->user->email)->send(new CertificateIssued($certificate));
-        } catch (\Throwable $e) {
-            report($e);
+        if ($certificate->student_email) {
+            try {
+                Mail::to($certificate->student_email)->send(new CertificateIssued($certificate));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
-        $application->user->notify(new CertificateIssuedNotification($certificate));
+        if ($application->user) {
+            $application->user->notify(new CertificateIssuedNotification($certificate));
+        }
 
-        return back()->with('status', 'Certificate issued to ' . $application->user->name . '.');
+        $recipientName = $certificate->student_name ?: optional($application->user)->name ?: 'Student';
+
+        return back()->with('status', 'Certificate issued to ' . $recipientName . '.');
     }
 
     public function updateDocuments(Request $request, Certificate $certificate)

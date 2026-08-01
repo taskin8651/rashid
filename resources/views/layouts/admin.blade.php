@@ -18,7 +18,7 @@
   <nav class="sb-nav">
     <div class="nsec">Overview</div>
     <a class="slink {{ request()->routeIs('admin.dashboard') ? 'act' : '' }}" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2"></i>Dashboard</a>
-    @canany(['manage-leads', 'follow-up-leads', 'manage-students', 'manage-certificate-applications', 'manage-attendance', 'manage-attendance-locations', 'manage-courses', 'manage-categories'])
+    @canany(['manage-leads', 'follow-up-leads', 'manage-students', 'manage-certificate-applications', 'manage-attendance', 'manage-attendance-locations', 'manage-courses', 'manage-categories', 'manage-admins'])
       <div class="nsec">Management</div>
       @canany(['manage-leads', 'follow-up-leads'])
         <a class="slink {{ request()->routeIs('admin.leads.*') ? 'act' : '' }}" href="{{ route('admin.leads.index') }}"><i class="bi bi-person-lines-fill"></i>Leads</a>
@@ -26,9 +26,9 @@
       @can('manage-students')
         <a class="slink {{ request()->routeIs('admin.students.*') ? 'act' : '' }}" href="{{ route('admin.students.index') }}"><i class="bi bi-people-fill"></i>Students</a>
       @endcan
-      @can('manage-certificate-applications')
+      @canany(['manage-certificate-applications', 'manage-admins'])
         <a class="slink {{ request()->routeIs('admin.certificate-applications.*') ? 'act' : '' }}" href="{{ route('admin.certificate-applications.index') }}"><i class="bi bi-patch-question-fill"></i>Certificate Applications</a>
-      @endcan
+      @endcanany
       @can('manage-attendance')
         <a class="slink {{ request()->routeIs('admin.attendance.*') ? 'act' : '' }}" href="{{ route('admin.attendance.index') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
       @endcan
