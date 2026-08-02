@@ -185,20 +185,22 @@ class CertificateApplicationController extends Controller
         return $content === false ? '' : 'data:image/png;base64,' . base64_encode($content);
     }
 
-    private function verificationQrDataUri(Certificate $certificate): string
-    {
-        $result = Builder::create()
-            ->writer(new PngWriter())
-            ->data(route('certificates.verify', ['code' => $certificate->cert_code]))
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(ErrorCorrectionLevel::Low)
-            ->size(300)
-            ->margin(10)
-            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-            ->build();
+   private function verificationQrDataUri(Certificate $certificate): string
+{
+    $builder = new Builder(
+        writer: new PngWriter(),
+        data: route('certificates.verify', [
+            'code' => $certificate->cert_code
+        ]),
+        encoding: new Encoding('UTF-8'),
+        errorCorrectionLevel: ErrorCorrectionLevel::Low,
+        size: 300,
+        margin: 10,
+        roundBlockSizeMode: RoundBlockSizeMode::Margin
+    );
 
-        return $result->getDataUri();
-    }
+    return $builder->build()->getDataUri();
+}
 
     public function approve(Request $request, CertificateApplication $application)
     {
