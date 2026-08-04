@@ -86,7 +86,9 @@
       </tbody>
     </table></div>
   </div>
-  <div class="mt-3">{{ $students->links() }}</div>
+ <div class="d-flex justify-content-center mt-4">
+    {{ $students->links('pagination::bootstrap-5') }}
+</div>
 
   <!-- Add Student Modal -->
   <div class="modal fade" id="addStudent" tabindex="-1">
