@@ -27,6 +27,7 @@
         <a class="slink {{ request()->routeIs('admin.students.*') ? 'act' : '' }}" href="{{ route('admin.students.index') }}"><i class="bi bi-people-fill"></i>Students</a>
       @endcan
       @canany(['manage-certificate-applications', 'manage-admins'])
+        <a class="slink {{ request()->routeIs('admin.certificates.*') ? 'act' : '' }}" href="{{ route('admin.certificates.index') }}"><i class="bi bi-award-fill"></i>Certificates</a>
         <a class="slink {{ request()->routeIs('admin.certificate-applications.*') ? 'act' : '' }}" href="{{ route('admin.certificate-applications.index') }}"><i class="bi bi-patch-question-fill"></i>Certificate Applications</a>
       @endcanany
       @can('manage-attendance')

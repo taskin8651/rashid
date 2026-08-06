@@ -60,7 +60,7 @@ class AdminCertificateApprovalTest extends TestCase
         $response = $controller->storeManual($request);
 
         $this->assertEquals(302, $response->getStatusCode());
-        $this->assertStringContainsString('/admin/certificate-applications', $response->headers->get('Location'));
+        $this->assertStringContainsString('/admin/certificates', $response->headers->get('Location'));
 
         $certificate = CertificateApplication::latest()->first()->certificate;
         $this->assertNotNull($certificate);

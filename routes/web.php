@@ -405,6 +405,7 @@ Route::middleware(['auth', 'track.active'])->group(function () {
 
         Route::middleware('permission:manage-certificate-applications')->group(function () {
             Route::get('/certificate-applications', [AdminCertificateApplicationController::class, 'index'])->name('admin.certificate-applications.index');
+            Route::get('/certificates', [AdminCertificateApplicationController::class, 'certificatesIndex'])->name('admin.certificates.index');
             Route::post('/certificate-applications/manual', [AdminCertificateApplicationController::class, 'storeManual'])->name('admin.certificate-applications.manual-store');
             Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
             Route::get('/certificates/{certificate}/download', [AdminCertificateApplicationController::class, 'download'])->name('admin.certificates.download');

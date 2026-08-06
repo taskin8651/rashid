@@ -42,6 +42,26 @@ class CertificateApplicationController extends Controller
         return view('admin.certificate-applications.index', compact('applications', 'status', 'pendingCount', 'courses'));
     }
 
+    public function certificatesIndex(Request $request)
+    {
+        $search = $request->query('search');
+
+        $certificates = Certificate::with(['user', 'course', 'subjects'])
+            ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
+                $q->where('student_name', 'like', "%{$search}%")
+                    ->orWhere('student_email', 'like', "%{$search}%")
+                    ->orWhere('cert_code', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
+            }))
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        $courses = Course::where('status', 'active')->orderBy('name')->get();
+
+        return view('admin.certificates.index', compact('certificates', 'courses', 'search'));
+    }
+
     public function downloadProof(CertificateApplication $application)
     {
         abort_unless($application->proof_path, 404);
@@ -60,7 +80,7 @@ class CertificateApplicationController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
-        ])->setPaper([0, 0, 841.89, 561.26]);
+        ])->setPaper('a4', 'landscape');
 
         return $pdf->download($filename);
     }
@@ -98,6 +118,8 @@ class CertificateApplicationController extends Controller
             'subjects.*.subject' => ['nullable', 'string', 'max:255'],
             'subjects.*.max_marks' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'subjects.*.marks_obtained' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'include_certificate' => ['nullable', 'boolean'],
+            'include_marksheet' => ['nullable', 'boolean'],
         ]);
 
         $course = Course::findOrFail($validated['course_id']);
@@ -134,6 +156,8 @@ class CertificateApplicationController extends Controller
             'issued_date' => now(),
             'cert_code' => Certificate::generateCode(),
             'source' => 'manual',
+            'include_certificate' => $request->boolean('include_certificate', true),
+            'include_marksheet' => $request->boolean('include_marksheet', true),
         ]);
 
         $application = CertificateApplication::create([
@@ -169,7 +193,7 @@ class CertificateApplicationController extends Controller
 
         $user->notify(new CertificateIssuedNotification($certificate->fresh(['user', 'course'])));
 
-        return redirect()->route('admin.certificate-applications.index')->with('status', 'Certificate created for ' . $validated['student_name'] . '. Add marksheet details from the same page when ready.');
+        return redirect()->route('admin.certificates.index')->with('status', 'Certificate created for ' . $validated['student_name'] . '.');
     }
 
     private function signatureImageDataUri(): string
@@ -185,22 +209,19 @@ class CertificateApplicationController extends Controller
         return $content === false ? '' : 'data:image/png;base64,' . base64_encode($content);
     }
 
-   private function verificationQrDataUri(Certificate $certificate): string
-{
-    $builder = new Builder(
-        writer: new PngWriter(),
-        data: route('certificates.verify', [
-            'code' => $certificate->cert_code
-        ]),
-        encoding: new Encoding('UTF-8'),
-        errorCorrectionLevel: ErrorCorrectionLevel::Low,
-        size: 300,
-        margin: 10,
-        roundBlockSizeMode: RoundBlockSizeMode::Margin
-    );
-
-    return $builder->build()->getDataUri();
-}
+    private function verificationQrDataUri(Certificate $certificate): string
+    {
+        return Builder::create()
+            ->writer(new PngWriter())
+            ->data(route('certificates.verify', ['code' => $certificate->cert_code]))
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(ErrorCorrectionLevel::Low)
+            ->size(300)
+            ->margin(10)
+            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+            ->build()
+            ->getDataUri();
+    }
 
     public function approve(Request $request, CertificateApplication $application)
     {
@@ -221,6 +242,8 @@ class CertificateApplicationController extends Controller
             'subjects.*.subject' => ['nullable', 'string', 'max:255'],
             'subjects.*.max_marks' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'subjects.*.marks_obtained' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'include_certificate' => ['nullable', 'boolean'],
+            'include_marksheet' => ['nullable', 'boolean'],
         ]);
 
         $application->load(['user', 'course']);
@@ -255,6 +278,8 @@ class CertificateApplicationController extends Controller
         $certificate->status = 'issued';
         $certificate->issued_date = now();
         $certificate->source = $certificate->source ?: 'manual';
+        $certificate->include_certificate = $request->boolean('include_certificate', true);
+        $certificate->include_marksheet = $request->boolean('include_marksheet', true);
         $certificate->save();
 
         $this->syncSubjects($certificate, $validated['subjects'] ?? []);
@@ -295,17 +320,21 @@ class CertificateApplicationController extends Controller
             'subjects.*.subject' => ['nullable', 'string', 'max:255'],
             'subjects.*.max_marks' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'subjects.*.marks_obtained' => ['nullable', 'integer', 'min:0', 'max:1000'],
+            'include_certificate' => ['nullable', 'boolean'],
+            'include_marksheet' => ['nullable', 'boolean'],
         ]);
 
         $certificate->update([
             'roll_no' => $validated['roll_no'] ?? null,
             'father_name' => $validated['father_name'] ?? null,
             'batch_name' => $validated['batch_name'] ?? null,
+            'include_certificate' => $request->boolean('include_certificate', true),
+            'include_marksheet' => $request->boolean('include_marksheet', true),
         ]);
 
         $this->syncSubjects($certificate, $validated['subjects'] ?? []);
 
-        return back()->with('status', 'Marksheet updated.');
+        return back()->with('status', 'Documents updated.');
     }
 
     private function syncSubjects(Certificate $certificate, array $rows): void

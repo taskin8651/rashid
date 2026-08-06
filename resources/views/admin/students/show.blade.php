@@ -121,8 +121,13 @@
             </div>
             <div class="d-flex align-items-center gap-2">
               @if ($cert->status === 'issued')
-                <span style="font-size:11px;color:{{ $cert->subjects->isNotEmpty() ? 'var(--ok)' : 'var(--muted)' }}" title="Marksheet {{ $cert->subjects->isNotEmpty() ? 'ready' : 'not filled in yet' }}"><i class="bi bi-file-earmark-text-fill"></i></span>
-                <button class="action-btn" style="border:none;background:none" title="Edit Marksheet Details" data-bs-toggle="modal" data-bs-target="#certDocs{{ $cert->id }}"><i class="bi bi-pencil-square"></i></button>
+                @if ($cert->include_certificate)
+                  <span style="font-size:11px;color:var(--ok)" title="Certificate enabled"><i class="bi bi-award-fill"></i></span>
+                @endif
+                @if ($cert->include_marksheet)
+                  <span style="font-size:11px;color:{{ $cert->subjects->isNotEmpty() ? 'var(--ok)' : 'var(--muted)' }}" title="Marksheet {{ $cert->subjects->isNotEmpty() ? 'ready' : 'not filled in yet' }}"><i class="bi bi-file-earmark-text-fill"></i></span>
+                @endif
+                <button class="action-btn" style="border:none;background:none" title="Edit Certificate" data-bs-toggle="modal" data-bs-target="#certDocs{{ $cert->id }}"><i class="bi bi-pencil-square"></i></button>
               @endif
               <span class="badge-rt {{ $cert->status === 'issued' ? 'bg-active' : 'bg-pending' }}">{{ ucfirst($cert->status) }}</span>
             </div>
@@ -140,6 +145,20 @@
                         <div class="col-md-4"><label class="flbl">Roll No.</label><input class="fctrl" type="text" name="roll_no" value="{{ $cert->roll_no }}" /></div>
                         <div class="col-md-4"><label class="flbl">Father's Name</label><input class="fctrl" type="text" name="father_name" value="{{ $cert->father_name }}" /></div>
                         <div class="col-md-4"><label class="flbl">Batch</label><input class="fctrl" type="text" name="batch_name" value="{{ $cert->batch_name }}" /></div>
+                      </div>
+
+                      <label class="flbl mt-2">Documents to Generate</label>
+                      <div class="d-flex gap-3 mb-2">
+                        <div class="form-check">
+                          <input type="hidden" name="include_certificate" value="0">
+                          <input class="form-check-input" type="checkbox" name="include_certificate" value="1" id="showIncludeCert{{ $cert->id }}" {{ $cert->include_certificate ? 'checked' : '' }}>
+                          <label class="form-check-label" for="showIncludeCert{{ $cert->id }}">Certificate</label>
+                        </div>
+                        <div class="form-check">
+                          <input type="hidden" name="include_marksheet" value="0">
+                          <input class="form-check-input" type="checkbox" name="include_marksheet" value="1" id="showIncludeMarksheet{{ $cert->id }}" {{ $cert->include_marksheet ? 'checked' : '' }}>
+                          <label class="form-check-label" for="showIncludeMarksheet{{ $cert->id }}">Marksheet</label>
+                        </div>
                       </div>
 
                       <label class="flbl mt-2">Subjects &amp; Marks (for Marksheet)</label>

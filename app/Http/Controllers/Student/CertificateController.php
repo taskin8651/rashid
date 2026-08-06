@@ -37,7 +37,7 @@ class CertificateController extends Controller
 
             $certificate = Certificate::firstOrCreate(
                 ['user_id' => $user->id, 'course_id' => $enrollment->course_id],
-                ['cert_code' => Certificate::generateCode(), 'status' => 'pending']
+                ['cert_code' => Certificate::generateCode(), 'status' => 'pending', 'include_certificate' => true, 'include_marksheet' => true]
             );
 
             if ($percent >= 100 && $certificate->status !== 'issued') {
@@ -69,6 +69,7 @@ class CertificateController extends Controller
     {
         abort_unless($certificate->user_id === auth()->id(), 403);
         abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->include_certificate, 404);
 
         $filename = 'RTech-Certificate-' . $certificate->cert_code . '.pdf';
 
@@ -78,7 +79,7 @@ class CertificateController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
-        ])->setPaper([0, 0, 841.89, 561.26]);
+        ])->setPaper('a4', 'landscape');
 
         return $pdf->download($filename);
     }
@@ -87,6 +88,7 @@ class CertificateController extends Controller
     {
         abort_unless($certificate->user_id === auth()->id(), 403);
         abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->include_marksheet, 404);
         abort_unless($certificate->hasMarksheetData(), 404);
 
         $certificate->load(['user', 'course', 'subjects']);
@@ -116,17 +118,16 @@ class CertificateController extends Controller
     }
 
     private function verificationQrDataUri(Certificate $certificate): string
-{
-    $result = new Builder(
-        writer: new PngWriter(),
-        data: route('certificates.verify', ['code' => $certificate->cert_code]),
-        encoding: new Encoding('UTF-8'),
-        errorCorrectionLevel: ErrorCorrectionLevel::Low,
-        size: 300,
-        margin: 10,
-        roundBlockSizeMode: RoundBlockSizeMode::Margin
-    );
-
-    return $result->build()->getDataUri();
-}
+    {
+        return Builder::create()
+            ->writer(new PngWriter())
+            ->data(route('certificates.verify', ['code' => $certificate->cert_code]))
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(ErrorCorrectionLevel::Low)
+            ->size(300)
+            ->margin(10)
+            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+            ->build()
+            ->getDataUri();
+    }
 }

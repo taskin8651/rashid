@@ -12,11 +12,13 @@ class Certificate extends Model
     protected $fillable = [
         'user_id', 'course_id', 'student_name', 'student_email', 'student_phone',
         'course_name', 'course_duration_text', 'cert_code', 'roll_no', 'father_name',
-        'batch_name', 'issued_date', 'status', 'source',
+        'batch_name', 'issued_date', 'status', 'source', 'include_certificate', 'include_marksheet',
     ];
 
     protected $casts = [
         'issued_date' => 'date',
+        'include_certificate' => 'boolean',
+        'include_marksheet' => 'boolean',
     ];
 
     public function user()

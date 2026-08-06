@@ -22,8 +22,10 @@
               on {{ $row['certificate']->issued_date->format('d M Y') }} &middot; Cert No. {{ $row['certificate']->cert_code }}
             </div>
             <div class="d-flex gap-2 flex-wrap" style="margin-top:20px">
-              <a class="bcontinue" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;padding:11px 24px;margin:0" href="{{ route('student.certificates.download', $row['certificate']) }}"><i class="bi bi-download"></i>Download PDF</a>
-              @if ($row['certificate']->hasMarksheetData())
+              @if ($row['certificate']->include_certificate)
+                <a class="bcontinue" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;padding:11px 24px;margin:0" href="{{ route('student.certificates.download', $row['certificate']) }}"><i class="bi bi-download"></i>Download PDF</a>
+              @endif
+              @if ($row['certificate']->include_marksheet && $row['certificate']->hasMarksheetData())
                 <a class="bcontinue" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;padding:11px 24px;margin:0;background:rgba(255,255,255,.12)" href="{{ route('student.certificates.marksheet', $row['certificate']) }}"><i class="bi bi-file-earmark-text-fill"></i>Marksheet</a>
               @endif
               <a class="bcontinue" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto;padding:11px 24px;margin:0;background:rgba(255,255,255,.12)" href="{{ route('certificates.verify', ['code' => $row['certificate']->cert_code]) }}" target="_blank"><i class="bi bi-patch-check-fill"></i>Verify</a>
