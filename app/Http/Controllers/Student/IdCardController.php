@@ -28,7 +28,7 @@ class IdCardController extends Controller
         $pdf = Pdf::loadView('id-card.pdf', [
             'user' => $user,
             'course' => $enrollment?->course,
-        ])->setPaper([0, 0, 242.65, 153.07]); // CR80 card size in points (85.6mm x 53.98mm)
+        ])->setPaper([0, 0, 153.07, 242.65]); // CR80 card size in points, portrait (53.98mm x 85.6mm)
 
         $filename = 'RTech-ID-Card-' . $user->student_code . '.pdf';
 

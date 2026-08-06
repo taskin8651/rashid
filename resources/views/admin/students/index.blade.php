@@ -18,17 +18,34 @@
 
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">
-      <thead><tr><th>Student</th><th>Email</th><th>Course</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Student</th><th>Email</th><th>Phone</th><th>Courses</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
         @forelse ($students as $s)
           <tr>
-            <td><a href="{{ route('admin.students.show', $s) }}" style="color:var(--text);text-decoration:none;font-weight:600">{{ $s->name }}</a></td>
+            <td>
+              <a href="{{ route('admin.students.show', $s) }}" style="color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px">
+                @if ($s->photoUrl())
+                  <img src="{{ $s->photoUrl() }}" alt="{{ $s->name }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0">
+                @else
+                  <span style="width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($s->name, 0, 1)) }}</span>
+                @endif
+                <span style="font-weight:600">{{ $s->name }}</span>
+              </a>
+            </td>
             <td>{{ $s->email }}</td>
-            <td>{{ optional($s->enrollments->first())->course->name ?? '—' }}</td>
+            <td>{{ $s->phone ?? '—' }}</td>
+            <td>
+              @forelse ($s->enrollments as $e)
+                <span class="badge-rt bg-pending" style="margin:1px">{{ $e->course->name ?? '—' }}</span>
+              @empty
+                —
+              @endforelse
+            </td>
             <td>{{ $s->created_at->format('d M Y') }}</td>
             <td><span class="badge-rt {{ $s->is_active ? 'bg-active' : 'bg-inactive' }}">{{ $s->is_active ? 'Active' : 'Inactive' }}</span></td>
             <td>
               <a href="{{ route('admin.students.show', $s) }}" class="action-btn" title="View"><i class="bi bi-eye-fill"></i></a>
+              <button class="action-btn" style="border:none;background:none" title="Edit Profile" data-bs-toggle="modal" data-bs-target="#editStudent{{ $s->id }}"><i class="bi bi-pencil-fill"></i></button>
               <button class="action-btn" style="border:none;background:none" title="Allot Course" data-bs-toggle="modal" data-bs-target="#allotCourse{{ $s->id }}"><i class="bi bi-mortarboard-fill"></i></button>
               <form method="POST" action="{{ route('admin.students.destroy', $s) }}" onsubmit="return confirm('Delete this student? This cannot be undone.')" class="d-inline">
                 @csrf @method('DELETE')
@@ -36,6 +53,63 @@
               </form>
             </td>
           </tr>
+
+          <!-- Edit Student Modal -->
+          <div class="modal fade" id="editStudent{{ $s->id }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Profile — {{ $s->name }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                <form method="POST" action="{{ route('admin.students.update', $s) }}" enctype="multipart/form-data">
+                  @csrf
+                  <div class="modal-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                      @if ($s->photoUrl())
+                        <img src="{{ $s->photoUrl() }}" alt="{{ $s->name }}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0">
+                      @else
+                        <span style="width:56px;height:56px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0">{{ strtoupper(substr($s->name, 0, 1)) }}</span>
+                      @endif
+                      <div class="flex-grow-1">
+                        <label class="flbl">Profile Photo</label>
+                        <input class="fctrl" type="file" name="photo" accept="image/*"/>
+                      </div>
+                    </div>
+                    <div class="mb-3"><label class="flbl">Full Name</label><input class="fctrl" name="name" value="{{ $s->name }}" required/></div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-6"><label class="flbl">Email</label><input class="fctrl" type="email" name="email" value="{{ $s->email }}" required/></div>
+                      <div class="col-6"><label class="flbl">Phone</label><input class="fctrl" name="phone" value="{{ $s->phone }}"/></div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-6"><label class="flbl">Date of Birth</label><input class="fctrl" type="date" name="date_of_birth" value="{{ optional($s->date_of_birth)->format('Y-m-d') }}"/></div>
+                      <div class="col-6">
+                        <label class="flbl">Blood Group</label>
+                        <select class="fctrl" name="blood_group">
+                          <option value="">Select</option>
+                          @foreach (['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
+                            <option value="{{ $bg }}" @selected($s->blood_group === $bg)>{{ $bg }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                    </div>
+                    <div class="mb-3"><label class="flbl">Address</label><textarea class="fctrl" name="address" rows="2">{{ $s->address }}</textarea></div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-6"><label class="flbl">Guardian / Father's Name</label><input class="fctrl" name="guardian_name" value="{{ $s->guardian_name }}"/></div>
+                      <div class="col-6"><label class="flbl">Emergency Contact</label><input class="fctrl" name="emergency_contact" value="{{ $s->emergency_contact }}"/></div>
+                    </div>
+                    <p style="font-size:11px;color:var(--muted)">Student ID: {{ $s->student_code ?? 'Not yet issued' }}</p>
+                    <div class="form-check">
+                      <input type="hidden" name="is_active" value="0">
+                      <input class="form-check-input" type="checkbox" name="is_active" value="1" id="editActive{{ $s->id }}" {{ $s->is_active ? 'checked' : '' }}>
+                      <label class="form-check-label" for="editActive{{ $s->id }}">Active</label>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="bsave">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
 
           <!-- Allot Course Modal -->
           <div class="modal fade" id="allotCourse{{ $s->id }}" tabindex="-1">
@@ -81,7 +155,7 @@
             </div>
           </div>
         @empty
-          <tr><td colspan="6" style="color:var(--muted)">No students found.</td></tr>
+          <tr><td colspan="7" style="color:var(--muted)">No students found.</td></tr>
         @endforelse
       </tbody>
     </table></div>

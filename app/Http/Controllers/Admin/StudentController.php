@@ -217,7 +217,7 @@ class StudentController extends Controller
         $pdf = Pdf::loadView('id-card.pdf', [
             'user' => $student,
             'course' => $enrollment?->course,
-        ])->setPaper([0, 0, 242.65, 153.07]);
+        ])->setPaper([0, 0, 153.07, 242.65]);
 
         $filename = 'RTech-ID-Card-' . $student->student_code . '.pdf';
 
@@ -226,14 +226,29 @@ class StudentController extends Controller
 
     public function update(Request $request, User $student)
     {
+        abort_unless($student->hasRole('student'), 404);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($student->id)],
             'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
+            'date_of_birth' => ['nullable', 'date'],
+            'guardian_name' => ['nullable', 'string', 'max:255'],
+            'blood_group' => ['nullable', 'string', 'max:5'],
+            'emergency_contact' => ['nullable', 'string', 'max:20'],
             'is_active' => ['boolean'],
+            'photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
+        $photo = $request->hasFile('photo');
+        unset($validated['photo']);
+
         $student->update($validated);
+
+        if ($photo) {
+            $student->addMediaFromRequest('photo')->toMediaCollection('photo');
+        }
 
         return back()->with('status', 'Student updated.');
     }
