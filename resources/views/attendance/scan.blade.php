@@ -24,7 +24,7 @@
             <i class="bi bi-check-circle-fill"></i>
             <div>
               <div class="att-marked-title">Punched In</div>
-              <div class="att-marked-sub">{{ $today->marked_at->format('h:i A') }} via {{ strtoupper($today->method) }}</div>
+              <div class="att-marked-sub">{{ $today->marked_at->format('h:i:s A') }} via {{ strtoupper($today->method) }}</div>
             </div>
           </div>
         @endif
@@ -48,6 +48,7 @@
             <input type="hidden" name="method" value="gps">
             <input type="hidden" name="latitude" id="gpsLat">
             <input type="hidden" name="longitude" id="gpsLng">
+            <input type="hidden" name="accuracy" id="gpsAcc">
             <button type="button" class="btn-enr w-100 justify-content-center" style="padding:14px" id="gpsBtn"><i class="bi bi-geo-alt-fill me-2"></i>{{ $today ? 'Punch Out (GPS)' : 'Punch In (GPS)' }}</button>
           </form>
           <p id="gpsStatus" style="font-size:12px;color:var(--muted);margin-top:10px"></p>
@@ -62,7 +63,7 @@
             <input type="hidden" name="method" value="wifi">
             <label class="fl">Institute WiFi Network Name</label>
             <input class="mi mb-3" type="text" name="wifi_ssid" placeholder="Check your phone's WiFi settings" required>
-            <button class="btn-enr w-100 justify-content-center" type="submit"><i class="bi bi-wifi me-2"></i>{{ $today ? 'Punch Out (WiFi)' : 'Punch In (WiFi)' }}</button>
+            <button class="btn-enr w-100 justify-content-center" type="submit" id="wifiBtn"><i class="bi bi-wifi me-2"></i>{{ $today ? 'Punch Out (WiFi)' : 'Punch In (WiFi)' }}</button>
           </form>
         @endif
       </div>
@@ -82,19 +83,39 @@
         }
         gpsBtn.disabled = true;
         statusEl.textContent = 'Getting your location…';
+
+        const errorMessages = {
+          1: 'Location permission denied. Please allow location access in your browser settings, or use the WiFi option instead.',
+          2: 'Could not determine your location — weak GPS signal. Try moving near a window or outdoors, or use the WiFi option instead.',
+          3: 'Location request timed out. Please try again, or use the WiFi option instead.',
+        };
+
         navigator.geolocation.getCurrentPosition(
           (position) => {
             document.getElementById('gpsLat').value = position.coords.latitude;
             document.getElementById('gpsLng').value = position.coords.longitude;
+            document.getElementById('gpsAcc').value = position.coords.accuracy;
             statusEl.textContent = 'Location found, marking attendance…';
             document.getElementById('gpsForm').submit();
           },
-          () => {
+          (err) => {
             gpsBtn.disabled = false;
-            statusEl.textContent = 'Location permission denied. Please allow location access, or use the WiFi option instead.';
+            statusEl.textContent = errorMessages[err.code] || 'Could not get your location. Please use the WiFi option instead.';
           },
-          { enableHighAccuracy: true, timeout: 10000 }
+          // maximumAge lets the browser reuse a recent fix (up to 30s old)
+          // instead of forcing a brand-new cold GPS lock every single time —
+          // that cold lock is what was timing out indoors/on weak signal.
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
         );
+      });
+    }
+
+    // Prevents a second tap (nervous double-tap on a slow connection) from
+    // firing a second request while the first is still in flight.
+    const wifiForm = document.getElementById('wifiForm');
+    if (wifiForm) {
+      wifiForm.addEventListener('submit', () => {
+        document.getElementById('wifiBtn').disabled = true;
       });
     }
   </script>

@@ -77,11 +77,18 @@ class AttendanceLocation extends Model
         return (int) round($earthRadius * $c);
     }
 
-    public function isWithinRadius(float $lat, float $lng): bool
+    /**
+     * $accuracyBuffer extends the geofence by the phone's own reported GPS
+     * accuracy (capped by the caller) — a hard cutoff at radius_meters with
+     * no tolerance was rejecting genuine students whenever their phone's GPS
+     * fix simply wasn't precise, which was disproportionately common at
+     * check-out time (rushed, often further from the anchor point).
+     */
+    public function isWithinRadius(float $lat, float $lng, float $accuracyBuffer = 0): bool
     {
         $distance = $this->distanceTo($lat, $lng);
 
-        return $distance !== null && $distance <= $this->radius_meters;
+        return $distance !== null && $distance <= ($this->radius_meters + $accuracyBuffer);
     }
 
     public function matchesWifi(string $ssid): bool

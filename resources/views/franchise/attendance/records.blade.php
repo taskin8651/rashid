@@ -41,10 +41,10 @@
               <td>{{ $a->user->name }}</td>
               <td>{{ $a->location->name }}</td>
               <td>{{ $a->date->format('d M Y') }}</td>
-              <td>{{ $a->marked_at->format('h:i A') }} <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
+              <td>{{ $a->marked_at->format('h:i:s A') }} <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
               <td>
                 @if ($a->isPunchedOut())
-                  {{ $a->check_out_at->format('h:i A') }} <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span>
+                  {{ $a->check_out_at->format('h:i:s A') }} <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span>
                 @else
                   <span style="color:var(--muted)">—</span>
                 @endif

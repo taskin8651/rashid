@@ -11,10 +11,10 @@ class Attendance extends Model
 
     protected $fillable = [
         'user_id', 'attendance_location_id', 'date', 'marked_at',
-        'method', 'latitude', 'longitude', 'distance_meters', 'wifi_ssid',
+        'method', 'latitude', 'longitude', 'distance_meters', 'accuracy_meters', 'wifi_ssid',
         'device', 'ip_address',
         'check_out_at', 'check_out_method', 'check_out_latitude', 'check_out_longitude',
-        'check_out_distance_meters', 'check_out_wifi_ssid',
+        'check_out_distance_meters', 'check_out_accuracy_meters', 'check_out_wifi_ssid',
         'check_out_device', 'check_out_ip_address',
     ];
 

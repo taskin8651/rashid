@@ -36,10 +36,10 @@
             <td>{{ $a->user->name }}</td>
             <td>{{ $a->location->name }}</td>
             <td>{{ $a->date->format('d M Y') }}</td>
-            <td>{{ $a->marked_at->format('h:i A') }} <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
+            <td>{{ $a->marked_at->format('h:i:s A') }} <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></td>
             <td>
               @if ($a->isPunchedOut())
-                {{ $a->check_out_at->format('h:i A') }} <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span>
+                {{ $a->check_out_at->format('h:i:s A') }} <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span>
               @else
                 <span style="color:var(--muted)">—</span>
               @endif
@@ -98,9 +98,9 @@
                     <div class="col-md-6">
                       <div class="card-rt" style="padding:14px">
                         <h6 style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:10px"><i class="bi bi-box-arrow-in-right me-1"></i>Punch In</h6>
-                        <div style="font-size:13px;margin-bottom:4px">Time: <b>{{ $a->marked_at->format('h:i A') }}</b> <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></div>
+                        <div style="font-size:13px;margin-bottom:4px">Time: <b>{{ $a->marked_at->format('h:i:s A') }}</b> <span class="badge-rt {{ $a->method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->method) }}</span></div>
                         @if ($a->method === 'gps')
-                          <div style="font-size:13px;margin-bottom:4px">Distance: <b>{{ $a->distance_meters }}m</b> from {{ $a->location->name }}</div>
+                          <div style="font-size:13px;margin-bottom:4px">Distance: <b>{{ $a->distance_meters }}m</b> from {{ $a->location->name }}@if ($a->accuracy_meters) <span style="color:var(--muted)">(GPS accuracy &plusmn;{{ $a->accuracy_meters }}m)</span>@endif</div>
                         @else
                           <div style="font-size:13px;margin-bottom:4px">WiFi: <b>{{ $a->wifi_ssid }}</b></div>
                         @endif
@@ -112,9 +112,9 @@
                       <div class="card-rt" style="padding:14px">
                         <h6 style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:10px"><i class="bi bi-box-arrow-right me-1"></i>Punch Out</h6>
                         @if ($a->isPunchedOut())
-                          <div style="font-size:13px;margin-bottom:4px">Time: <b>{{ $a->check_out_at->format('h:i A') }}</b> <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span></div>
+                          <div style="font-size:13px;margin-bottom:4px">Time: <b>{{ $a->check_out_at->format('h:i:s A') }}</b> <span class="badge-rt {{ $a->check_out_method === 'gps' ? 'bg-active' : 'bg-pending' }}">{{ strtoupper($a->check_out_method) }}</span></div>
                           @if ($a->check_out_method === 'gps')
-                            <div style="font-size:13px;margin-bottom:4px">Distance: <b>{{ $a->check_out_distance_meters }}m</b> from {{ $a->location->name }}</div>
+                            <div style="font-size:13px;margin-bottom:4px">Distance: <b>{{ $a->check_out_distance_meters }}m</b> from {{ $a->location->name }}@if ($a->check_out_accuracy_meters) <span style="color:var(--muted)">(GPS accuracy &plusmn;{{ $a->check_out_accuracy_meters }}m)</span>@endif</div>
                           @else
                             <div style="font-size:13px;margin-bottom:4px">WiFi: <b>{{ $a->check_out_wifi_ssid }}</b></div>
                           @endif
