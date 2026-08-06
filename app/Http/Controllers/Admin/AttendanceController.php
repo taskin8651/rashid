@@ -15,16 +15,28 @@ class AttendanceController extends Controller
         $locationId = $request->query('location');
         $date = $request->query('date');
 
-        $attendances = Attendance::with(['user', 'location'])
+        $filtered = fn () => Attendance::query()
             ->when($locationId, fn ($q) => $q->where('attendance_location_id', $locationId))
-            ->when($date, fn ($q) => $q->whereDate('date', $date))
+            ->when($date, fn ($q) => $q->whereDate('date', $date));
+
+        $attendances = $filtered()
+            ->with(['user', 'location'])
             ->latest('marked_at')
             ->paginate(30)
             ->withQueryString();
 
         $locations = AttendanceLocation::orderBy('name')->get();
 
-        return view('admin.attendance.index', compact('attendances', 'locations', 'locationId', 'date'));
+        $stats = [
+            'total' => $filtered()->count(),
+            'still_in' => $filtered()->whereNull('check_out_at')->count(),
+            'completed' => $filtered()->whereNotNull('check_out_at')->count(),
+            'avg_duration_minutes' => $filtered()->whereNotNull('check_out_at')
+                ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, marked_at, check_out_at)) as avg_min')
+                ->value('avg_min'),
+        ];
+
+        return view('admin.attendance.index', compact('attendances', 'locations', 'locationId', 'date', 'stats'));
     }
 
     public function export(Request $request)

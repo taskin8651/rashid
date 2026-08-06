@@ -197,6 +197,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var
 .notif-view-all{display:block;text-align:center;padding:12px;font-size:12px;font-weight:600;color:var(--orange);text-decoration:none}
 .notif-view-all:hover{background:rgba(var(--text-rgb),.04)}
 
+/* ── ATTENDANCE (premium detail view) ── */
+.att-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.att-avatar-ph{width:34px;height:34px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.att-avatar-lg{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,.4)}
+.att-avatar-lg-ph{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex-shrink:0}
+
+.att-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(var(--text-rgb),.05);color:var(--muted);margin:2px 6px 2px 0}
+.att-pill i{font-size:11px}
+.att-meta-row{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px}
+
+.att-stepper{display:flex;flex-direction:column;gap:0}
+.att-step{display:flex;gap:14px;position:relative;padding-bottom:18px}
+.att-step:last-child{padding-bottom:0}
+.att-step::before{content:'';position:absolute;left:19px;top:42px;bottom:-2px;width:2px;background:var(--border)}
+.att-step:last-child::before{display:none}
+.att-step-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;flex-shrink:0;position:relative;z-index:1;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.att-step-icon.in{background:linear-gradient(135deg,#16a34a,#22c55e)}
+.att-step-icon.out{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.att-step-icon.pending{background:rgba(var(--text-rgb),.08);color:var(--muted);box-shadow:none}
+.att-step-body{flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;min-width:0}
+.att-step-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
+.att-step-time{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+
+.att-map-card{border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:20px}
+.att-map-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(var(--text-rgb),.03);border-bottom:1px solid var(--border)}
+.att-map-head h6{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:0}
+.att-legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 16px;background:rgba(var(--text-rgb),.02)}
+.att-legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.att-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.att-pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.35);border:2px solid #fff}
+.att-pin i{transform:rotate(45deg);color:#fff;font-size:13px}
+
 @media(max-width:768px){
   .sb{transform:translateX(-100%)}
   .sb.open{transform:translateX(0)}

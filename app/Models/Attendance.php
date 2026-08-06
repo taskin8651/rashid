@@ -112,8 +112,11 @@ class Attendance extends Model
 
     public function durationLabel(): ?string
     {
-        $minutes = $this->durationMinutes();
+        return self::formatMinutes($this->durationMinutes());
+    }
 
+    public static function formatMinutes(?int $minutes): ?string
+    {
         if ($minutes === null) {
             return null;
         }
