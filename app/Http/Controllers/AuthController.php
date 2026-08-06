@@ -21,7 +21,10 @@ class AuthController extends Controller
 
         $user = User::where('email', $credentials['email'])->first();
 
-        if (!$user || !Auth::attempt($credentials)) {
+        // Always "remember" — the webapp is reopened after long gaps (a day,
+        // a week), and a plain session-only login was forcing every user
+        // back to the login screen each time it did.
+        if (!$user || !Auth::attempt($credentials, true)) {
             return back()->withErrors(['login' => 'Invalid credentials.'])->withInput();
         }
 
@@ -81,7 +84,7 @@ class AuthController extends Controller
             }
         }
 
-        Auth::login($user);
+        Auth::login($user, true);
         $request->session()->regenerate();
 
         return redirect()->intended(route('student.dashboard'))->with('status', 'Account created successfully!');
