@@ -24,6 +24,43 @@
     </div>
   </div>
 
+  <div class="card-rt mb-3" style="padding:16px 20px">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h6 style="font-size:13px;font-weight:700;margin-bottom:6px"><i class="bi bi-link-45deg me-1"></i>HQ Enquiry Form Link</h6>
+        <div class="d-flex gap-2" style="max-width:480px">
+          <input class="fctrl copy-src" type="text" readonly value="{{ route('leads.apply') }}">
+          <button type="button" class="bghost copy-btn" style="flex-shrink:0" title="Copy"><i class="bi bi-clipboard"></i></button>
+        </div>
+      </div>
+      <button class="bghost" type="button" data-bs-toggle="collapse" data-bs-target="#franchiseLinks">Franchise Links &amp; Webhooks <i class="bi bi-chevron-down ms-1"></i></button>
+    </div>
+    <div class="collapse mt-3" id="franchiseLinks">
+      <hr style="border-color:var(--border)">
+      @forelse ($bookings as $b)
+        <div class="row g-2 align-items-center mb-2">
+          <div class="col-12" style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">{{ $b->city }}</div>
+          <div class="col-md-6">
+            <label class="flbl">Enquiry Form Link</label>
+            <div class="d-flex gap-2">
+              <input class="fctrl copy-src" type="text" readonly value="{{ $b->leadFormUrl() }}">
+              <button type="button" class="bghost copy-btn" style="flex-shrink:0" title="Copy"><i class="bi bi-clipboard"></i></button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="flbl">Webhook URL</label>
+            <div class="d-flex gap-2">
+              <input class="fctrl copy-src" type="text" readonly value="{{ $b->leadWebhookUrl() }}">
+              <button type="button" class="bghost copy-btn" style="flex-shrink:0" title="Copy"><i class="bi bi-clipboard"></i></button>
+            </div>
+          </div>
+        </div>
+      @empty
+        <p style="font-size:12px;color:var(--muted);margin:0">No paid franchises yet.</p>
+      @endforelse
+    </div>
+  </div>
+
   <div class="d-flex gap-2 mb-3 flex-wrap">
     <a href="{{ route('admin.leads.index') }}" class="badge-rt {{ !$status ? 'bg-active' : 'bg-inactive' }}" style="text-decoration:none">All ({{ $counts->sum() }})</a>
     @foreach (\App\Models\StudentLead::STATUSES as $s)
@@ -127,4 +164,19 @@
       </div>
     </div>
   @endcan
+@endsection
+
+@section('scripts')
+  <script>
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const input = btn.closest('.d-flex').querySelector('.copy-src');
+        navigator.clipboard.writeText(input.value).then(function () {
+          const icon = btn.querySelector('i');
+          icon.className = 'bi bi-check-lg';
+          setTimeout(function () { icon.className = 'bi bi-clipboard'; }, 1500);
+        });
+      });
+    });
+  </script>
 @endsection

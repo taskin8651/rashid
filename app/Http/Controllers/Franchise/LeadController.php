@@ -78,6 +78,7 @@ class LeadController extends Controller
         $canManage = $manageableIds->isNotEmpty();
         $courses = Course::whereIn('franchise_booking_id', $manageableIds)->where('status', 'active')->orderBy('name')->get();
         $bookings = $request->user()->accessibleFranchiseBookingsQuery()->whereIn('id', $manageableIds)->get();
+        $bookings->each->ensureLeadFormToken();
         $staff = $this->staffFor($manageableIds);
 
         return view('franchise.leads.index', [

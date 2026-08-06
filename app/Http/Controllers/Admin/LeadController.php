@@ -35,6 +35,7 @@ class LeadController extends Controller
         $counts = StudentLead::selectRaw('status, count(*) as c')->groupBy('status')->pluck('c', 'status');
         $courses = Course::where('status', 'active')->orderBy('name')->get();
         $bookings = FranchiseBooking::where('status', 'paid')->orderBy('city')->get();
+        $bookings->each->ensureLeadFormToken();
         $staff = User::role('admin')->orderBy('name')->get();
 
         return view('admin.leads.index', [

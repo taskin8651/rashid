@@ -32,6 +32,7 @@ use App\Http\Controllers\CertificateVerificationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\LeadCaptureController;
 use App\Http\Controllers\Franchise\AttendanceController as FranchiseAttendanceController;
 use App\Http\Controllers\Franchise\CertificateController as FranchiseCertificateController;
 use App\Http\Controllers\Franchise\CourseAssignmentController as FranchiseCourseAssignmentController;
@@ -128,6 +129,9 @@ Route::get('/about', [PageController::class, 'about'])->name('about');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.submit')->middleware('throttle:5,1');
+
+Route::get('/leads/apply/{token?}', [LeadCaptureController::class, 'show'])->name('leads.apply');
+Route::post('/leads/apply', [LeadCaptureController::class, 'store'])->name('leads.apply.submit')->middleware('throttle:10,1');
 
 Route::get('/franchise', [FranchiseController::class, 'index'])->name('franchise');
 Route::get('/franchises/{franchiseBooking}', [FranchiseController::class, 'show'])->name('franchises.show');

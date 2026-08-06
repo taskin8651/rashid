@@ -19,6 +19,34 @@
     @endif
   </div>
 
+  @if ($canManage && $bookings->isNotEmpty())
+    <div class="card-rt mb-3" style="padding:16px 20px">
+      <h6 style="font-size:13px;font-weight:700;margin-bottom:10px"><i class="bi bi-link-45deg me-1"></i>Auto Lead Capture</h6>
+      @foreach ($bookings as $b)
+        <div class="row g-2 align-items-center mb-2">
+          @if ($bookings->count() > 1)
+            <div class="col-12" style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">{{ $b->city }}</div>
+          @endif
+          <div class="col-md-6">
+            <label class="flbl">Enquiry Form Link — share in WhatsApp ads/bio</label>
+            <div class="d-flex gap-2">
+              <input class="fctrl copy-src" type="text" readonly value="{{ $b->leadFormUrl() }}">
+              <button type="button" class="bghost copy-btn" style="flex-shrink:0" title="Copy"><i class="bi bi-clipboard"></i></button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="flbl">Webhook URL — paste into Zapier/Interakt/WATI etc.</label>
+            <div class="d-flex gap-2">
+              <input class="fctrl copy-src" type="text" readonly value="{{ $b->leadWebhookUrl() }}">
+              <button type="button" class="bghost copy-btn" style="flex-shrink:0" title="Copy"><i class="bi bi-clipboard"></i></button>
+            </div>
+          </div>
+        </div>
+      @endforeach
+      <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Leads submitted through the form link, or pushed in via the webhook from any tool you connect (WhatsApp Business tool, Zapier, Meta Lead Ads, etc.), land here automatically.</p>
+    </div>
+  @endif
+
   <div class="d-flex gap-2 mb-3 flex-wrap">
     <a href="{{ route('franchise.leads.index') }}" class="badge-rt {{ !$status ? 'bg-active' : 'bg-inactive' }}" style="text-decoration:none">All ({{ $counts->sum() }})</a>
     @foreach (\App\Models\StudentLead::STATUSES as $s)
@@ -113,4 +141,19 @@
       </div>
     </div>
   @endif
+@endsection
+
+@section('scripts')
+  <script>
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const input = btn.closest('.d-flex').querySelector('.copy-src');
+        navigator.clipboard.writeText(input.value).then(function () {
+          const icon = btn.querySelector('i');
+          icon.className = 'bi bi-check-lg';
+          setTimeout(function () { icon.className = 'bi bi-clipboard'; }, 1500);
+        });
+      });
+    });
+  </script>
 @endsection

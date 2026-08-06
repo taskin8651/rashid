@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\FranchiseController;
+use App\Http\Controllers\Api\LeadWebhookController;
 use App\Http\Controllers\Api\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Api\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Api\Student\PaymentController as StudentPaymentController;
@@ -35,6 +36,8 @@ Route::get('/courses/{slug}', [CourseController::class, 'show']);
 
 Route::post('/coupons/validate', [CouponController::class, 'validateCode']);
 Route::post('/contact', [ContactController::class, 'submit'])->middleware('throttle:10,1');
+
+Route::post('/leads/webhook/{token}', [LeadWebhookController::class, 'store'])->middleware('throttle:60,1');
 
 Route::post('/franchise/inquiry', [FranchiseController::class, 'inquiry'])->middleware('throttle:10,1');
 Route::post('/franchise/booking/create-order', [FranchiseController::class, 'bookingCreateOrder']);

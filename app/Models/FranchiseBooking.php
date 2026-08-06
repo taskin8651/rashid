@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class FranchiseBooking extends Model
 {
@@ -18,7 +19,7 @@ class FranchiseBooking extends Model
         'launched' => 'Launched',
     ];
 
-    protected $fillable = ['franchise_lead_id', 'user_id', 'name', 'email', 'phone', 'city', 'amount', 'status', 'stage'];
+    protected $fillable = ['franchise_lead_id', 'user_id', 'name', 'email', 'phone', 'city', 'amount', 'status', 'stage', 'lead_form_token'];
 
     protected $casts = [
         'amount' => 'decimal:2',
@@ -62,6 +63,25 @@ class FranchiseBooking extends Model
     public function attendanceLocation()
     {
         return $this->hasOne(AttendanceLocation::class);
+    }
+
+    public function ensureLeadFormToken(): string
+    {
+        if (!$this->lead_form_token) {
+            $this->forceFill(['lead_form_token' => (string) Str::uuid()])->save();
+        }
+
+        return $this->lead_form_token;
+    }
+
+    public function leadFormUrl(): string
+    {
+        return route('leads.apply', $this->lead_form_token);
+    }
+
+    public function leadWebhookUrl(): string
+    {
+        return url('/api/leads/webhook/' . $this->lead_form_token);
     }
 
     public function stageLabel(): string
