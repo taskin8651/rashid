@@ -107,19 +107,24 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
-     * The course shown alongside this student's public profile — their most
-     * recent paid/completed enrollment, since a student may have several.
+     * The enrollment shown alongside this student's public profile — their
+     * most recent paid/completed one, since a student may have several.
      */
-    public function featuredCourse(): ?Course
+    public function featuredEnrollment(): ?Enrollment
     {
         if ($this->relationLoaded('enrollments')) {
             return $this->enrollments
                 ->whereIn('status', ['paid', 'completed'])
                 ->sortByDesc('enrolled_at')
-                ->first()?->course;
+                ->first();
         }
 
-        return $this->enrollments()->whereIn('status', ['paid', 'completed'])->latest('enrolled_at')->first()?->course;
+        return $this->enrollments()->whereIn('status', ['paid', 'completed'])->latest('enrolled_at')->first();
+    }
+
+    public function featuredCourse(): ?Course
+    {
+        return $this->featuredEnrollment()?->course;
     }
 
     public function franchiseBookings()

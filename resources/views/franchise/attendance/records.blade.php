@@ -5,7 +5,10 @@
 @section('content')
   <div class="shead d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div><h4>Attendance Records</h4><p>Check-ins from your students</p></div>
-    <a href="{{ route('franchise.attendance.manage') }}" class="bghost" style="text-decoration:none"><i class="bi bi-geo-alt-fill me-1"></i>Manage QR &amp; Location</a>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ route('franchise.attendance.export', request()->query()) }}" class="bghost" style="text-decoration:none"><i class="bi bi-download me-1"></i>Export CSV</a>
+      <a href="{{ route('franchise.attendance.manage') }}" class="bghost" style="text-decoration:none"><i class="bi bi-geo-alt-fill me-1"></i>Manage QR &amp; Location</a>
+    </div>
   </div>
 
   @if ($locations->isEmpty())

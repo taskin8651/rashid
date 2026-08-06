@@ -10,7 +10,10 @@
 @section('content')
   <div class="shead d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <div><h4>Expenses</h4><p>Your institute's income, expenses and net profit</p></div>
-    <button class="bsave" data-bs-toggle="modal" data-bs-target="#addExpense"><i class="bi bi-plus-lg me-1"></i>Add Expense</button>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ route('franchise.expenses.export') }}" class="bghost" style="text-decoration:none;font-size:14px;padding:11px 20px"><i class="bi bi-download me-1"></i>Export CSV</a>
+      <button class="bsave" data-bs-toggle="modal" data-bs-target="#addExpense"><i class="bi bi-plus-lg me-1"></i>Add Expense</button>
+    </div>
   </div>
 
   <div class="row g-3 mb-4">

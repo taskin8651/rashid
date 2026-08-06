@@ -5,15 +5,18 @@
 @section('content')
   <div class="shead d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div><h4>My Students</h4><p>Students enrolled in your courses</p></div>
-    @if ($canManage)
-      <button class="bsave" data-bs-toggle="modal" data-bs-target="#offlineEnroll"><i class="bi bi-person-plus-fill me-1"></i>Register Offline Student</button>
-    @endif
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ route('franchise.students.export') }}" class="bghost" style="text-decoration:none;font-size:14px;padding:11px 20px"><i class="bi bi-download me-1"></i>Export CSV</a>
+      @if ($canManage)
+        <button class="bsave" data-bs-toggle="modal" data-bs-target="#offlineEnroll"><i class="bi bi-person-plus-fill me-1"></i>Register Offline Student</button>
+      @endif
+    </div>
   </div>
 
   <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden">
     <div class="prow" style="background:rgba(var(--text-rgb),.03);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase">
       <div style="flex:2">Student</div><div style="flex:2">Course</div><div style="flex:1">Enrolled</div><div style="flex:2">Fee / Paid / Balance</div>
-      @if ($canManage)<div style="flex:1;text-align:right">Actions</div>@endif
+      <div style="flex:1;text-align:right">Actions</div>
     </div>
     @forelse ($students as $enrollment)
       <div class="prow">
@@ -24,11 +27,14 @@
           <div>Fee: <b>₹{{ number_format($enrollment->final_amount, 0) }}</b> &middot; Paid: <b style="color:var(--ok)">₹{{ number_format($enrollment->amount_paid, 0) }}</b></div>
           <div>Balance: <b style="color:{{ $enrollment->balance_due > 0 ? 'var(--danger)' : 'var(--ok)' }}">₹{{ number_format($enrollment->balance_due, 0) }}</b></div>
         </div>
-        @if ($canManage)
-          <div style="flex:1;text-align:right">
+        <div style="flex:1;text-align:right">
+          <a href="{{ route('franchise.students.show', $enrollment->user) }}" class="action-btn" title="View Profile"><i class="bi bi-eye-fill"></i></a>
+          @if ($canManage)
             <button class="action-btn" data-bs-toggle="modal" data-bs-target="#feePay{{ $enrollment->id }}" title="Record Payment"><i class="bi bi-cash-coin"></i></button>
             <button class="action-btn" data-bs-toggle="modal" data-bs-target="#allotCourse{{ $enrollment->user_id }}" title="Allot Another Course"><i class="bi bi-mortarboard-fill"></i></button>
-          </div>
+          @endif
+        </div>
+        @if ($canManage)
 
           <div class="modal fade" id="allotCourse{{ $enrollment->user_id }}" tabindex="-1">
             <div class="modal-dialog">

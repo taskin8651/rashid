@@ -9,6 +9,7 @@ use App\Models\Enrollment;
 use App\Models\Expense;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -115,5 +116,36 @@ class ExpenseController extends Controller
         abort_unless($expense->receipt_path, 404);
 
         return Storage::disk('local')->download($expense->receipt_path);
+    }
+
+    public function export(Request $request)
+    {
+        $this->authorizeAnyFranchisePermission($request, 'manage-expenses');
+
+        $bookingIds = $this->permittedBookingIds($request);
+
+        $expenses = Expense::with(['franchiseBooking', 'recordedBy'])
+            ->whereIn('franchise_booking_id', $bookingIds)
+            ->latest('expense_date')
+            ->get();
+
+        $rows = ["Date,Category,Title,Franchise,Amount,Method,Recorded By,Note\n"];
+        foreach ($expenses as $e) {
+            $rows[] = implode(',', [
+                $e->expense_date->format('Y-m-d'),
+                ucfirst($e->category),
+                '"' . str_replace('"', '""', $e->title) . '"',
+                '"' . str_replace('"', '""', $e->franchiseBooking->city ?? 'Head Office') . '"',
+                $e->amount,
+                $e->method ?? '—',
+                '"' . str_replace('"', '""', $e->recordedBy->name ?? '—') . '"',
+                '"' . str_replace('"', '""', $e->note ?? '') . '"',
+            ]) . "\n";
+        }
+
+        return Response::make(implode('', $rows), 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="expenses-' . now()->format('Y-m-d') . '.csv"',
+        ]);
     }
 }

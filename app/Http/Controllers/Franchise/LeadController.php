@@ -11,6 +11,7 @@ use App\Models\FranchiseTeamMember;
 use App\Models\StudentLead;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
 
 class LeadController extends Controller
@@ -232,5 +233,36 @@ class LeadController extends Controller
         $lead->delete();
 
         return redirect()->route('franchise.leads.index')->with('status', 'Lead deleted.');
+    }
+
+    public function export(Request $request)
+    {
+        $this->authorizeAnyFranchisePermission($request, 'manage-leads');
+
+        $bookingIds = $this->manageableBookingIds($request);
+
+        $leads = StudentLead::with(['course', 'franchiseBooking'])
+            ->whereIn('franchise_booking_id', $bookingIds)
+            ->latest()
+            ->get();
+
+        $rows = ["Name,Phone,Email,Course,Franchise,Source,Status,Received\n"];
+        foreach ($leads as $l) {
+            $rows[] = implode(',', [
+                '"' . str_replace('"', '""', $l->name) . '"',
+                $l->phone,
+                $l->email ?? '—',
+                '"' . str_replace('"', '""', $l->course->name ?? '—') . '"',
+                '"' . str_replace('"', '""', $l->franchiseBooking->city ?? 'Head Office') . '"',
+                $l->source,
+                $l->status,
+                $l->created_at->format('Y-m-d'),
+            ]) . "\n";
+        }
+
+        return Response::make(implode('', $rows), 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="leads-' . now()->format('Y-m-d') . '.csv"',
+        ]);
     }
 }

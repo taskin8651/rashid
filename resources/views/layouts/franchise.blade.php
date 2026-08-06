@@ -36,9 +36,12 @@
     @endif
     @if (auth()->user()->hasAnyFranchisePermission('manage-courses'))
       <a class="slink {{ request()->routeIs('franchise.courses.*') ? 'act' : '' }}" href="{{ route('franchise.courses.index') }}"><i class="bi bi-collection-play-fill"></i>My Courses</a>
+      <a class="slink {{ request()->routeIs('franchise.reviews.*') ? 'act' : '' }}" href="{{ route('franchise.reviews.index') }}"><i class="bi bi-star-fill"></i>Reviews</a>
     @endif
     @if (auth()->user()->hasAnyFranchisePermission('view-students'))
       <a class="slink {{ request()->routeIs('franchise.students.*') ? 'act' : '' }}" href="{{ route('franchise.students.index') }}"><i class="bi bi-people-fill"></i>My Students</a>
+      <a class="slink {{ request()->routeIs('franchise.payments.*') ? 'act' : '' }}" href="{{ route('franchise.payments.index') }}"><i class="bi bi-cash-stack"></i>Payments</a>
+      <a class="slink {{ request()->routeIs('franchise.certificates.*') ? 'act' : '' }}" href="{{ route('franchise.certificates.index') }}"><i class="bi bi-award-fill"></i>Certificates</a>
     @endif
     @if (auth()->user()->hasAnyFranchisePermission('manage-gallery'))
       <a class="slink {{ request()->routeIs('franchise.gallery.*') ? 'act' : '' }}" href="{{ route('franchise.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>

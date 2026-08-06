@@ -12,7 +12,10 @@
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
     <div class="shead mb-0"><h4>Leads</h4><p>Course enquiries — track, follow up, and convert to enrolled students</p></div>
     @if ($canManage)
-      <button class="bsave" data-bs-toggle="modal" data-bs-target="#addLead"><i class="bi bi-person-plus-fill me-1"></i>Add Lead</button>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ route('franchise.leads.export') }}" class="bghost" style="text-decoration:none;font-size:14px;padding:11px 20px"><i class="bi bi-download me-1"></i>Export CSV</a>
+        <button class="bsave" data-bs-toggle="modal" data-bs-target="#addLead"><i class="bi bi-person-plus-fill me-1"></i>Add Lead</button>
+      </div>
     @endif
   </div>
 

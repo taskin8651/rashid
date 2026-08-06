@@ -33,6 +33,16 @@
               </div>
               <button type="button" class="bghost w-100 mt-2" style="font-size:12px" onclick="useMyLocation('lat{{ $loc->id }}','lng{{ $loc->id }}')"><i class="bi bi-crosshair me-1"></i>Use My Current Location</button>
               <div class="mt-2"><label class="flbl">WiFi Network Name</label><input class="fctrl" name="wifi_ssid" value="{{ $loc->wifi_ssid }}" placeholder="Your institute's WiFi SSID"/></div>
+              <div class="row g-2 mt-2">
+                <div class="col-6"><label class="flbl">GPS Radius (meters)</label><input class="fctrl" type="number" min="10" max="2000" name="radius_meters" value="{{ $loc->radius_meters }}"/></div>
+                <div class="col-6">
+                  <label class="flbl">Status</label>
+                  <select class="fctrl" name="status">
+                    <option value="active" @selected($loc->status === 'active')>Active</option>
+                    <option value="inactive" @selected($loc->status === 'inactive')>Inactive</option>
+                  </select>
+                </div>
+              </div>
               <button class="bsave w-100 mt-3" type="submit">Save</button>
             </form>
           </div>

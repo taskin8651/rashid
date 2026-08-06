@@ -33,6 +33,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\Franchise\AttendanceController as FranchiseAttendanceController;
+use App\Http\Controllers\Franchise\CertificateController as FranchiseCertificateController;
 use App\Http\Controllers\Franchise\CourseAssignmentController as FranchiseCourseAssignmentController;
 use App\Http\Controllers\Franchise\CourseController as FranchiseCourseController;
 use App\Http\Controllers\Franchise\CourseNoteController as FranchiseCourseNoteController;
@@ -43,8 +44,10 @@ use App\Http\Controllers\Franchise\DocumentController as FranchiseDocumentContro
 use App\Http\Controllers\Franchise\ExpenseController as FranchiseExpenseController;
 use App\Http\Controllers\Franchise\GalleryController as FranchiseGalleryController;
 use App\Http\Controllers\Franchise\LeadController as FranchiseLeadController;
+use App\Http\Controllers\Franchise\PaymentController as FranchisePaymentController;
 use App\Http\Controllers\Franchise\ProfileController as FranchiseProfileController;
 use App\Http\Controllers\Franchise\ResourceController as FranchiseResourceController;
+use App\Http\Controllers\Franchise\ReviewController as FranchiseReviewController;
 use App\Http\Controllers\Franchise\StudentController as FranchiseStudentController;
 use App\Http\Controllers\Franchise\TeamController as FranchiseTeamController;
 use App\Http\Controllers\Franchise\TeamMemberController as FranchiseTeamMemberController;
@@ -233,6 +236,7 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::delete('/courses/{course}/notes/{note}', [FranchiseCourseNoteController::class, 'destroy'])->name('franchise.courses.notes.destroy');
 
         Route::get('/leads', [FranchiseLeadController::class, 'index'])->name('franchise.leads.index');
+        Route::get('/leads/export', [FranchiseLeadController::class, 'export'])->name('franchise.leads.export');
         Route::post('/leads', [FranchiseLeadController::class, 'store'])->name('franchise.leads.store');
         Route::get('/leads/{lead}', [FranchiseLeadController::class, 'show'])->name('franchise.leads.show');
         Route::post('/leads/{lead}', [FranchiseLeadController::class, 'update'])->name('franchise.leads.update');
@@ -242,10 +246,26 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::delete('/leads/{lead}', [FranchiseLeadController::class, 'destroy'])->name('franchise.leads.destroy');
 
         Route::get('/students', [FranchiseStudentController::class, 'index'])->name('franchise.students.index');
+        Route::get('/students/export', [FranchiseStudentController::class, 'export'])->name('franchise.students.export');
         Route::post('/students/offline-enroll', [FranchiseStudentController::class, 'storeOffline'])->name('franchise.students.offline-enroll');
         Route::post('/students/{student}/allot-course', [FranchiseStudentController::class, 'allotCourse'])->name('franchise.students.allot-course');
+        Route::get('/students/{student}', [FranchiseStudentController::class, 'show'])->name('franchise.students.show');
+        Route::get('/students/{student}/id-card', [FranchiseStudentController::class, 'idCardView'])->name('franchise.students.id-card.view');
+        Route::get('/students/{student}/id-card/download', [FranchiseStudentController::class, 'idCardDownload'])->name('franchise.students.id-card.download');
+        Route::post('/students/{student}', [FranchiseStudentController::class, 'update'])->name('franchise.students.update');
+
+        Route::get('/payments', [FranchisePaymentController::class, 'index'])->name('franchise.payments.index');
+        Route::get('/payments/export', [FranchisePaymentController::class, 'export'])->name('franchise.payments.export');
+
+        Route::get('/certificates', [FranchiseCertificateController::class, 'index'])->name('franchise.certificates.index');
+        Route::get('/certificates/{certificate}/download', [FranchiseCertificateController::class, 'download'])->name('franchise.certificates.download');
+        Route::get('/certificates/{certificate}/marksheet', [FranchiseCertificateController::class, 'downloadMarksheet'])->name('franchise.certificates.marksheet');
+        Route::get('/certificate-applications/{application}/proof', [FranchiseCertificateController::class, 'downloadProof'])->name('franchise.certificate-applications.proof');
+
+        Route::get('/reviews', [FranchiseReviewController::class, 'index'])->name('franchise.reviews.index');
 
         Route::get('/expenses', [FranchiseExpenseController::class, 'index'])->name('franchise.expenses.index');
+        Route::get('/expenses/export', [FranchiseExpenseController::class, 'export'])->name('franchise.expenses.export');
         Route::post('/expenses', [FranchiseExpenseController::class, 'store'])->name('franchise.expenses.store');
         Route::get('/expenses/{expense}/receipt', [FranchiseExpenseController::class, 'downloadReceipt'])->name('franchise.expenses.receipt');
         Route::delete('/expenses/{expense}', [FranchiseExpenseController::class, 'destroy'])->name('franchise.expenses.destroy');
@@ -258,6 +278,7 @@ Route::middleware(['auth', 'track.active'])->group(function () {
 
         Route::get('/attendance', [FranchiseAttendanceController::class, 'manage'])->name('franchise.attendance.manage');
         Route::get('/attendance/records', [FranchiseAttendanceController::class, 'records'])->name('franchise.attendance.records');
+        Route::get('/attendance/export', [FranchiseAttendanceController::class, 'export'])->name('franchise.attendance.export');
         Route::post('/attendance/{location}', [FranchiseAttendanceController::class, 'update'])->name('franchise.attendance.update');
 
         Route::get('/team', [FranchiseTeamController::class, 'index'])->name('franchise.team.index');
