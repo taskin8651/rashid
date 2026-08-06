@@ -171,25 +171,41 @@
 
                   @if (($a->method === 'gps' && $a->latitude) || ($a->check_out_method === 'gps' && $a->check_out_latitude))
                     <div class="att-map-card">
-                      <div class="att-map-head"><h6><i class="bi bi-map me-1"></i>Location Map</h6></div>
-                      <div
-                        id="attMap{{ $a->id }}"
-                        class="att-map"
-                        style="height:320px"
-                        data-loc-lat="{{ $a->location->latitude }}"
-                        data-loc-lng="{{ $a->location->longitude }}"
-                        data-loc-name="{{ $a->location->name }}"
-                        data-in-lat="{{ $a->method === 'gps' ? $a->latitude : '' }}"
-                        data-in-lng="{{ $a->method === 'gps' ? $a->longitude : '' }}"
-                        data-in-dist="{{ $a->distance_meters }}"
-                        data-out-lat="{{ $a->check_out_method === 'gps' ? $a->check_out_latitude : '' }}"
-                        data-out-lng="{{ $a->check_out_method === 'gps' ? $a->check_out_longitude : '' }}"
-                        data-out-dist="{{ $a->check_out_distance_meters }}"
-                      ></div>
+                      <div class="att-map-head">
+                        <h6><i class="bi bi-map me-1"></i>Location Map</h6>
+                        <button type="button" class="att-map-recenter" title="Recenter" data-map-recenter="attMap{{ $a->id }}"><i class="bi bi-arrows-angle-contract"></i></button>
+                      </div>
+                      <div class="att-map-wrap">
+                        <div class="att-map-overlay">
+                          @if ($a->method === 'gps')
+                            <div class="att-map-overlay-row"><span class="att-map-overlay-dot" style="background:#16a34a"></span>In: {{ $a->distance_meters }}m</div>
+                          @endif
+                          @if ($a->check_out_method === 'gps')
+                            <div class="att-map-overlay-row"><span class="att-map-overlay-dot" style="background:#f59e0b"></span>Out: {{ $a->check_out_distance_meters }}m</div>
+                          @endif
+                          <div class="att-map-overlay-row"><span class="att-map-overlay-dot" style="background:#2563eb"></span>Allowed: {{ $a->location->radius_meters }}m</div>
+                        </div>
+                        <div
+                          id="attMap{{ $a->id }}"
+                          class="att-map"
+                          style="height:340px"
+                          data-loc-lat="{{ $a->location->latitude }}"
+                          data-loc-lng="{{ $a->location->longitude }}"
+                          data-loc-name="{{ $a->location->name }}"
+                          data-radius="{{ $a->location->radius_meters }}"
+                          data-in-lat="{{ $a->method === 'gps' ? $a->latitude : '' }}"
+                          data-in-lng="{{ $a->method === 'gps' ? $a->longitude : '' }}"
+                          data-in-dist="{{ $a->distance_meters }}"
+                          data-out-lat="{{ $a->check_out_method === 'gps' ? $a->check_out_latitude : '' }}"
+                          data-out-lng="{{ $a->check_out_method === 'gps' ? $a->check_out_longitude : '' }}"
+                          data-out-dist="{{ $a->check_out_distance_meters }}"
+                        ></div>
+                      </div>
                       <div class="att-legend">
                         <div class="att-legend-item"><span class="att-legend-dot" style="background:#2563eb"></span>Institute</div>
                         <div class="att-legend-item"><span class="att-legend-dot" style="background:#16a34a"></span>Punch In</div>
                         <div class="att-legend-item"><span class="att-legend-dot" style="background:#f59e0b"></span>Punch Out</div>
+                        <div class="att-legend-item"><span class="att-legend-dot" style="background:rgba(37,99,235,.15);border-color:#2563eb"></span>Allowed Radius</div>
                       </div>
                     </div>
                   @else
@@ -222,6 +238,23 @@
       });
     }
 
+    function attDistLabel(midpoint, text) {
+      return L.marker(midpoint, {
+        icon: L.divIcon({ className: '', html: '<div class="att-dist-label">' + text + '</div>', iconSize: [0, 0] }),
+        interactive: false,
+        keyboard: false,
+      });
+    }
+
+    function attIsDarkTheme() {
+      const attr = document.documentElement.getAttribute('data-theme');
+      if (attr === 'dark') return true;
+      if (attr === 'light') return false;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    const attMaps = {};
+
     document.querySelectorAll('.modal').forEach(function (modalEl) {
       modalEl.addEventListener('shown.bs.modal', function () {
         const mapDiv = modalEl.querySelector('.att-map');
@@ -231,35 +264,71 @@
         const locLat = parseFloat(mapDiv.dataset.locLat), locLng = parseFloat(mapDiv.dataset.locLng);
         const inLat = parseFloat(mapDiv.dataset.inLat), inLng = parseFloat(mapDiv.dataset.inLng);
         const outLat = parseFloat(mapDiv.dataset.outLat), outLng = parseFloat(mapDiv.dataset.outLng);
+        const radius = parseFloat(mapDiv.dataset.radius) || 0;
 
-        const map = L.map(mapDiv, { zoomControl: true }).setView([locLat, locLng], 15);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        const map = L.map(mapDiv, { zoomControl: true }).setView([locLat, locLng], 16);
+        attMaps[mapDiv.id] = map;
+
+        const tiles = attIsDarkTheme()
+          ? 'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png'
+          : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        L.tileLayer(tiles, {
           attribution: '&copy; OpenStreetMap &copy; CARTO',
           maxZoom: 20,
           subdomains: 'abcd',
         }).addTo(map);
 
         const bounds = [[locLat, locLng]];
+
+        // Geofence — the circle within which a punch is actually accepted,
+        // drawn so it's obvious at a glance whether a check-in/out landed
+        // inside or outside the allowed zone.
+        if (radius > 0) {
+          L.circle([locLat, locLng], {
+            radius: radius,
+            color: '#2563eb',
+            weight: 1.5,
+            dashArray: '5,7',
+            fillColor: '#2563eb',
+            fillOpacity: 0.08,
+          }).addTo(map);
+        }
+
         L.marker([locLat, locLng], { icon: attPin('#2563eb', 'bi-building') })
-          .addTo(map).bindPopup('<b>' + mapDiv.dataset.locName + '</b><br>Institute');
+          .addTo(map).bindPopup('<b>' + mapDiv.dataset.locName + '</b><br>Institute &middot; ' + radius + 'm allowed radius', { className: 'att-popup' });
 
         if (!isNaN(inLat) && !isNaN(inLng)) {
           bounds.push([inLat, inLng]);
           L.marker([inLat, inLng], { icon: attPin('#16a34a', 'bi-geo-alt-fill') })
-            .addTo(map).bindPopup('<b>Punch In</b><br>' + mapDiv.dataset.inDist + 'm away');
+            .addTo(map).bindPopup('<b>Punch In</b><br>' + mapDiv.dataset.inDist + 'm away', { className: 'att-popup' });
           L.polyline([[locLat, locLng], [inLat, inLng]], { color: '#16a34a', weight: 3, dashArray: '4,7', opacity: .8 }).addTo(map);
+          attDistLabel([(locLat + inLat) / 2, (locLng + inLng) / 2], mapDiv.dataset.inDist + 'm').addTo(map);
         }
 
         if (!isNaN(outLat) && !isNaN(outLng)) {
           bounds.push([outLat, outLng]);
           L.marker([outLat, outLng], { icon: attPin('#f59e0b', 'bi-geo-alt-fill') })
-            .addTo(map).bindPopup('<b>Punch Out</b><br>' + mapDiv.dataset.outDist + 'm away');
+            .addTo(map).bindPopup('<b>Punch Out</b><br>' + mapDiv.dataset.outDist + 'm away', { className: 'att-popup' });
           L.polyline([[locLat, locLng], [outLat, outLng]], { color: '#f59e0b', weight: 3, dashArray: '4,7', opacity: .8 }).addTo(map);
+          attDistLabel([(locLat + outLat) / 2, (locLng + outLng) / 2], mapDiv.dataset.outDist + 'm').addTo(map);
         }
 
-        map.fitBounds(bounds, { padding: [36, 36] });
+        setTimeout(function () {
+          map.invalidateSize();
+          map.flyToBounds(bounds, { padding: [40, 40], duration: 1.1 });
+        }, 200);
+      });
+    });
 
-        setTimeout(function () { map.invalidateSize(); }, 200);
+    document.querySelectorAll('[data-map-recenter]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const map = attMaps[btn.dataset.mapRecenter];
+        if (!map) return;
+        const bounds = [];
+        map.eachLayer(function (layer) {
+          if (layer instanceof L.Marker) bounds.push(layer.getLatLng());
+        });
+        if (bounds.length) map.flyToBounds(L.latLngBounds(bounds), { padding: [40, 40], duration: .8 });
       });
     });
   </script>
