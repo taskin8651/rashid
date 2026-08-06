@@ -18,7 +18,7 @@
 
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">
-      <thead><tr><th>Student</th><th>Email</th><th>Phone</th><th>Courses</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Student</th><th>Email</th><th>Phone</th><th>Courses</th><th>Joined</th><th>Status</th><th>Website</th><th>Actions</th></tr></thead>
       <tbody>
         @forelse ($students as $s)
           <tr>
@@ -43,6 +43,14 @@
             </td>
             <td>{{ $s->created_at->format('d M Y') }}</td>
             <td><span class="badge-rt {{ $s->is_active ? 'bg-active' : 'bg-inactive' }}">{{ $s->is_active ? 'Active' : 'Inactive' }}</span></td>
+            <td>
+              <form method="POST" action="{{ route('admin.students.feature', $s) }}">
+                @csrf
+                <button type="submit" class="action-btn" style="border:none;background:none" title="{{ $s->is_featured_student ? 'Remove from Home/About page' : 'Show on Home/About page' }}">
+                  <i class="bi {{ $s->is_featured_student ? 'bi-star-fill' : 'bi-star' }}" style="color:{{ $s->is_featured_student ? '#f59e0b' : 'var(--muted)' }}"></i>
+                </button>
+              </form>
+            </td>
             <td>
               <a href="{{ route('admin.students.show', $s) }}" class="action-btn" title="View"><i class="bi bi-eye-fill"></i></a>
               <button class="action-btn" style="border:none;background:none" title="Edit Profile" data-bs-toggle="modal" data-bs-target="#editStudent{{ $s->id }}"><i class="bi bi-pencil-fill"></i></button>
@@ -155,7 +163,7 @@
             </div>
           </div>
         @empty
-          <tr><td colspan="7" style="color:var(--muted)">No students found.</td></tr>
+          <tr><td colspan="8" style="color:var(--muted)">No students found.</td></tr>
         @endforelse
       </tbody>
     </table></div>

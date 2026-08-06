@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\FranchiseBooking;
 use App\Models\Review;
 use App\Models\TeamMember;
+use App\Models\User;
 
 class PageController extends Controller
 {
@@ -21,12 +22,17 @@ class PageController extends Controller
             ->orderBy('name')
             ->get();
 
+        $featuredStudents = User::role('student')->where('is_featured_student', true)
+            ->with(['enrollments' => fn ($q) => $q->whereIn('status', ['paid', 'completed'])->with('course')])
+            ->latest()
+            ->get();
+
         $stats = [
             'courses' => Course::where('status', 'active')->count(),
             'franchises' => FranchiseBooking::where('status', 'paid')->count(),
         ];
 
-        return view('about', compact('testimonials', 'teamMembers', 'stats'));
+        return view('about', compact('testimonials', 'teamMembers', 'featuredStudents', 'stats'));
     }
 
     public function freeDemo()

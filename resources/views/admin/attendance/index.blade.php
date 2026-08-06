@@ -27,7 +27,7 @@
 
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">
-      <thead><tr><th>Student</th><th>Location</th><th>Date</th><th>Punch In</th><th>Punch Out</th><th>Duration</th><th>Details</th></tr></thead>
+      <thead><tr><th>Student</th><th>Location</th><th>Date</th><th>Punch In</th><th>Punch Out</th><th>Duration</th><th>Where From</th><th>Device</th></tr></thead>
       <tbody>
         @forelse ($attendances as $a)
           <tr>
@@ -45,22 +45,49 @@
             <td>{{ $a->durationLabel() ?? '—' }}</td>
             <td style="font-size:11.5px;color:var(--muted)">
               @if ($a->method === 'gps')
-                In: {{ $a->distance_meters }}m
+                In:
+                @if ($a->mapUrl())
+                  <a href="{{ $a->mapUrl() }}" target="_blank" rel="noopener">{{ $a->distance_meters }}m away &middot; view map</a>
+                @else
+                  {{ $a->distance_meters }}m away
+                @endif
               @else
-                In: {{ $a->wifi_ssid }}
+                In: WiFi &middot; {{ $a->wifi_ssid }}
               @endif
               @if ($a->isPunchedOut())
                 <br>
                 @if ($a->check_out_method === 'gps')
-                  Out: {{ $a->check_out_distance_meters }}m
+                  Out:
+                  @if ($a->checkOutMapUrl())
+                    <a href="{{ $a->checkOutMapUrl() }}" target="_blank" rel="noopener">{{ $a->check_out_distance_meters }}m away &middot; view map</a>
+                  @else
+                    {{ $a->check_out_distance_meters }}m away
+                  @endif
                 @else
-                  Out: {{ $a->check_out_wifi_ssid }}
+                  Out: WiFi &middot; {{ $a->check_out_wifi_ssid }}
                 @endif
+              @endif
+            </td>
+            <td style="font-size:11.5px;color:var(--muted)">
+              @if ($a->deviceLabel())
+                <span title="{{ $a->device }}">In: {{ $a->deviceLabel() }}</span>
+              @if ($a->ip_address)
+                <br><span style="opacity:.75">{{ $a->ip_address }}</span>
+              @endif
+              @endif
+              @if ($a->isPunchedOut() && $a->checkOutDeviceLabel())
+                <br><span title="{{ $a->check_out_device }}">Out: {{ $a->checkOutDeviceLabel() }}</span>
+                @if ($a->check_out_ip_address)
+                  <br><span style="opacity:.75">{{ $a->check_out_ip_address }}</span>
+                @endif
+              @endif
+              @if (!$a->deviceLabel() && !$a->checkOutDeviceLabel())
+                <span style="color:var(--muted)">—</span>
               @endif
             </td>
           </tr>
         @empty
-          <tr><td colspan="7" style="color:var(--muted)">No attendance records found.</td></tr>
+          <tr><td colspan="8" style="color:var(--muted)">No attendance records found.</td></tr>
         @endforelse
       </tbody>
     </table></div>

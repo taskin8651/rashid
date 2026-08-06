@@ -32,6 +32,7 @@ class User extends Authenticatable implements HasMedia
         'emergency_contact',
         'password',
         'is_active',
+        'is_featured_student',
     ];
 
     /**
@@ -53,6 +54,7 @@ class User extends Authenticatable implements HasMedia
         'email_verified_at' => 'datetime',
         'date_of_birth' => 'date',
         'is_active' => 'boolean',
+        'is_featured_student' => 'boolean',
         'password' => 'hashed',
         'last_seen_at' => 'datetime',
     ];
@@ -102,6 +104,22 @@ class User extends Authenticatable implements HasMedia
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    /**
+     * The course shown alongside this student's public profile — their most
+     * recent paid/completed enrollment, since a student may have several.
+     */
+    public function featuredCourse(): ?Course
+    {
+        if ($this->relationLoaded('enrollments')) {
+            return $this->enrollments
+                ->whereIn('status', ['paid', 'completed'])
+                ->sortByDesc('enrolled_at')
+                ->first()?->course;
+        }
+
+        return $this->enrollments()->whereIn('status', ['paid', 'completed'])->latest('enrolled_at')->first()?->course;
     }
 
     public function franchiseBookings()

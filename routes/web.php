@@ -316,6 +316,7 @@ Route::middleware(['auth', 'track.active'])->group(function () {
             Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCardView'])->name('admin.students.id-card.view');
             Route::get('/students/{student}/id-card/download', [AdminStudentController::class, 'idCardDownload'])->name('admin.students.id-card.download');
             Route::post('/students/{student}', [AdminStudentController::class, 'update'])->name('admin.students.update');
+            Route::post('/students/{student}/feature', [AdminStudentController::class, 'toggleFeature'])->name('admin.students.feature');
             Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
             Route::post('/enrollments/{enrollment}/payments', [AdminStudentController::class, 'storePayment'])->name('admin.enrollments.payments.store');
             Route::post('/enrollments/{enrollment}/fee', [AdminStudentController::class, 'updateFee'])->name('admin.enrollments.fee.update');

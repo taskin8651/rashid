@@ -253,6 +253,17 @@ class StudentController extends Controller
         return back()->with('status', 'Student updated.');
     }
 
+    public function toggleFeature(User $student)
+    {
+        abort_unless($student->hasRole('student'), 404);
+
+        $student->update(['is_featured_student' => !$student->is_featured_student]);
+
+        return back()->with('status', $student->is_featured_student
+            ? $student->name . ' is now shown on the website.'
+            : $student->name . ' removed from the website.');
+    }
+
     public function destroy(User $student)
     {
         $student->delete();

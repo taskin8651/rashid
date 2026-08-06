@@ -38,7 +38,7 @@ class AttendanceController extends Controller
             ->latest('marked_at')
             ->get();
 
-        $rows = ["Student,Location,Date,Punch In,Punch In Method,Punch Out,Punch Out Method,Duration (min)\n"];
+        $rows = ["Student,Location,Date,Punch In,Punch In Method,Punch In Lat,Punch In Lng,Punch In Device,Punch In IP,Punch Out,Punch Out Method,Punch Out Lat,Punch Out Lng,Punch Out Device,Punch Out IP,Duration (min)\n"];
         foreach ($attendances as $a) {
             $rows[] = implode(',', [
                 '"' . str_replace('"', '""', $a->user->name) . '"',
@@ -46,8 +46,16 @@ class AttendanceController extends Controller
                 $a->date->format('Y-m-d'),
                 $a->marked_at->format('H:i'),
                 $a->method,
+                $a->latitude ?? '',
+                $a->longitude ?? '',
+                '"' . str_replace('"', '""', $a->device ?? '') . '"',
+                $a->ip_address ?? '',
                 $a->isPunchedOut() ? $a->check_out_at->format('H:i') : '',
                 $a->check_out_method ?? '',
+                $a->check_out_latitude ?? '',
+                $a->check_out_longitude ?? '',
+                '"' . str_replace('"', '""', $a->check_out_device ?? '') . '"',
+                $a->check_out_ip_address ?? '',
                 $a->durationMinutes() ?? '',
             ]) . "\n";
         }

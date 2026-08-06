@@ -44,8 +44,14 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
+        $featuredStudents = User::role('student')->where('is_featured_student', true)
+            ->with(['enrollments' => fn ($q) => $q->whereIn('status', ['paid', 'completed'])->with('course')])
+            ->latest()
+            ->take(8)
+            ->get();
+
         $faqs = Faq::where('status', 'active')->orderBy('sort_order')->orderBy('id')->get();
 
-        return view('home', compact('courses', 'categories', 'totalDemoVideos', 'franchises', 'testimonials', 'faqs'));
+        return view('home', compact('courses', 'categories', 'totalDemoVideos', 'franchises', 'testimonials', 'featuredStudents', 'faqs'));
     }
 }

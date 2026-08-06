@@ -52,6 +52,8 @@ class AttendanceController extends Controller
                 'date' => now()->toDateString(),
                 'marked_at' => now(),
                 'method' => $validated['method'],
+                'device' => $request->userAgent(),
+                'ip_address' => $request->ip(),
             ], $verified));
 
             return back()->with('status', 'Punched in! Have a great session.');
@@ -66,6 +68,8 @@ class AttendanceController extends Controller
         $today->update(array_merge([
             'check_out_at' => now(),
             'check_out_method' => $validated['method'],
+            'check_out_device' => $request->userAgent(),
+            'check_out_ip_address' => $request->ip(),
         ], $this->prefixCheckOut($verified)));
 
         return back()->with('status', 'Punched out! Total time: ' . $today->fresh()->durationLabel() . '.');

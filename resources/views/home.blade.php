@@ -8,6 +8,7 @@
   @include('partials.home.franchises')
   @include('partials.home.free-demo')
   @include('partials.home.why')
+  @include('partials.home.students')
   @include('partials.home.faq')
   @include('partials.home.contact')
 @endsection
