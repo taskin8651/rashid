@@ -223,6 +223,11 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(CertificateApplication::class);
     }
 
+    public function placements()
+    {
+        return $this->hasMany(Placement::class);
+    }
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);

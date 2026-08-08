@@ -10,6 +10,7 @@
     'view-students' => 'View Students',
     'manage-students' => 'Register Students & Manage Fees',
     'manage-gallery' => 'Manage Gallery',
+    'manage-placements' => 'Manage Placements',
     'manage-attendance' => 'Manage Attendance',
     'manage-documents' => 'Manage Documents',
     'manage-expenses' => 'Manage Expenses (view income & record expenses)',

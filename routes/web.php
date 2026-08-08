@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\FranchiseResourceController as AdminFranchiseReso
 use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Admin\LeadController as AdminLeadController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\PlacementController as AdminPlacementController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
@@ -46,6 +47,7 @@ use App\Http\Controllers\Franchise\ExpenseController as FranchiseExpenseControll
 use App\Http\Controllers\Franchise\GalleryController as FranchiseGalleryController;
 use App\Http\Controllers\Franchise\LeadController as FranchiseLeadController;
 use App\Http\Controllers\Franchise\PaymentController as FranchisePaymentController;
+use App\Http\Controllers\Franchise\PlacementController as FranchisePlacementController;
 use App\Http\Controllers\Franchise\ProfileController as FranchiseProfileController;
 use App\Http\Controllers\Franchise\ResourceController as FranchiseResourceController;
 use App\Http\Controllers\Franchise\ReviewController as FranchiseReviewController;
@@ -58,6 +60,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NoteDownloadController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PlacementController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\AttendanceController as StudentAttendanceController;
 use App\Http\Controllers\Student\CertificateController as StudentCertificateController;
@@ -66,6 +69,7 @@ use App\Http\Controllers\Student\DashboardController as StudentDashboardControll
 use App\Http\Controllers\Student\IdCardController as StudentIdCardController;
 use App\Http\Controllers\Student\NoteController as StudentNoteController;
 use App\Http\Controllers\Student\PaymentController as StudentPaymentController;
+use App\Http\Controllers\Student\PlacementController as StudentPlacementController;
 use App\Http\Controllers\Student\ProfileController as StudentProfileController;
 use App\Http\Controllers\Student\QuizController as StudentQuizController;
 use App\Http\Controllers\Student\ReferralController as StudentReferralController;
@@ -98,6 +102,8 @@ Route::get('/courses/{course:slug}', [CourseController::class, 'show'])->name('c
 Route::get('/free-demo', [PageController::class, 'freeDemo'])->name('free-demo');
 
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
+
+Route::get('/placements', [PlacementController::class, 'index'])->name('placements');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -201,6 +207,10 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::get('/referrals', [StudentReferralController::class, 'index'])->name('student.referrals.index');
 
         Route::get('/attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance.index');
+
+        Route::get('/placements', [StudentPlacementController::class, 'index'])->name('student.placements.index');
+        Route::post('/placements', [StudentPlacementController::class, 'store'])->name('student.placements.store');
+        Route::delete('/placements/{placement}', [StudentPlacementController::class, 'destroy'])->name('student.placements.destroy');
     });
 
     Route::prefix('franchise')->middleware('role:franchisee')->group(function () {
@@ -279,6 +289,10 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::get('/gallery', [FranchiseGalleryController::class, 'index'])->name('franchise.gallery.index');
         Route::post('/gallery', [FranchiseGalleryController::class, 'store'])->name('franchise.gallery.store');
         Route::delete('/gallery/{gallery}', [FranchiseGalleryController::class, 'destroy'])->name('franchise.gallery.destroy');
+
+        Route::get('/placements', [FranchisePlacementController::class, 'index'])->name('franchise.placements.index');
+        Route::post('/placements', [FranchisePlacementController::class, 'store'])->name('franchise.placements.store');
+        Route::delete('/placements/{placement}', [FranchisePlacementController::class, 'destroy'])->name('franchise.placements.destroy');
 
         Route::get('/attendance', [FranchiseAttendanceController::class, 'manage'])->name('franchise.attendance.manage');
         Route::get('/attendance/records', [FranchiseAttendanceController::class, 'records'])->name('franchise.attendance.records');
@@ -439,6 +453,16 @@ Route::middleware(['auth', 'track.active'])->group(function () {
             Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
             Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
             Route::post('/certificates/{certificate}/documents', [AdminCertificateApplicationController::class, 'updateDocuments'])->name('admin.certificates.documents.update');
+        });
+
+        Route::middleware('permission:manage-placements')->group(function () {
+            Route::get('/placements', [AdminPlacementController::class, 'index'])->name('admin.placements.index');
+            Route::get('/placements/{placement}/proof', [AdminPlacementController::class, 'downloadProof'])->name('admin.placements.proof');
+            Route::post('/placements/{placement}/approve', [AdminPlacementController::class, 'approve'])->name('admin.placements.approve');
+            Route::post('/placements/{placement}/reject', [AdminPlacementController::class, 'reject'])->name('admin.placements.reject');
+            Route::post('/placements/{placement}/update', [AdminPlacementController::class, 'update'])->name('admin.placements.update');
+            Route::post('/placements/{placement}/feature', [AdminPlacementController::class, 'toggleFeatured'])->name('admin.placements.feature');
+            Route::delete('/placements/{placement}', [AdminPlacementController::class, 'destroy'])->name('admin.placements.destroy');
         });
 
         Route::middleware('permission:manage-attendance-locations')->group(function () {

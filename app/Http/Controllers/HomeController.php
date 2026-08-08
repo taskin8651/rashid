@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Course;
 use App\Models\Faq;
 use App\Models\FranchiseBooking;
+use App\Models\Placement;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -52,6 +53,13 @@ class HomeController extends Controller
 
         $faqs = Faq::where('status', 'active')->orderBy('sort_order')->orderBy('id')->get();
 
-        return view('home', compact('courses', 'categories', 'totalDemoVideos', 'franchises', 'testimonials', 'featuredStudents', 'faqs'));
+        $featuredPlacements = Placement::approved()
+            ->with(['user', 'course'])
+            ->orderByDesc('is_featured')
+            ->latest('joining_date')
+            ->take(6)
+            ->get();
+
+        return view('home', compact('courses', 'categories', 'totalDemoVideos', 'franchises', 'testimonials', 'featuredStudents', 'faqs', 'featuredPlacements'));
     }
 }

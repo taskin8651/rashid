@@ -22,6 +22,7 @@ class FranchiseRole extends Model
         'view-students',
         'manage-students',
         'manage-gallery',
+        'manage-placements',
         'manage-attendance',
         'manage-documents',
         'manage-expenses',
