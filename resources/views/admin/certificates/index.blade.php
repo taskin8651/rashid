@@ -135,6 +135,13 @@
               @csrf
               <div class="modal-body">
                 <div class="row g-2 mb-1">
+                  <div class="col-md-4"><label class="flbl">Certificate Code</label><input class="fctrl" type="text" value="{{ $cert->cert_code }}" disabled></div>
+                  <div class="col-md-4"><label class="flbl">Student Name</label><input class="fctrl" type="text" name="student_name" value="{{ optional($cert->user)->name ?: $cert->student_name }}" required /></div>
+                  <div class="col-md-4"><label class="flbl">Student Email</label><input class="fctrl" type="email" name="student_email" value="{{ optional($cert->user)->email ?: $cert->student_email }}" /></div>
+                  <div class="col-md-4"><label class="flbl">Student Phone</label><input class="fctrl" type="text" name="student_phone" value="{{ optional($cert->user)->phone ?: $cert->student_phone }}" /></div>
+                  <div class="col-md-4"><label class="flbl">Course Name</label><input class="fctrl" type="text" name="course_name" value="{{ $cert->course_name }}" /></div>
+                  <div class="col-md-4"><label class="flbl">Course Duration</label><input class="fctrl" type="text" name="course_duration_text" value="{{ $cert->course_duration_text }}" placeholder="e.g. 3 Months" /></div>
+                  <div class="col-md-4"><label class="flbl">Issued Date</label><input class="fctrl" type="date" name="issued_date" value="{{ optional($cert->issued_date)->format('Y-m-d') }}" /></div>
                   <div class="col-md-4"><label class="flbl">Roll No.</label><input class="fctrl" type="text" name="roll_no" value="{{ $cert->roll_no }}" /></div>
                   <div class="col-md-4"><label class="flbl">Father's Name</label><input class="fctrl" type="text" name="father_name" value="{{ $cert->father_name }}" /></div>
                   <div class="col-md-4"><label class="flbl">Batch</label><input class="fctrl" type="text" name="batch_name" value="{{ $cert->batch_name }}" /></div>

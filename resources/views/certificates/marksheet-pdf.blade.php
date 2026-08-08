@@ -1,10 +1,10 @@
 @php
-    $studentName = optional($certificate->user)->name ?: 'Student Name';
+    $studentName = $certificate->student_name ?: (optional($certificate->user)->name ?: 'Student Name');
     $fatherName = $certificate->father_name ?: 'Father Name';
-    $courseName = optional($certificate->course)->name ?: 'Course Name';
+    $courseName = $certificate->course_name ?: (optional($certificate->course)->name ?: 'Course Name');
     $batchName = $certificate->batch_name ?: 'Batch/Time';
     $rollNo = $certificate->roll_no ?: 'Roll No.';
-    $duration = optional($certificate->course)->duration_text ?: 'Course Duration';
+    $duration = $certificate->course_duration_text ?: (optional($certificate->course)->duration_text ?: 'Course Duration');
     $issueDate = $certificate->issued_date ? $certificate->issued_date->format('d / m / Y') : 'DD / MM / YYYY';
     $enrollmentNo = $certificate->cert_code ?: 'Enrollment No.';
     $subjects = $certificate->subjects;

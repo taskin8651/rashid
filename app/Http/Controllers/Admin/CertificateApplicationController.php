@@ -319,6 +319,12 @@ class CertificateApplicationController extends Controller
     public function updateDocuments(Request $request, Certificate $certificate)
     {
         $validated = $request->validate([
+            'student_name' => ['nullable', 'string', 'max:255'],
+            'student_email' => ['nullable', 'email', 'max:255'],
+            'student_phone' => ['nullable', 'string', 'max:20'],
+            'course_name' => ['nullable', 'string', 'max:255'],
+            'course_duration_text' => ['nullable', 'string', 'max:255'],
+            'issued_date' => ['nullable', 'date'],
             'roll_no' => ['nullable', 'string', 'max:255'],
             'father_name' => ['nullable', 'string', 'max:255'],
             'batch_name' => ['nullable', 'string', 'max:255'],
@@ -331,6 +337,12 @@ class CertificateApplicationController extends Controller
         ]);
 
         $certificate->update([
+            'student_name' => $validated['student_name'] ?? $certificate->student_name,
+            'student_email' => $validated['student_email'] ?? null,
+            'student_phone' => $validated['student_phone'] ?? null,
+            'course_name' => $validated['course_name'] ?? $certificate->course_name,
+            'course_duration_text' => $validated['course_duration_text'] ?? null,
+            'issued_date' => $validated['issued_date'] ?? $certificate->issued_date,
             'roll_no' => $validated['roll_no'] ?? null,
             'father_name' => $validated['father_name'] ?? null,
             'batch_name' => $validated['batch_name'] ?? null,
@@ -340,7 +352,7 @@ class CertificateApplicationController extends Controller
 
         $this->syncSubjects($certificate, $validated['subjects'] ?? []);
 
-        return back()->with('status', 'Documents updated.');
+        return back()->with('status', 'Certificate updated.');
     }
 
     private function syncSubjects(Certificate $certificate, array $rows): void

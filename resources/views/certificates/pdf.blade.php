@@ -133,8 +133,8 @@
     </div>
 
     @php
-      $studentName = $certificate->user->name;
-      $courseName = strtoupper($certificate->course->name);
+      $studentName = $certificate->student_name ?: $certificate->user->name;
+      $courseName = strtoupper($certificate->course_name ?: $certificate->course->name);
       $courseNameSize = match (true) {
         strlen($courseName) <= 22 => '17pt',
         strlen($courseName) <= 30 => '14pt',
@@ -168,7 +168,7 @@
     <div class="info-item">
         <i class="fas fa-clock info-icon"></i>
         <div class="info-label">Course Duration</div>
-        <div class="info-value">{{ $certificate->course->duration_text ?: '—' }}</div>
+        <div class="info-value">{{ $certificate->course_duration_text ?: $certificate->course->duration_text ?: '—' }}</div>
     </div>
 
     @if ($certificate->hasMarksheetData())

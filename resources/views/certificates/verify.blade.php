@@ -23,7 +23,9 @@
               $hasMarksheet = $certificate->hasMarksheetData();
               $result = $hasMarksheet ? $certificate->result() : null;
               $photoUrl = optional($certificate->user)->photoUrl();
-              $initial = strtoupper(substr($certificate->user->name ?: 'S', 0, 1));
+              $displayName = $certificate->student_name ?: $certificate->user->name;
+              $displayCourseName = $certificate->course_name ?: $certificate->course->name;
+              $initial = strtoupper(substr($displayName ?: 'S', 0, 1));
             @endphp
             <div class="cert-verify-card">
               <div class="cert-verify-banner">
@@ -37,13 +39,13 @@
               <div class="cert-verify-body">
                 <div class="cert-verify-profile">
                   @if ($photoUrl)
-                    <img src="{{ $photoUrl }}" alt="{{ $certificate->user->name }}" class="cert-verify-photo">
+                    <img src="{{ $photoUrl }}" alt="{{ $displayName }}" class="cert-verify-photo">
                   @else
                     <span class="cert-verify-photo-fallback">{{ $initial }}</span>
                   @endif
                   <div>
-                    <div class="cert-verify-name">{{ $certificate->user->name }}</div>
-                    <div class="cert-verify-course"><i class="bi bi-mortarboard-fill me-1"></i>{{ $certificate->course->name }}</div>
+                    <div class="cert-verify-name">{{ $displayName }}</div>
+                    <div class="cert-verify-course"><i class="bi bi-mortarboard-fill me-1"></i>{{ $displayCourseName }}</div>
                   </div>
                 </div>
 
