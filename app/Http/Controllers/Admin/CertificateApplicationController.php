@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+
 class CertificateApplicationController extends Controller
 {
     public function index(Request $request)
@@ -209,19 +210,24 @@ class CertificateApplicationController extends Controller
         return $content === false ? '' : 'data:image/png;base64,' . base64_encode($content);
     }
 
-    private function verificationQrDataUri(Certificate $certificate): string
-    {
-        return Builder::create()
-            ->writer(new PngWriter())
-            ->data(route('certificates.verify', ['code' => $certificate->cert_code]))
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(ErrorCorrectionLevel::Low)
-            ->size(300)
-            ->margin(10)
-            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-            ->build()
-            ->getDataUri();
-    }
+   private function verificationQrDataUri(Certificate $certificate): string
+{
+    $builder = new Builder(
+        writer: new PngWriter(),
+        writerOptions: [],
+        validateResult: false,
+        data: route('certificates.verify', [
+            'code' => $certificate->cert_code
+        ]),
+        encoding: new Encoding('UTF-8'),
+        errorCorrectionLevel: ErrorCorrectionLevel::Low,
+        size: 300,
+        margin: 10,
+        roundBlockSizeMode: RoundBlockSizeMode::Margin,
+    );
+
+    return $builder->build()->getDataUri();
+}
 
     public function approve(Request $request, CertificateApplication $application)
     {
