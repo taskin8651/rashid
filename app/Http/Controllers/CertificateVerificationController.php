@@ -17,7 +17,7 @@ class CertificateVerificationController extends Controller
             $searched = true;
             $certificate = Certificate::where('cert_code', trim($code))
                 ->where('status', 'issued')
-                ->with(['user', 'course'])
+                ->with(['user', 'course', 'subjects'])
                 ->first();
         }
 

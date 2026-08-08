@@ -4,7 +4,7 @@
 
 @section('content')
   <section class="sec">
-    <div class="container" style="max-width:640px">
+    <div class="container" style="max-width:720px">
       <div class="text-center mb-4 rv">
         <div class="sec-lbl">Trust &amp; Authenticity</div>
         <h2 class="sec-h">Verify a <em>Certificate</em></h2>
@@ -19,14 +19,117 @@
 
         @if ($searched)
           @if ($certificate)
-            <div class="cert-verify-result ok">
-              <div class="cert-verify-icon"><i class="bi bi-patch-check-fill"></i></div>
-              <div>
-                <div class="cert-verify-title">Certificate Verified</div>
-                <div class="cert-verify-row"><span>Student</span><b>{{ $certificate->user->name }}</b></div>
-                <div class="cert-verify-row"><span>Course</span><b>{{ $certificate->course->name }}</b></div>
-                <div class="cert-verify-row"><span>Issued On</span><b>{{ $certificate->issued_date->format('d M Y') }}</b></div>
-                <div class="cert-verify-row"><span>Certificate Code</span><b>{{ $certificate->cert_code }}</b></div>
+            @php
+              $hasMarksheet = $certificate->hasMarksheetData();
+              $result = $hasMarksheet ? $certificate->result() : null;
+              $photoUrl = optional($certificate->user)->photoUrl();
+              $initial = strtoupper(substr($certificate->user->name ?: 'S', 0, 1));
+            @endphp
+            <div class="cert-verify-card">
+              <div class="cert-verify-banner">
+                <div class="cert-verify-banner-icon"><i class="bi bi-patch-check-fill"></i></div>
+                <div>
+                  <div class="cert-verify-banner-title">Certificate Verified</div>
+                  <div class="cert-verify-banner-sub">This is a valid certificate officially issued by R-Tech Computer.</div>
+                </div>
+              </div>
+
+              <div class="cert-verify-body">
+                <div class="cert-verify-profile">
+                  @if ($photoUrl)
+                    <img src="{{ $photoUrl }}" alt="{{ $certificate->user->name }}" class="cert-verify-photo">
+                  @else
+                    <span class="cert-verify-photo-fallback">{{ $initial }}</span>
+                  @endif
+                  <div>
+                    <div class="cert-verify-name">{{ $certificate->user->name }}</div>
+                    <div class="cert-verify-course"><i class="bi bi-mortarboard-fill me-1"></i>{{ $certificate->course->name }}</div>
+                  </div>
+                </div>
+
+                <div class="cert-verify-grid">
+                  <div>
+                    <div class="cert-verify-field-label">Certificate Code</div>
+                    <div class="cert-verify-field-value">{{ $certificate->cert_code }}</div>
+                  </div>
+                  <div>
+                    <div class="cert-verify-field-label">Issued On</div>
+                    <div class="cert-verify-field-value">{{ $certificate->issued_date->format('d M Y') }}</div>
+                  </div>
+                  @if ($certificate->course_duration_text)
+                    <div>
+                      <div class="cert-verify-field-label">Course Duration</div>
+                      <div class="cert-verify-field-value">{{ $certificate->course_duration_text }}</div>
+                    </div>
+                  @endif
+                  @if ($certificate->batch_name)
+                    <div>
+                      <div class="cert-verify-field-label">Batch</div>
+                      <div class="cert-verify-field-value">{{ $certificate->batch_name }}</div>
+                    </div>
+                  @endif
+                  @if ($certificate->roll_no)
+                    <div>
+                      <div class="cert-verify-field-label">Roll No.</div>
+                      <div class="cert-verify-field-value">{{ $certificate->roll_no }}</div>
+                    </div>
+                  @endif
+                  @if ($certificate->father_name)
+                    <div>
+                      <div class="cert-verify-field-label">Father's Name</div>
+                      <div class="cert-verify-field-value">{{ $certificate->father_name }}</div>
+                    </div>
+                  @endif
+                </div>
+
+                @if ($hasMarksheet)
+                  <div class="cert-verify-section-title"><i class="bi bi-clipboard-data-fill"></i>Marksheet</div>
+
+                  <div style="overflow-x:auto">
+                    <table class="cert-verify-mtable">
+                      <thead>
+                        <tr>
+                          <th>Subject</th>
+                          <th class="num">Max Marks</th>
+                          <th class="num">Marks Obtained</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach ($certificate->subjects as $subject)
+                          <tr>
+                            <td>{{ $subject->subject }}</td>
+                            <td class="num">{{ $subject->max_marks }}</td>
+                            <td class="num">{{ $subject->marks_obtained ?? '—' }}</td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="cert-verify-summary">
+                    <div class="cert-verify-stat">
+                      <div class="cert-verify-stat-label">Total Marks</div>
+                      <div class="cert-verify-stat-value">{{ $certificate->totalMarksObtained() }}/{{ $certificate->totalMaxMarks() }}</div>
+                    </div>
+                    <div class="cert-verify-stat">
+                      <div class="cert-verify-stat-label">Percentage</div>
+                      <div class="cert-verify-stat-value">{{ $certificate->percentage() }}%</div>
+                    </div>
+                    <div class="cert-verify-stat">
+                      <div class="cert-verify-stat-label">Grade</div>
+                      <div class="cert-verify-stat-value">{{ $certificate->grade() }}</div>
+                    </div>
+                    <div class="cert-verify-stat {{ $result === 'PASS' ? 'pass' : 'fail' }}">
+                      <div class="cert-verify-stat-label">Result</div>
+                      <div class="cert-verify-stat-value">{{ $result }}</div>
+                    </div>
+                  </div>
+                @endif
+              </div>
+
+              <div class="cert-verify-footer">
+                <i class="bi bi-shield-check"></i>
+                Verified against R-Tech Computer's official records on {{ now()->format('d M Y, h:i A') }}.
               </div>
             </div>
           @else
