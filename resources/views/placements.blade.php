@@ -9,6 +9,7 @@
         <div class="sec-lbl">Career Outcomes</div>
         <h2 class="sec-h">Where Our Students <em>Work</em></h2>
         <p style="font-size:14px;color:var(--muted);max-width:560px;margin:10px auto 0">Real students, real jobs — a look at the companies hiring R-Tech Computer graduates.</p>
+        <a href="{{ route('careers') }}" class="btn-g mt-2"><i class="bi bi-send-fill"></i>Browse Open Job Postings</a>
       </div>
 
       <div class="row g-3 justify-content-center mb-4">

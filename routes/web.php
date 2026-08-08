@@ -25,9 +25,12 @@ use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TeamController as AdminTeamController;
 use App\Http\Controllers\Admin\TeamMemberController as AdminTeamMemberController;
 use App\Http\Controllers\Admin\CertificateApplicationController as AdminCertificateApplicationController;
+use App\Http\Controllers\Admin\JobApplicationController as AdminJobApplicationController;
+use App\Http\Controllers\Admin\JobPostingController as AdminJobPostingController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CertificateApplicationController;
 use App\Http\Controllers\CertificateVerificationController;
 use App\Http\Controllers\ContactController;
@@ -104,6 +107,10 @@ Route::get('/free-demo', [PageController::class, 'freeDemo'])->name('free-demo')
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 
 Route::get('/placements', [PlacementController::class, 'index'])->name('placements');
+
+Route::get('/careers', [CareerController::class, 'index'])->name('careers');
+Route::get('/careers/{career}', [CareerController::class, 'show'])->name('careers.show');
+Route::post('/careers/{career}/apply', [CareerController::class, 'apply'])->name('careers.apply')->middleware('throttle:5,1');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -453,6 +460,19 @@ Route::middleware(['auth', 'track.active'])->group(function () {
             Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
             Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
             Route::post('/certificates/{certificate}/documents', [AdminCertificateApplicationController::class, 'updateDocuments'])->name('admin.certificates.documents.update');
+        });
+
+        Route::middleware('permission:manage-careers')->group(function () {
+            Route::get('/careers', [AdminJobPostingController::class, 'index'])->name('admin.careers.index');
+            Route::post('/careers', [AdminJobPostingController::class, 'store'])->name('admin.careers.store');
+            Route::post('/careers/{career}', [AdminJobPostingController::class, 'update'])->name('admin.careers.update');
+            Route::post('/careers/{career}/toggle', [AdminJobPostingController::class, 'toggleStatus'])->name('admin.careers.toggle');
+            Route::delete('/careers/{career}', [AdminJobPostingController::class, 'destroy'])->name('admin.careers.destroy');
+
+            Route::get('/job-applications', [AdminJobApplicationController::class, 'index'])->name('admin.job-applications.index');
+            Route::get('/job-applications/{application}/resume', [AdminJobApplicationController::class, 'downloadResume'])->name('admin.job-applications.resume');
+            Route::post('/job-applications/{application}/status', [AdminJobApplicationController::class, 'updateStatus'])->name('admin.job-applications.status');
+            Route::delete('/job-applications/{application}', [AdminJobApplicationController::class, 'destroy'])->name('admin.job-applications.destroy');
         });
 
         Route::middleware('permission:manage-placements')->group(function () {

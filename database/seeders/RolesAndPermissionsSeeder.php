@@ -29,6 +29,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'manage-reviews',
         'manage-certificate-applications',
         'manage-placements',
+        'manage-careers',
         'manage-attendance',
         'manage-attendance-locations',
         'manage-faqs',

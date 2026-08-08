@@ -23,6 +23,7 @@
             <li><a href="{{ route('courses') }}">Courses</a></li>
             <li><a href="{{ route('gallery') }}">Gallery</a></li>
             <li><a href="{{ route('placements') }}">Placements</a></li>
+            <li><a href="{{ route('careers') }}">Careers</a></li>
             <li><a href="{{ route('blog') }}">Blog</a></li>
             <li><a href="{{ route('certificates.verify') }}">Verify Certificate</a></li>
             <li><a href="{{ route('certificate-applications.create') }}">Apply for Certificate</a></li>

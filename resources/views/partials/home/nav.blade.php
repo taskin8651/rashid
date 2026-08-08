@@ -12,6 +12,7 @@
           <a class="nav-link-item {{ request()->routeIs('why-rtech') ? 'active' : '' }}" href="{{ route('why-rtech') }}">Why R-Tech</a>
           <a class="nav-link-item {{ request()->routeIs('gallery') ? 'active' : '' }}" href="{{ route('gallery') }}">Gallery</a>
           <a class="nav-link-item {{ request()->routeIs('placements') ? 'active' : '' }}" href="{{ route('placements') }}">Placements</a>
+          <a class="nav-link-item {{ request()->routeIs('careers*') ? 'active' : '' }}" href="{{ route('careers') }}">Careers</a>
           <a class="nav-link-item {{ request()->routeIs('franchise') ? 'active' : '' }}" href="{{ route('franchise') }}">Franchise</a>
           <a class="nav-link-item {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Contact</a>
          
