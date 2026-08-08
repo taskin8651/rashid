@@ -106,22 +106,36 @@
                     </table>
                   </div>
 
-                  <div class="cert-verify-summary">
-                    <div class="cert-verify-stat">
-                      <div class="cert-verify-stat-label">Total Marks</div>
-                      <div class="cert-verify-stat-value">{{ $certificate->totalMarksObtained() }}/{{ $certificate->totalMaxMarks() }}</div>
+                  <div class="cert-verify-chart-wrap">
+                    <div class="cert-verify-chart">
+                      @include('partials.charts.donut', [
+                        'segments' => [
+                          ['label' => 'Marks Obtained', 'value' => $certificate->totalMarksObtained(), 'color' => $result === 'PASS' ? '40,180,90' : '220,38,38'],
+                          ['label' => 'Marks Remaining', 'value' => max($certificate->totalMaxMarks() - $certificate->totalMarksObtained(), 0), 'color' => '107,127,163'],
+                        ],
+                        'centerValue' => $certificate->percentage() . '%',
+                        'centerLabel' => 'Score',
+                        'size' => 132,
+                      ])
                     </div>
-                    <div class="cert-verify-stat">
-                      <div class="cert-verify-stat-label">Percentage</div>
-                      <div class="cert-verify-stat-value">{{ $certificate->percentage() }}%</div>
-                    </div>
-                    <div class="cert-verify-stat">
-                      <div class="cert-verify-stat-label">Grade</div>
-                      <div class="cert-verify-stat-value">{{ $certificate->grade() }}</div>
-                    </div>
-                    <div class="cert-verify-stat {{ $result === 'PASS' ? 'pass' : 'fail' }}">
-                      <div class="cert-verify-stat-label">Result</div>
-                      <div class="cert-verify-stat-value">{{ $result }}</div>
+
+                    <div class="cert-verify-summary">
+                      <div class="cert-verify-stat">
+                        <div class="cert-verify-stat-label">Total Marks</div>
+                        <div class="cert-verify-stat-value">{{ $certificate->totalMarksObtained() }}/{{ $certificate->totalMaxMarks() }}</div>
+                      </div>
+                      <div class="cert-verify-stat">
+                        <div class="cert-verify-stat-label">Percentage</div>
+                        <div class="cert-verify-stat-value">{{ $certificate->percentage() }}%</div>
+                      </div>
+                      <div class="cert-verify-stat">
+                        <div class="cert-verify-stat-label">Grade</div>
+                        <div class="cert-verify-stat-value">{{ $certificate->grade() }}</div>
+                      </div>
+                      <div class="cert-verify-stat {{ $result === 'PASS' ? 'pass' : 'fail' }}">
+                        <div class="cert-verify-stat-label">Result</div>
+                        <div class="cert-verify-stat-value">{{ $result }}</div>
+                      </div>
                     </div>
                   </div>
                 @endif
