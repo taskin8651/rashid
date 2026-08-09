@@ -28,8 +28,8 @@
   .brand-reg { font-size: 7.5pt; color: #5c6a8a; margin-top: 1mm; }
   .brand-reg b { color: #16336e; }
 
-  .badges { position: absolute; right: 0; top: 0; width: 76mm; text-align: right; }
-  .badge-img { height: 21mm; margin-left: 4mm; vertical-align: top; }
+  .badges { position: absolute; right: 0; top: 0; width: 80mm; text-align: right; }
+  .badge-img { height: 28mm; margin-left: 2mm; vertical-align: top; }
 
   /* TITLE */
   .title-block { position: absolute; top: 40mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
@@ -171,13 +171,7 @@
         <div class="info-value">{{ $certificate->course_duration_text ?: $certificate->course->duration_text ?: '—' }}</div>
     </div>
 
-    @if ($certificate->hasMarksheetData())
-        <div class="info-item">
-            <i class="fas fa-award info-icon"></i>
-            <div class="info-label">Result</div>
-            <div class="info-value">{{ $certificate->result() }}</div>
-        </div>
-    @endif
+    
 
 </div>
     <div class="sign-col">
