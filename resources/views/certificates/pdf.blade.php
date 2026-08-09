@@ -28,8 +28,9 @@
   .brand-reg { font-size: 7.5pt; color: #5c6a8a; margin-top: 1mm; }
   .brand-reg b { color: #16336e; }
 
-  .badges { position: absolute; right: 0; top: 0; width: 80mm; text-align: right; }
-  .badge-img { height: 28mm; margin-left: 2mm; vertical-align: top; }
+  .badges { position: absolute; right: 0; top: 0; width: 95mm; text-align: right; }
+  .badge-box { position: relative; display: inline-block; width: 24mm; height: 24mm; overflow: hidden; margin-left: 2mm; vertical-align: top; }
+  .badge-img { position: absolute; top: -6mm; left: -6mm; width: 36mm; height: 36mm; }
 
   /* TITLE */
   .title-block { position: absolute; top: 40mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
@@ -80,17 +81,24 @@
   .qr-img { width: 28mm; height: 28mm; border: 1pt solid #c9a24b; padding: 1.2mm; background: #fff; }
   .qr-caption { font-size: 7pt; color: #5c6a8a; margin-top: 1.5mm; line-height: 1.3; }
 
+  /* DECORATIVE SEAL (LEFT) — mirrors the QR column for visual balance */
+  .seal-decor { position: absolute; left: 16mm; top: 88mm; width: 46mm; text-align: center; }
+  .achievement-img { width: 42mm; height: auto; }
+  .seal-decor-orn { margin-top: 2mm; font-size: 7pt; color: #c9a24b; }
+  .seal-decor-orn .srl { display: inline-block; width: 8mm; height: 0.7pt; background: #c9a24b; vertical-align: middle; margin: 0 2mm; }
+
   /* FOOTER */
   .footer-bar {
-    position: absolute; left: 9mm; right: 9mm; bottom: 12mm;
+    position: absolute; left: 9mm; right: 9mm; bottom: 20mm;
     background: #16336e; color: #fff; padding: 2.6mm 8mm; font-size: 8pt;
   }
   .footer-table { width: 100%; border-collapse: collapse; }
   .footer-table td { color: rgba(255,255,255,.92); font-size: 7.8pt; }
 
   .disclaimer {
-    position: absolute; left: 16mm; right: 16mm; bottom: 7mm;
-    text-align: center; font-size: 6pt; color: #2e2e2e; line-height: 1.3;
+    position: absolute; left: 18mm; right: 18mm; bottom: 9.5mm;
+    text-align: center; font-size: 6.3pt; color: #8b96b3; line-height: 1.4;
+    font-family: 'Times New Roman', 'DejaVu Serif', serif; font-style: italic; letter-spacing: 0.15pt;
   }
 </style>
 </head>
@@ -118,10 +126,14 @@
       </div>
       <div class="badges">
         @if (file_exists(public_path('assets/img/logoiso.png')))
-          <img class="badge-img" src="file://{{ str_replace('\\', '/', public_path('assets/img/logoiso.png')) }}">
+          <div class="badge-box">
+            <img class="badge-img" src="file://{{ str_replace('\\', '/', public_path('assets/img/logoiso.png')) }}">
+          </div>
         @endif
         @if (file_exists(public_path('assets/img/logo-msme.png')))
-          <img class="badge-img" src="file://{{ str_replace('\\', '/', public_path('assets/img/logo-msme.png')) }}">
+          <div class="badge-box">
+            <img class="badge-img" src="file://{{ str_replace('\\', '/', public_path('assets/img/logo-msme.png')) }}">
+          </div>
         @endif
       </div>
     </div>
@@ -180,6 +192,13 @@
       @endif
       <div class="sign-name">Authorized Signatory</div>
       <div class="sign-role">R-Tech Computer</div>
+    </div>
+
+    <div class="seal-decor">
+      @if (file_exists(public_path('assets/img/achievement.png')))
+        <img class="achievement-img" src="file://{{ str_replace('\\', '/', public_path('assets/img/achievement.png')) }}">
+      @endif
+      <div class="seal-decor-orn"><span class="srl"></span>&#9670;<span class="srl"></span></div>
     </div>
 
     <div class="qr-col">
