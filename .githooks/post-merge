@@ -1,0 +1,21 @@
+#!/bin/sh
+# Runs automatically after every `git pull` / `git merge`.
+# Keeps vendor/ in sync with composer.lock so server and local never drift apart.
+
+changed_files() {
+    git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD
+}
+
+if changed_files | grep -q "^composer.lock$"; then
+    echo "composer.lock changed — running composer install..."
+    composer install --no-dev --optimize-autoloader
+fi
+
+if changed_files | grep -Eq "^database/migrations/"; then
+    echo "New migrations detected — remember to run: php artisan migrate"
+fi
+
+if changed_files | grep -q "^composer.lock$"; then
+    php artisan config:clear
+    php artisan cache:clear
+fi
