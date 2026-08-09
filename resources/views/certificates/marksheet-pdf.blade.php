@@ -5,614 +5,259 @@
     $batchName = $certificate->batch_name ?: 'Batch/Time';
     $rollNo = $certificate->roll_no ?: 'Roll No.';
     $duration = $certificate->course_duration_text ?: (optional($certificate->course)->duration_text ?: 'Course Duration');
-    $issueDate = $certificate->issued_date ? $certificate->issued_date->format('d / m / Y') : 'DD / MM / YYYY';
+    $issueDate = $certificate->issued_date ? $certificate->issued_date->format('d M Y') : 'DD MM YYYY';
     $enrollmentNo = $certificate->cert_code ?: 'Enrollment No.';
     $subjects = $certificate->subjects;
-    $result = $certificate->result();
+    $result = $certificate->result() ?: 'PASS';
     $percentage = rtrim(rtrim(number_format($certificate->percentage(), 2), '0'), '.');
+    $grade = $certificate->grade() ?: '—';
 
-    $fit = function ($value, $limit = 32) {
+    $fit = function ($value, $limit = 22) {
         return \Illuminate\Support\Str::limit((string) $value, $limit, '...');
     };
-
-    $logoPath = 'file://' . str_replace('\\', '/', public_path('assets/img/rtech-logo-generated.png'));
-    $isoPath = 'file://' . str_replace('\\', '/', public_path('assets/img/logoiso.png'));
-    $msmePath = 'file://' . str_replace('\\', '/', public_path('assets/img/logo-msme.png'));
 @endphp
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" integrity="sha512-ApSLB1Pd3/bZN8fWB/RG9YhN/7bd9Hkf3AGaE2mPfebjrxagjuBtx2GcgdqIlJkUzwylBo61r9Xa9NmgBI0swA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
-    @page { margin: 0; size: A4 landscape; }
-    * { box-sizing: border-box; }
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: DejaVu Sans, Helvetica, Arial, sans-serif;
-        color: #040b38;
-        background: #ffffff;
-    }
-    .sheet {
-        position: relative;
-        width: 297mm;
-        height: 210mm;
-        overflow: hidden;
-        background: #fffefa;
-    }
+  @page { margin: 0; size: A4 landscape; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Helvetica', 'DejaVu Sans', sans-serif; color: #16233f; }
+  .sheet { position: relative; width: 297mm; height: 210mm; background: #fdfcf8; }
 
-    .outer {
-        position: absolute;
-        top: 5mm;
-        left: 5mm;
-        right: 5mm;
-        bottom: 5mm;
-        border: 2.1mm solid #020b35;
-    }
-    .inner-gold {
-        position: absolute;
-        top: 7.6mm;
-        left: 7.6mm;
-        right: 7.6mm;
-        bottom: 7.6mm;
-        border: .75mm solid #d7ad45;
-    }
-    .inner-blue {
-        position: absolute;
-        top: 9mm;
-        left: 9mm;
-        right: 9mm;
-        bottom: 9mm;
-        border: .45mm solid #020b35;
-    }
-    .corner {
-        position: absolute;
-        width: 56mm;
-        height: 56mm;
-        border: 3.8mm solid #d7ad45;
-        border-radius: 50%;
-    }
-    .corner.tl { left: 8mm; top: 8mm; border-right-color: transparent; border-bottom-color: transparent; }
-    .corner.br { right: 8mm; bottom: 8mm; border-left-color: transparent; border-top-color: transparent; }
-    .swoosh {
-        position: absolute;
-        left: -20mm;
-        right: -20mm;
-        bottom: 5mm;
-        height: 34mm;
-        background: #020b35;
-        transform: skewY(-3deg);
-    }
-    .swoosh-gold {
-        position: absolute;
-        right: -22mm;
-        bottom: 10mm;
-        width: 96mm;
-        height: 15mm;
-        border-top: 5mm solid #d7ad45;
-        border-radius: 50%;
-        transform: rotate(-17deg);
-    }
-    .white-mask {
-        position: absolute;
-        left: 18mm;
-        right: 33mm;
-        bottom: 17mm;
-        height: 23mm;
-        background: #fffefa;
-        transform: skewY(-3deg);
-    }
+  .border-outer { position: absolute; top: 6mm; left: 6mm; right: 6mm; bottom: 6mm; border: 3.2pt solid #16336e; border-radius: 9mm; }
+  .border-inner { position: absolute; top: 9mm; left: 9mm; right: 9mm; bottom: 9mm; border: 1pt solid #c9a24b; border-radius: 7mm; }
+  .accent-spine { position: absolute; top: 9mm; bottom: 9mm; left: 9mm; width: 3mm; background: #c9a24b; border-top-left-radius: 7mm; border-bottom-left-radius: 7mm; }
 
-    .header {
-        position: absolute;
-        left: 23mm;
-        right: 22mm;
-        top: 15mm;
-        height: 38mm;
-    }
-    .brand-logo {
-        position: absolute;
-        left: 0;
-        top: 1mm;
-        width: 48mm;
-        height: 31mm;
-        object-fit: contain;
-    }
-    .brand {
-        position: absolute;
-        left: 52mm;
-        right: 64mm;
-        top: 1mm;
-        text-align: center;
-    }
-    .brand h1 {
-        margin: 0;
-        color: #020b35;
-        font-size: 31pt;
-        line-height: 1;
-        font-weight: 900;
-        letter-spacing: .8pt;
-    }
-    .iso-line {
-        margin-top: 6mm;
-        color: #101845;
-        font-size: 11.2pt;
-        font-weight: 700;
-    }
-    .iso-line b { color: #020b35; }
-    .iso-line:before,
-    .iso-line:after {
-        content: "";
-        display: inline-block;
-        width: 23mm;
-        height: .7mm;
-        margin: 0 4mm 1.2mm;
-        background: #d7ad45;
-    }
-    .reg {
-        margin-top: 3mm;
-        color: #182153;
-        font-size: 9.5pt;
-        font-weight: 700;
-    }
-    .badges {
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 60mm;
-        height: 31mm;
-        white-space: nowrap;
-        text-align: right;
-    }
-    .badges img {
-        position: absolute;
-        top: 0;
-        object-fit: contain;
-        background: #fff;
-    }
-    .iso-badge { left: 0; width: 36mm; height: 26mm; }
-    .msme-badge { right: 0; width: 30mm; height: 31mm; }
+  /* HEADER */
+  .header-row { position: absolute; top: 13mm; left: 16mm; right: 16mm; height: 26mm; }
+  .brand-block { position: absolute; left: 0; top: 0; }
+  .brand-logo-wrap {
+    position: absolute; left: 0; top: 0; width: 20mm; height: 20mm;
+    background: #fff; border: 0.6pt solid #e4dcc8; border-radius: 2mm;
+    text-align: center; padding-top: 2mm;
+  }
+  .brand-logo { width: 16mm; height: 16mm; }
+  .brand-text { position: absolute; left: 24mm; top: 0; width: 130mm; }
+  .brand-name { font-size: 19pt; font-weight: bold; color: #16336e; letter-spacing: 0.5pt; }
+  .brand-sub { font-size: 9pt; color: #45516e; margin-top: 1.5mm; }
+  .brand-sub b { color: #16336e; }
+  .brand-reg { font-size: 7.5pt; color: #5c6a8a; margin-top: 1mm; }
+  .brand-reg b { color: #16336e; }
 
-    .title {
-        position: absolute;
-        top: 49mm;
-        left: 60mm;
-        right: 60mm;
-        text-align: center;
-    }
-    .title h2 {
-        margin: 0;
-        color: #050a36;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 33pt;
-        line-height: 1;
-        letter-spacing: 7pt;
-        font-weight: 700;
-    }
-    .title .rule {
-        width: 112mm;
-        height: .55mm;
-        margin: 4mm auto 0;
-        background: #d7ad45;
-    }
-    .title .ornament {
-        margin-top: -2.3mm;
-        color: #c99121;
-        font-size: 13pt;
-        letter-spacing: 1pt;
-    }
+  .badges { position: absolute; right: 0; top: 0; width: 95mm; text-align: right; }
+  .badge-box { position: relative; display: inline-block; width: 24mm; height: 24mm; overflow: hidden; margin-left: 2mm; vertical-align: top; }
+  .badge-img { position: absolute; top: -6mm; left: -6mm; width: 36mm; height: 36mm; }
 
-    .left-panel {
-        position: absolute;
-        left: 16mm;
-        top: 70mm;
-        width: 50mm;
-        height: 87mm;
-        border-right: .45mm solid #d7ad45;
-        padding-top: 1mm;
-    }
-    .side-item {
-        position: relative;
-        min-height: 15mm;
-        margin: 0 7mm 5.4mm 0;
-        padding: 1.5mm 0 2.5mm 16mm;
-        border-bottom: .3mm solid #dfc37d;
-    }
-    .side-icon {
-        position: absolute;
-        left: 0;
-        top: 1mm;
-        width: 11.8mm;
-        height: 11.8mm;
-        border-radius: 50%;
-        border: .8mm solid #d7ad45;
-        background: #020b35;
-        color: #fff;
-        text-align: center;
-        line-height: 10.2mm;
-        font-size: 8pt;
-        font-weight: 900;
-    }
-    .side-label {
-        color: #06103e;
-        font-size: 8pt;
-        font-weight: 900;
-        text-transform: uppercase;
-        line-height: 1.15;
-    }
-    .side-value {
-        margin-top: 1.6mm;
-        color: #121a4b;
-        font-size: 8pt;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    .gold { color: #c99121; }
+  /* TITLE */
+  .title-block { position: absolute; top: 38mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
+  .title { font-size: 36pt; font-weight: bold; color: #16233f; letter-spacing: 2pt; }
+  .subtitle { font-size: 12pt; color: #5c6a8a; letter-spacing: 5pt; text-transform: uppercase; margin-top: 1mm; }
+  .ornament { margin-top: 2.5mm; font-size: 8pt; color: #c9a24b; }
+  .ornament .rl { display: inline-block; width: 22mm; height: 0.8pt; background: #c9a24b; vertical-align: middle; margin: 0 3mm; }
 
-    .details {
-        position: absolute;
-        top: 70mm;
-        left: 74mm;
-        width: 151mm;
-        height: 30mm;
-        font-size: 8.6pt;
-        font-weight: 700;
-    }
-    .col {
-        position: absolute;
-        top: 0;
-        width: 72mm;
-    }
-    .col.left { left: 0; }
-    .col.right { right: 0; }
-    .row {
-        position: relative;
-        height: 7mm;
-        white-space: nowrap;
-    }
-    .label {
-        display: inline-block;
-        width: 30mm;
-        color: #06103e;
-        font-weight: 900;
-        text-transform: uppercase;
-    }
-    .right .label { width: 31mm; }
-    .colon {
-        display: inline-block;
-        width: 4mm;
-        color: #06103e;
-        text-align: center;
-    }
-    .value {
-        display: inline-block;
-        max-width: 36mm;
-        color: #121a4b;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        vertical-align: top;
-    }
-    .right .value { max-width: 34mm; }
+  /* STUDENT STRIP */
+  .ms-student { position: absolute; top: 65mm; left: 16mm; right: 96mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
+  .ms-student-name {
+    font-size: 21pt; font-weight: bold; font-style: italic; color: #16336e;
+    padding-bottom: 1.6mm; display: inline-block; border-bottom: 1pt solid #c9a24b;
+    max-width: 195mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ms-student-sub { font-size: 9pt; color: #5c6a8a; margin-top: 1.6mm; }
+  .ms-student-sub b { color: #16233f; }
 
-    .qr-block {
-        position: absolute;
-        top: 73mm;
-        right: 28mm;
-        width: 32mm;
-        text-align: center;
-    }
-    .qr-block img {
-        width: 23mm;
-        height: 23mm;
-        padding: 1.3mm;
-        border: .65mm solid #111;
-        background: #fff;
-        object-fit: contain;
-    }
-    .qr-block p {
-        margin: 3mm 0 0;
-        color: #141a3f;
-        font-size: 7.6pt;
-        line-height: 1.25;
-        font-weight: 700;
-    }
+  /* INFO ROWS (details + summary) — horizontal strips matching certificate language */
+  .ms-info { position: absolute; left: 20mm; right: 96mm; z-index: 5; }
+  .ms-info:after { content: ""; display: table; clear: both; }
+  .ms-info-item { float: left; text-align: center; padding: 0 2mm; box-sizing: border-box; }
+  .ms-info-icon { color: #16336e; margin: 0 auto 1.6mm; font-size: 13pt; display: block; }
+  .ms-info-label { font-size: 7.6pt; text-transform: uppercase; letter-spacing: 0.4pt; color: #8b96b3; }
+  .ms-info-value { font-size: 10pt; font-weight: bold; color: #16233f; margin-top: 0.6mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ms-info-value.accent { color: #c9924b; }
+  .ms-info-value.pass { color: #1c7a44; }
+  .ms-info-value.fail { color: #a91515; }
 
-    .marks {
-        position: absolute;
-        top: 97mm;
-        left: 74mm;
-        width: 151mm;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .marks th {
-        height: 8mm;
-        background: #020b35;
-        color: #fff;
-        border: .35mm solid #d7ad45;
-        font-size: 8.7pt;
-        text-transform: uppercase;
-        font-weight: 900;
-        text-align: center;
-    }
-    .marks td {
-        height: 6.2mm;
-        padding: 0 3mm;
-        border: .35mm solid #d7ad45;
-        color: #06103e;
-        font-size: 8.2pt;
-        font-weight: 700;
-        vertical-align: middle;
-    }
-    .marks td.num { text-align: center; }
-    .marks tr.total td {
-        height: 7.2mm;
-        background: #020b35;
-        color: #fff;
-        font-size: 9.4pt;
-        font-weight: 900;
-    }
-    .bracket {
-        display: inline-block;
-        min-width: 18mm;
-        color: inherit;
-    }
+  /* MARKS TABLE */
+  .ms-marks { position: absolute; top: 105mm; left: 16mm; right: 96mm; }
+  .ms-marks table { width: 100%; border-collapse: collapse; }
+  .ms-marks th {
+    height: 7mm; background: #16336e; color: #d9b65c; border: 0.5pt solid #c9a24b;
+    font-size: 8.3pt; text-transform: uppercase; font-weight: bold; letter-spacing: 0.3pt;
+  }
+  .ms-marks td {
+    height: 5.8mm; padding: 0 3mm; border: 0.5pt solid #c9a24b; color: #16233f; font-size: 8.3pt; font-weight: bold;
+  }
+  .ms-marks td.num { text-align: center; }
+  .ms-marks tr.total td { background: #16336e; color: #fff; font-size: 9pt; }
 
-    .summary {
-        position: absolute;
-        top: 155mm;
-        left: 74mm;
-        width: 151mm;
-    }
-    .summary td {
-        height: 11.5mm;
-        border: .4mm solid #06103e;
-        text-align: center;
-        color: #06103e;
-        font-size: 8.6pt;
-        font-weight: 900;
-        text-transform: uppercase;
-    }
-    .summary span {
-        display: block;
-        margin-top: 1.2mm;
-        color: #c99121;
-        font-size: 10.5pt;
-    }
-    .summary .result-pass { color: #c99121; }
-    .summary .result-fail { color: #a91515; }
+  /* SIGNATURE + QR (right sidebar) */
+  .ms-sign-col { position: absolute; left: 221mm; top: 65mm; width: 60mm; text-align: center; }
+  .ms-seal-img { width: 28mm; height: 16mm; margin-bottom: 1.5mm; }
+  .ms-sign-name { font-size: 10pt; font-weight: bold; color: #16233f; }
+  .ms-sign-role { font-size: 8.5pt; color: #5c6a8a; margin-top: 0.5mm; }
 
-    .signature {
-        position: absolute;
-        top: 112mm;
-        right: 19mm;
-        width: 50mm;
-        text-align: center;
-        color: #06103e;
-    }
-    .sign-name {
-        color: #1b2464;
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 16pt;
-        font-style: italic;
-        line-height: 1;
-        border-bottom: .35mm solid #d7ad45;
-        padding-bottom: 1mm;
-    }
-    .signature b {
-        display: block;
-        margin-top: 1mm;
-        font-size: 8pt;
-        line-height: 1.2;
-    }
-    .signature img {
-        display: block;
-        width: 34mm;
-        height: 16mm;
-        margin: 0 auto 2mm;
-        object-fit: contain;
-    }
+  .ms-qr-col { position: absolute; left: 221mm; top: 112mm; width: 60mm; text-align: center; }
+  .ms-qr-img { width: 26mm; height: 26mm; border: 1pt solid #c9a24b; padding: 1.2mm; background: #fff; }
+  .ms-qr-caption { font-size: 7pt; color: #5c6a8a; margin-top: 1.5mm; line-height: 1.3; }
 
-    .footer {
-        position: absolute;
-        left: 14mm;
-        right: 16mm;
-        bottom: 13mm;
-        height: 16mm;
-        color: #fff;
-        font-size: 7.5pt;
-        font-weight: 700;
-        border-top: .45mm solid #d7ad45;
-        border-bottom: .45mm solid #d7ad45;
-        background: rgba(2, 11, 53, .96);
-    }
-    .footer td {
-        color: #fff;
-        vertical-align: middle;
-        border-right: .35mm solid rgba(215, 173, 69, .8);
-        padding: 2.4mm 4mm 2mm;
-        line-height: 1.25;
-    }
-    .footer td:last-child { border-right: 0; }
-    .foot-label {
-        display: block;
-        color: #f2cf75;
-        font-size: 5.4pt;
-        letter-spacing: .8pt;
-        text-transform: uppercase;
-        margin-bottom: 1mm;
-    }
-    .foot-value {
-        display: block;
-        color: #fff;
-        font-size: 7.6pt;
-        font-weight: 800;
-    }
-    .disclaimer {
-        position: absolute;
-        left: 30mm;
-        right: 30mm;
-        bottom: 31.5mm;
-        color: #06103e;
-        font-size: 6.2pt;
-        line-height: 1.35;
-        text-align: center;
-        font-weight: 700;
-    }
+  /* FOOTER */
+  .footer-bar {
+    position: absolute; left: 9mm; right: 9mm; bottom: 20mm;
+    background: #16336e; color: #fff; padding: 2.6mm 8mm; font-size: 8pt;
+  }
+  .footer-table { width: 100%; border-collapse: collapse; }
+  .footer-table td { color: rgba(255,255,255,.92); font-size: 7.8pt; }
+
+  .disclaimer {
+    position: absolute; left: 18mm; right: 18mm; bottom: 9.5mm;
+    text-align: center; font-size: 6.3pt; color: #8b96b3; line-height: 1.4;
+    font-family: 'Times New Roman', 'DejaVu Serif', serif; font-style: italic; letter-spacing: 0.15pt;
+  }
 </style>
 </head>
 <body>
-<div class="sheet">
-    <div class="swoosh"></div>
-    <div class="swoosh-gold"></div>
-    <div class="white-mask"></div>
-    <div class="outer"></div>
-    <div class="inner-gold"></div>
-    <div class="inner-blue"></div>
-    <div class="corner tl"></div>
-    <div class="corner br"></div>
+  <div class="sheet">
+    <div class="border-outer"></div>
+    <div class="border-inner"></div>
+    <div class="accent-spine"></div>
 
-    <div class="header">
-        <img class="brand-logo" src="{{ $logoPath }}" alt="R-Tech Computer">
-        <div class="brand">
-            <h1>R-TECH COMPUTER</h1>
-            <div class="iso-line">An <b>ISO 9001:2015</b> Certified Institute</div>
-            <div class="reg">Udyam Registration No.: <b>UDYAM-BR-24-0042559</b></div>
-        </div>
-        <div class="badges">
-            <img class="iso-badge" src="{{ $isoPath }}" alt="ISO 9001:2015">
-            <img class="msme-badge" src="{{ $msmePath }}" alt="Udyam MSME">
-            
-        </div>
-        
-    </div>
-
-    <div class="title">
-        <h2>MARKSHEET</h2>
-        <div class="rule"></div>
-        <div class="ornament">~ ~ ~</div>
-    </div>
-
-    <div class="left-panel">
-        <div class="side-item">
-            <div class="side-icon">S</div>
-            <div class="side-label">Student Name</div>
-            <div class="side-value">{{ $fit($studentName, 22) }}</div>
-        </div>
-        <div class="side-item">
-            <div class="side-icon">C</div>
-            <div class="side-label">Course</div>
-            <div class="side-value gold">{{ $fit(strtoupper($courseName), 23) }}</div>
-        </div>
-       
-        <div class="side-item">
-            <div class="side-icon">D</div>
-            <div class="side-label">Duration</div>
-            <div class="side-value">{{ $fit($duration, 22) }}</div>
-        </div>
-        <div class="side-item">
-            <div class="side-icon">G</div>
-            <div class="side-label">Grade</div>
-            <div class="side-value">{{ $certificate->grade() ?: 'Grade' }}</div>
-        </div>
-    </div>
-
-    <div class="details">
-        <div class="col left">
-            <div class="row"><span class="label">Student Name</span><span class="colon">:</span><span class="value">{{ $fit($studentName, 29) }}</span></div>
-            <div class="row"><span class="label">Father's Name</span><span class="colon">:</span><span class="value">{{ $fit($fatherName, 29) }}</span></div>
-            <div class="row"><span class="label">Course</span><span class="colon">:</span><span class="value gold">{{ $fit(strtoupper($courseName), 29) }}</span></div>
-            <div class="row"><span class="label">Enrollment No.</span><span class="colon">:</span><span class="value">{{ $fit($enrollmentNo, 28) }}</span></div>
-        </div>
-        <div class="col right">
-            <div class="row"><span class="label">Roll No.</span><span class="colon">:</span><span class="value">{{ $fit($rollNo, 26) }}</span></div>
-            <div class="row"><span class="label">Batch</span><span class="colon">:</span><span class="value">{{ $fit($batchName, 26) }}</span></div>
-            <div class="row"><span class="label">Date of Issue</span><span class="colon">:</span><span class="value">{{ $issueDate }}</span></div>
-            <div class="row"><span class="label">Duration</span><span class="colon">:</span><span class="value">{{ $fit($duration, 26) }}</span></div>
-        </div>
-    </div>
-
-    <div class="qr-block">
-        <img src="{{ $qrDataUri }}" alt="Verification QR Code">
-        <p>Scan QR Code<br>to Verify Marksheet</p>
-    </div>
-    <div class="signature">    
-        @if(!empty($signatureImageDataUri))
-            <img src="{{ $signatureImageDataUri }}" alt="Signature">
-        @else
-            <div class="sign-name">Md Rashid</div>
+    <div class="header-row">
+      <div class="brand-block">
+        @if (file_exists(public_path('assets/img/logo.png')))
+          <div class="brand-logo-wrap">
+            <img class="brand-logo" src="file://{{ str_replace('\\', '/', public_path('assets/img/logo.png')) }}">
+          </div>
         @endif
-        <b>Authorized Signatory<br>R-Tech Computer</b>
+        <div class="brand-text">
+          <div class="brand-name">R-TECH COMPUTER</div>
+          <div class="brand-sub">An <b>ISO 9001:2015</b> Certified Institute</div>
+          <div class="brand-reg">Udyam Registration No.: <b>UDYAM-BR-24-0042559</b></div>
+        </div>
+      </div>
+      <div class="badges">
+        @if (file_exists(public_path('assets/img/logoiso.png')))
+          <div class="badge-box">
+            <img class="badge-img" src="file://{{ str_replace('\\', '/', public_path('assets/img/logoiso.png')) }}">
+          </div>
+        @endif
+        @if (file_exists(public_path('assets/img/logo-msme.png')))
+          <div class="badge-box">
+            <img class="badge-img" src="file://{{ str_replace('\\', '/', public_path('assets/img/logo-msme.png')) }}">
+          </div>
+        @endif
+      </div>
     </div>
 
-    <div class="marks">
-        <table>
-            <thead>
-                <tr>
-                    <th style="width:46%">Subjects</th>
-                    <th style="width:26%">Maximum Marks</th>
-                    <th style="width:28%">Marks Obtained</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for ($i = 0; $i < max(6, $subjects->count()); $i++)
-                    @php $subject = $subjects->get($i); @endphp
-                    <tr>
-                        <td>{!! $subject ? e($fit($subject->subject, 42)) : '&nbsp;' !!}</td>
-                        <td class="num">{!! $subject ? e($subject->max_marks ?? '') : '&nbsp;' !!}</td>
-                        <td class="num"><span class="bracket"> {{ $subject && $subject->marks_obtained !== null ? $subject->marks_obtained : '' }} </span></td>
-                    </tr>
-                @endfor
-                <tr class="total">
-                    <td>TOTAL MARKS</td>
-                    <td class="num">{{ $certificate->totalMaxMarks() }}</td>
-                    <td class="num"><span class="bracket">[ {{ $certificate->totalMarksObtained() }} ]</span></td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="title-block">
+      <div class="title">MARKSHEET</div>
+      <div class="subtitle">Statement of Marks</div>
+      <div class="ornament"><span class="rl"></span>&#9670;<span class="rl"></span></div>
     </div>
 
-    <div class="summary">
-        <table>
+    <div class="ms-student">
+      <div class="ms-student-name">{{ $fit($studentName, 34) }}</div>
+      <div class="ms-student-sub">S/o-D/o <b>{{ $fit($fatherName, 26) }}</b> &nbsp;|&nbsp; Roll No. <b>{{ $fit($rollNo, 16) }}</b></div>
+    </div>
+
+    <div class="ms-info" style="top: 86mm;">
+      <div class="ms-info-item" style="width: 20%">
+        <i class="fas fa-graduation-cap ms-info-icon"></i>
+        <div class="ms-info-label">Course</div>
+        <div class="ms-info-value accent">{{ $fit(strtoupper($courseName), 18) }}</div>
+      </div>
+      <div class="ms-info-item" style="width: 20%">
+        <i class="fas fa-id-card ms-info-icon"></i>
+        <div class="ms-info-label">Enrollment No.</div>
+        <div class="ms-info-value">{{ $fit($enrollmentNo, 16) }}</div>
+      </div>
+      <div class="ms-info-item" style="width: 20%">
+        <i class="fas fa-users ms-info-icon"></i>
+        <div class="ms-info-label">Batch</div>
+        <div class="ms-info-value">{{ $fit($batchName, 14) }}</div>
+      </div>
+      <div class="ms-info-item" style="width: 20%">
+        <i class="fas fa-clock ms-info-icon"></i>
+        <div class="ms-info-label">Duration</div>
+        <div class="ms-info-value">{{ $fit($duration, 14) }}</div>
+      </div>
+      <div class="ms-info-item" style="width: 20%">
+        <i class="fas fa-calendar-alt ms-info-icon"></i>
+        <div class="ms-info-label">Issue Date</div>
+        <div class="ms-info-value">{{ $issueDate }}</div>
+      </div>
+    </div>
+
+    <div class="ms-marks">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:46%">Subject</th>
+            <th style="width:27%">Maximum Marks</th>
+            <th style="width:27%">Marks Obtained</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for ($i = 0; $i < max(6, $subjects->count()); $i++)
+            @php $subject = $subjects->get($i); @endphp
             <tr>
-                <td>Percentage <span>[ {{ $percentage }}% ]</span></td>
-                <td>Grade <span>[ {{ $certificate->grade() ?: 'GRADE' }} ]</span></td>
-                <td>Result <span class="{{ $result === 'PASS' ? 'result-pass' : 'result-fail' }}">{{ $result ?: 'PASS' }}</span></td>
+              <td>{!! $subject ? e($fit($subject->subject, 40)) : '&nbsp;' !!}</td>
+              <td class="num">{!! $subject ? e($subject->max_marks ?? '') : '&nbsp;' !!}</td>
+              <td class="num">{!! $subject && $subject->marks_obtained !== null ? e($subject->marks_obtained) : '&nbsp;' !!}</td>
             </tr>
-        </table>
+          @endfor
+          <tr class="total">
+            <td>TOTAL MARKS</td>
+            <td class="num">{{ $certificate->totalMaxMarks() }}</td>
+            <td class="num">{{ $certificate->totalMarksObtained() }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    
-
-    <div class="footer">
-        <table>
-            <tr>
-                <td style="width:38%">
-                    <span class="foot-label">Institute Address</span>
-                    <span class="foot-value">Mogalkuan, Etwari Bazar, Sohsarai Road,<br>Bihar Sharif, Nalanda, Bihar - 803117</span>
-                </td>
-                <td style="width:18%">
-                    <span class="foot-label">Phone</span>
-                    <span class="foot-value">9117744925</span>
-                </td>
-                <td style="width:20%">
-                    <span class="foot-label">Website</span>
-                    <span class="foot-value">www.rtechcomputer.in</span>
-                </td>
-                <td style="width:24%">
-                    <span class="foot-label">Email</span>
-                    <span class="foot-value">rtechcomputer40@gmail.com</span>
-                </td>
-            </tr>
-        </table>
+    <div class="ms-info" style="top: 157mm;">
+      <div class="ms-info-item" style="width: 33.33%">
+        <i class="fas fa-percent ms-info-icon"></i>
+        <div class="ms-info-label">Percentage</div>
+        <div class="ms-info-value">{{ $percentage }}%</div>
+      </div>
+      <div class="ms-info-item" style="width: 33.33%">
+        <i class="fas fa-award ms-info-icon"></i>
+        <div class="ms-info-label">Grade</div>
+        <div class="ms-info-value accent">{{ $grade }}</div>
+      </div>
+      <div class="ms-info-item" style="width: 33.33%">
+        <i class="fas fa-check-circle ms-info-icon"></i>
+        <div class="ms-info-label">Result</div>
+        <div class="ms-info-value {{ $result === 'PASS' ? 'pass' : 'fail' }}">{{ $result }}</div>
+      </div>
     </div>
 
-    <div class="disclaimer">
-        This marksheet is issued by R-Tech Computer. ISO 9001:2015 and Udyam Registration relate to the institute's
-        certification and registration status and do not constitute government approval or accreditation of the individual course or student.
+    <div class="ms-sign-col">
+      @if (!empty($signatureImageDataUri))
+        <img class="ms-seal-img" src="{{ $signatureImageDataUri }}">
+      @endif
+      <div class="ms-sign-name">Authorized Signatory</div>
+      <div class="ms-sign-role">R-Tech Computer</div>
     </div>
-</div>
+
+    <div class="ms-qr-col">
+      <img class="ms-qr-img" src="{{ $qrDataUri }}">
+      <div class="ms-qr-caption">Scan QR Code<br>to Verify Marksheet</div>
+    </div>
+
+    <div class="footer-bar">
+      <table class="footer-table">
+        <tr>
+          <td style="width:34%">Mogalkuan, Etwari Bazar, Sohsarai Road,<br>Bihar Sharif, Nalanda &ndash; 803117</td>
+          <td style="width:20%">+91 9117744925</td>
+          <td style="width:24%">www.rtechcomputer.in</td>
+          <td style="width:22%">rtechcomputer40@gmail.com</td>
+        </tr>
+      </table>
+    </div>
+    <div class="disclaimer">This marksheet is issued by R-Tech Computer. ISO 9001:2015 and Udyam Registration relate to the institute&rsquo;s certification and registration status and do not constitute government approval or accreditation of the individual course or student.</div>
+  </div>
 </body>
 </html>
