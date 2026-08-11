@@ -48,8 +48,8 @@
   .brand-reg b { color: #16336e; }
 
   .badges { position: absolute; right: 0; top: 0; width: 95mm; text-align: right; }
-  .badge-box { position: relative; display: inline-block; width: 24mm; height: 24mm; overflow: hidden; margin-left: 2mm; vertical-align: top; }
-  .badge-img { position: absolute; top: -6mm; left: -6mm; width: 36mm; height: 36mm; }
+  .badge-box { display: inline-block; height: 24mm; margin-left: 3mm; vertical-align: top; }
+  .badge-img { height: 100%; width: auto; }
 
   /* TITLE */
   .title-block { position: absolute; top: 38mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
