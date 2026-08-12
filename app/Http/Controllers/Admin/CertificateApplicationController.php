@@ -60,7 +60,14 @@ class CertificateApplicationController extends Controller
 
         $courses = Course::where('status', 'active')->orderBy('name')->get();
 
-        return view('admin.certificates.index', compact('certificates', 'courses', 'search'));
+        $totalIssued = Certificate::where('status', 'issued')->count();
+        $issuedThisMonth = Certificate::where('status', 'issued')
+            ->whereMonth('issued_date', now()->month)
+            ->whereYear('issued_date', now()->year)
+            ->count();
+        $withMarksheet = Certificate::where('status', 'issued')->where('include_marksheet', true)->count();
+
+        return view('admin.certificates.index', compact('certificates', 'courses', 'search', 'totalIssued', 'issuedThisMonth', 'withMarksheet'));
     }
 
     public function downloadProof(CertificateApplication $application)
@@ -86,6 +93,22 @@ class CertificateApplicationController extends Controller
         return $pdf->download($filename);
     }
 
+    public function view(Certificate $certificate)
+    {
+        abort_unless($certificate->status === 'issued', 404);
+
+        $filename = 'RTech-Certificate-' . $certificate->cert_code . '.pdf';
+        $certificate->load(['user', 'course']);
+
+        $pdf = Pdf::loadView('certificates.pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream($filename);
+    }
+
     public function downloadMarksheet(Certificate $certificate)
     {
         abort_unless($certificate->status === 'issued', 404);
@@ -101,6 +124,23 @@ class CertificateApplicationController extends Controller
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download($filename);
+    }
+
+    public function viewMarksheet(Certificate $certificate)
+    {
+        abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->hasMarksheetData(), 404);
+
+        $filename = 'RTech-Marksheet-' . $certificate->cert_code . '.pdf';
+        $certificate->load(['user', 'course', 'subjects']);
+
+        $pdf = Pdf::loadView('certificates.marksheet-pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream($filename);
     }
 
     public function storeManual(Request $request)

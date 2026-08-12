@@ -44,7 +44,12 @@ class CertificateController extends Controller
             ->latest()
             ->paginate(20, ['*'], 'certificates_page');
 
-        return view('franchise.certificates.index', compact('applications', 'certificates'));
+        $pendingCount = CertificateApplication::whereHas('course', fn ($q) => $q->whereIn('franchise_booking_id', $bookingIds))
+            ->where('status', 'pending')->count();
+        $issuedCount = Certificate::whereHas('course', fn ($q) => $q->whereIn('franchise_booking_id', $bookingIds))
+            ->where('status', 'issued')->count();
+
+        return view('franchise.certificates.index', compact('applications', 'certificates', 'pendingCount', 'issuedCount'));
     }
 
     public function downloadProof(Request $request, CertificateApplication $application)
@@ -74,6 +79,24 @@ class CertificateController extends Controller
         return $pdf->download($filename);
     }
 
+    public function view(Request $request, Certificate $certificate)
+    {
+        $this->authorizeAnyFranchisePermission($request, 'view-students');
+        abort_unless($this->ownBookingIds($request)->contains($certificate->course?->franchise_booking_id), 404);
+        abort_unless($certificate->status === 'issued', 404);
+
+        $filename = 'RTech-Certificate-' . $certificate->cert_code . '.pdf';
+        $certificate->load(['user', 'course']);
+
+        $pdf = Pdf::loadView('certificates.pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream($filename);
+    }
+
     public function downloadMarksheet(Request $request, Certificate $certificate)
     {
         $this->authorizeAnyFranchisePermission($request, 'view-students');
@@ -91,6 +114,25 @@ class CertificateController extends Controller
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download($filename);
+    }
+
+    public function viewMarksheet(Request $request, Certificate $certificate)
+    {
+        $this->authorizeAnyFranchisePermission($request, 'view-students');
+        abort_unless($this->ownBookingIds($request)->contains($certificate->course?->franchise_booking_id), 404);
+        abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->hasMarksheetData(), 404);
+
+        $filename = 'RTech-Marksheet-' . $certificate->cert_code . '.pdf';
+        $certificate->load(['user', 'course', 'subjects']);
+
+        $pdf = Pdf::loadView('certificates.marksheet-pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream($filename);
     }
 
     private function signatureImageDataUri(): string

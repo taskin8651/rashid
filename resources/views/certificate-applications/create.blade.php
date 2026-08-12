@@ -8,6 +8,7 @@
   <section class="sec">
     <div class="container" style="max-width:760px">
       <div class="text-center mb-4 rv">
+        <div style="width:56px;height:56px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;margin:0 auto 14px;box-shadow:0 10px 24px -8px rgba(37,99,235,.5)"><i class="bi bi-award-fill"></i></div>
         <div class="sec-lbl">Offline Students</div>
         <h2 class="sec-h">Apply for Your <em>Certificate</em></h2>
         <p style="font-size:14px;color:var(--muted);max-width:520px;margin:10px auto 0">Trained at an R-Tech Computer institute offline? Register here and apply for your official completion certificate — our team will review and issue it.</p>
@@ -21,7 +22,10 @@
         <form method="POST" action="{{ route('certificate-applications.store') }}" enctype="multipart/form-data">
           @csrf
           <div class="row g-3">
-            <div class="col-12"><h6 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Your Details</h6></div>
+            <div class="col-12 d-flex align-items-center gap-2" style="margin-bottom:2px">
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--grad);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">1</span>
+              <h6 style="font-size:14px;font-weight:700;color:var(--text);margin:0">Your Details</h6>
+            </div>
             <div class="col-md-6"><label class="fl">Full Name</label><input class="mi" type="text" name="name" value="{{ auth()->user()->name ?? old('name') }}" placeholder="Enter your full name" required /></div>
             <div class="col-md-6"><label class="fl">Email</label><input class="mi" type="email" name="email" value="{{ auth()->user()->email ?? old('email') }}" placeholder="you@example.com" required @if(auth()->check()) readonly @endif /></div>
             <div class="col-md-6"><label class="fl">Phone</label><input class="mi" type="tel" name="phone" value="{{ auth()->user()->phone ?? old('phone') }}" placeholder="+91 XXXXX XXXXX" required /></div>
@@ -32,7 +36,10 @@
               <div class="col-12"><p style="font-size:11px;color:var(--muted);margin:0"><i class="bi bi-info-circle me-1"></i>We'll create your student account so you can track your application and download your certificate.</p></div>
             @endguest
 
-            <div class="col-12 mt-2"><h6 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Training Details</h6></div>
+            <div class="col-12 mt-2 d-flex align-items-center gap-2" style="margin-bottom:2px">
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--grad);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">2</span>
+              <h6 style="font-size:14px;font-weight:700;color:var(--text);margin:0">Training Details</h6>
+            </div>
             <div class="col-md-6">
               <label class="fl">Course You Completed</label>
               <select class="mi" name="course_id" required>

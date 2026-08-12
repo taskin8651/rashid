@@ -152,9 +152,11 @@
             <div class="d-flex align-items-center gap-2">
               @if ($cert->status === 'issued')
                 @if ($cert->include_certificate)
+                  <a href="{{ route('franchise.certificates.view', $cert) }}" style="font-size:11px;color:var(--ok)" title="View Certificate" target="_blank"><i class="bi bi-eye-fill"></i></a>
                   <a href="{{ route('franchise.certificates.download', $cert) }}" style="font-size:11px;color:var(--ok)" title="Download Certificate"><i class="bi bi-award-fill"></i></a>
                 @endif
                 @if ($cert->include_marksheet && $cert->subjects->isNotEmpty())
+                  <a href="{{ route('franchise.certificates.marksheet.view', $cert) }}" style="font-size:11px;color:var(--ok)" title="View Marksheet" target="_blank"><i class="bi bi-eye-fill"></i></a>
                   <a href="{{ route('franchise.certificates.marksheet', $cert) }}" style="font-size:11px;color:var(--ok)" title="Download Marksheet"><i class="bi bi-file-earmark-text-fill"></i></a>
                 @endif
               @endif

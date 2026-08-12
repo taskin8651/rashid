@@ -84,6 +84,25 @@ class CertificateController extends Controller
         return $pdf->download($filename);
     }
 
+    public function view(Certificate $certificate)
+    {
+        abort_unless($certificate->user_id === auth()->id(), 403);
+        abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->include_certificate, 404);
+
+        $filename = 'RTech-Certificate-' . $certificate->cert_code . '.pdf';
+
+        $certificate->load(['user', 'course']);
+
+        $pdf = Pdf::loadView('certificates.pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream($filename);
+    }
+
     public function downloadMarksheet(Certificate $certificate)
     {
         abort_unless($certificate->user_id === auth()->id(), 403);
@@ -102,6 +121,26 @@ class CertificateController extends Controller
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download($filename);
+    }
+
+    public function viewMarksheet(Certificate $certificate)
+    {
+        abort_unless($certificate->user_id === auth()->id(), 403);
+        abort_unless($certificate->status === 'issued', 404);
+        abort_unless($certificate->include_marksheet, 404);
+        abort_unless($certificate->hasMarksheetData(), 404);
+
+        $certificate->load(['user', 'course', 'subjects']);
+
+        $filename = 'RTech-Marksheet-' . $certificate->cert_code . '.pdf';
+
+        $pdf = Pdf::loadView('certificates.marksheet-pdf', [
+            'certificate' => $certificate,
+            'qrDataUri' => $this->verificationQrDataUri($certificate),
+            'signatureImageDataUri' => $this->signatureImageDataUri(),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->stream($filename);
     }
 
     private function signatureImageDataUri(): string

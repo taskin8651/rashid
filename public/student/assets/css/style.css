@@ -243,3 +243,69 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var
 .att-divider{display:flex;align-items:center;gap:12px;margin:20px 0;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .att-divider::before,.att-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 #qr-reader video{border-radius:12px}
+
+/* ══════════════════════ CERTIFICATE — PREMIUM ══════════════════════ */
+:root{
+  --cert-navy:#0d1e3c;--cert-navy-2:#16336e;--cert-navy-3:#1c4694;
+  --cert-gold:#c9a24b;--cert-gold-2:#e8c873;--cert-gold-ink:#8a6a22;--cert-gold-rgb:201,162,75;
+  --cert-grad-navy:linear-gradient(135deg,#0d1e3c 0%,#16336e 55%,#1c4694 100%);
+  --cert-grad-gold:linear-gradient(135deg,#c9a24b 0%,#e8c873 100%);
+}
+:root[data-theme="dark"]{--cert-gold-ink:var(--cert-gold-2)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--cert-gold-ink:var(--cert-gold-2)}}
+
+.cert-hero{position:relative;overflow:hidden;background:var(--cert-grad-navy);border-radius:20px;padding:28px 30px;color:#fff;margin-bottom:22px;border:1px solid rgba(var(--cert-gold-rgb),.35)}
+.cert-hero::before{content:'';position:absolute;top:-70px;right:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(var(--cert-gold-rgb),.24),transparent 70%)}
+.cert-hero::after{content:'';position:absolute;bottom:-90px;left:12%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 70%)}
+.cert-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;position:relative}
+.cert-hero-icon{width:52px;height:52px;border-radius:14px;background:rgba(var(--cert-gold-rgb),.18);border:1px solid rgba(var(--cert-gold-rgb),.42);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--cert-gold-2);flex-shrink:0}
+.cert-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(var(--cert-gold-rgb),.16);border:1px solid rgba(var(--cert-gold-rgb),.4);color:var(--cert-gold-2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 11px;border-radius:20px;margin-bottom:10px}
+.cert-hero h4{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:23px;margin:0 0 4px}
+.cert-hero p{font-size:13px;color:rgba(255,255,255,.72);margin:0;max-width:480px}
+.cert-hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:22px;position:relative}
+.cert-hero-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:13px 15px;backdrop-filter:blur(4px)}
+.cert-hero-stat b{display:block;font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;color:#fff;line-height:1.1}
+.cert-hero-stat span{font-size:10.5px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.5px}
+
+.cert-toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cert-search{position:relative;flex:1;min-width:240px;max-width:360px}
+.cert-search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+.cert-search input{padding-left:36px}
+
+.cert-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.cert-card-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.cert-card-head i{color:var(--cert-gold-ink);font-size:16px}
+.cert-card-head h6{font-size:14px;font-weight:700;margin:0;color:var(--text)}
+.cert-card-head span{font-size:11px;color:var(--muted);margin-left:auto}
+
+.cert-avatar{width:36px;height:36px;border-radius:50%;background:var(--cert-grad-navy);color:var(--cert-gold-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;border:1px solid rgba(var(--cert-gold-rgb),.4)}
+.cert-name-cell{display:flex;align-items:center;gap:10px}
+.cert-name-cell .nm{font-weight:600;color:var(--text);font-size:13px}
+.cert-name-cell .em{font-size:11px;color:var(--muted)}
+
+.badge-cert-issued{background:rgba(var(--cert-gold-rgb),.14);color:var(--cert-gold-ink);border:1px solid rgba(var(--cert-gold-rgb),.4);font-size:11px;font-weight:700;padding:3px 11px;border-radius:10px;display:inline-flex;align-items:center;gap:4px}
+
+.cert-icon-btn{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;text-decoration:none;border:1px solid var(--border);background:rgba(var(--text-rgb),.03);color:rgba(var(--text-rgb),.6);transition:all .2s;margin-right:5px;cursor:pointer}
+.cert-icon-btn.navy:hover{border-color:var(--cert-navy-3);color:var(--cert-navy-3)}
+:root[data-theme="dark"] .cert-icon-btn.navy:hover{color:#7fb0ff;border-color:#7fb0ff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .cert-icon-btn.navy:hover{color:#7fb0ff;border-color:#7fb0ff}}
+.cert-icon-btn.gold:hover{border-color:var(--cert-gold);color:var(--cert-gold-ink);background:rgba(var(--cert-gold-rgb),.1)}
+
+.cert-empty{padding:56px 20px;text-align:center}
+.cert-empty i{font-size:36px;color:var(--cert-gold);opacity:.5;margin-bottom:10px;display:block}
+.cert-empty b{display:block;font-size:14px;color:var(--text);margin-bottom:3px}
+.cert-empty span{font-size:12px;color:var(--muted)}
+
+/* Student trophy card — premium upgrade */
+.cert.cert-premium{border:1px solid rgba(var(--cert-gold-rgb),.55);box-shadow:0 18px 40px -14px rgba(13,30,60,.55)}
+.cert.cert-premium::before{border-color:rgba(var(--cert-gold-rgb),.3)}
+.cert-corner-ribbon{position:absolute;top:0;right:0;width:100px;height:100px;overflow:hidden;pointer-events:none}
+.cert-corner-ribbon span{position:absolute;top:17px;right:-32px;width:140px;transform:rotate(45deg);background:var(--cert-grad-gold);color:#241a04;font-size:10px;font-weight:800;text-align:center;padding:4px 0;letter-spacing:.6px;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.cert-seal{width:60px;height:60px;border-radius:50%;background:var(--cert-grad-gold);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px;box-shadow:0 8px 20px rgba(var(--cert-gold-rgb),.35);border:3px solid rgba(255,255,255,.25)}
+.cert-code-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(var(--cert-gold-rgb),.35);color:var(--cert-gold-2);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;margin-top:2px}
+.cert-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;border:1px solid rgba(255,255,255,.22)}
+.cert-btn.primary{background:var(--cert-grad-gold);color:#241a04;border:none;box-shadow:0 8px 20px rgba(var(--cert-gold-rgb),.3)}
+.cert-btn.primary:hover{opacity:.9;color:#241a04}
+.cert-btn.ghost{background:rgba(255,255,255,.1);color:#fff}
+.cert-btn.ghost:hover{background:rgba(255,255,255,.18);color:#fff}
+.cert-locked-icon{width:46px;height:46px;border-radius:12px;background:rgba(var(--text-rgb),.06);display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--muted);flex-shrink:0}

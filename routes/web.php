@@ -195,7 +195,9 @@ Route::middleware(['auth', 'track.active'])->group(function () {
 
         Route::get('/certificates', [StudentCertificateController::class, 'index'])->name('student.certificates.index');
         Route::get('/certificates/{certificate}/download', [StudentCertificateController::class, 'download'])->name('student.certificates.download');
+        Route::get('/certificates/{certificate}/view', [StudentCertificateController::class, 'view'])->name('student.certificates.view');
         Route::get('/certificates/{certificate}/marksheet', [StudentCertificateController::class, 'downloadMarksheet'])->name('student.certificates.marksheet');
+        Route::get('/certificates/{certificate}/marksheet/view', [StudentCertificateController::class, 'viewMarksheet'])->name('student.certificates.marksheet.view');
 
         Route::get('/wishlist', [StudentWishlistController::class, 'index'])->name('student.wishlist.index');
         Route::post('/wishlist/toggle', [StudentWishlistController::class, 'toggle'])->name('student.wishlist.toggle');
@@ -280,7 +282,9 @@ Route::middleware(['auth', 'track.active'])->group(function () {
 
         Route::get('/certificates', [FranchiseCertificateController::class, 'index'])->name('franchise.certificates.index');
         Route::get('/certificates/{certificate}/download', [FranchiseCertificateController::class, 'download'])->name('franchise.certificates.download');
+        Route::get('/certificates/{certificate}/view', [FranchiseCertificateController::class, 'view'])->name('franchise.certificates.view');
         Route::get('/certificates/{certificate}/marksheet', [FranchiseCertificateController::class, 'downloadMarksheet'])->name('franchise.certificates.marksheet');
+        Route::get('/certificates/{certificate}/marksheet/view', [FranchiseCertificateController::class, 'viewMarksheet'])->name('franchise.certificates.marksheet.view');
         Route::get('/certificate-applications/{application}/proof', [FranchiseCertificateController::class, 'downloadProof'])->name('franchise.certificate-applications.proof');
 
         Route::get('/reviews', [FranchiseReviewController::class, 'index'])->name('franchise.reviews.index');
@@ -456,7 +460,9 @@ Route::middleware(['auth', 'track.active'])->group(function () {
             Route::post('/certificate-applications/manual', [AdminCertificateApplicationController::class, 'storeManual'])->name('admin.certificate-applications.manual-store');
             Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
             Route::get('/certificates/{certificate}/download', [AdminCertificateApplicationController::class, 'download'])->name('admin.certificates.download');
+            Route::get('/certificates/{certificate}/view', [AdminCertificateApplicationController::class, 'view'])->name('admin.certificates.view');
             Route::get('/certificates/{certificate}/marksheet', [AdminCertificateApplicationController::class, 'downloadMarksheet'])->name('admin.certificates.marksheet');
+            Route::get('/certificates/{certificate}/marksheet/view', [AdminCertificateApplicationController::class, 'viewMarksheet'])->name('admin.certificates.marksheet.view');
             Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
             Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
             Route::post('/certificates/{certificate}/documents', [AdminCertificateApplicationController::class, 'updateDocuments'])->name('admin.certificates.documents.update');
