@@ -211,19 +211,19 @@
    <div class="info-row">
 
     <div class="info-item">
-        <span class="info-icon-ring"><span class="info-icon-cell"><i class="fa-ico info-icon">&#xf0a3;</i></span></span>
+        <span class="info-icon-ring"><span class="info-icon-cell"><i class="fa-ico info-icon" style="font-size:11.5pt">&#xf0a3;</i></span></span>
         <div class="info-label">Certificate No.</div>
         <div class="info-value">{{ $certificate->cert_code }}</div>
     </div>
 
     <div class="info-item">
-        <span class="info-icon-ring"><span class="info-icon-cell"><i class="fa-ico info-icon">&#xf073;</i></span></span>
+        <span class="info-icon-ring"><span class="info-icon-cell"><i class="fa-ico info-icon" style="font-size:11pt">&#xf073;</i></span></span>
         <div class="info-label">Issue Date</div>
         <div class="info-value">{{ $certificate->issued_date->format('d M Y') }}</div>
     </div>
 
     <div class="info-item">
-        <span class="info-icon-ring"><span class="info-icon-cell"><i class="fa-ico info-icon">&#xf017;</i></span></span>
+        <span class="info-icon-ring"><span class="info-icon-cell"><i class="fa-ico info-icon" style="font-size:15pt">&#xf017;</i></span></span>
         <div class="info-label">Course Duration</div>
         <div class="info-value">{{ $certificate->course_duration_text ?: $certificate->course->duration_text ?: '—' }}</div>
     </div>

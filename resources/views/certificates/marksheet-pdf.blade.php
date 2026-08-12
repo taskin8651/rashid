@@ -208,27 +208,27 @@
 
     <div class="ms-info" style="top: 86mm;">
       <div class="ms-info-item" style="width: 20%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf19d;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:6.8pt">&#xf19d;</i></span></span>
         <div class="ms-info-label">Course</div>
         <div class="ms-info-value accent">{{ $fit(strtoupper($courseName), 18) }}</div>
       </div>
       <div class="ms-info-item" style="width: 20%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf2c2;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:7pt">&#xf2c2;</i></span></span>
         <div class="ms-info-label">Enrollment No.</div>
         <div class="ms-info-value">{{ $fit($enrollmentNo, 16) }}</div>
       </div>
       <div class="ms-info-item" style="width: 20%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf0c0;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:7.2pt">&#xf0c0;</i></span></span>
         <div class="ms-info-label">Batch</div>
         <div class="ms-info-value">{{ $fit($batchName, 14) }}</div>
       </div>
       <div class="ms-info-item" style="width: 20%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf017;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:13pt">&#xf017;</i></span></span>
         <div class="ms-info-label">Duration</div>
         <div class="ms-info-value">{{ $fit($duration, 14) }}</div>
       </div>
       <div class="ms-info-item" style="width: 20%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf073;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:9.5pt">&#xf073;</i></span></span>
         <div class="ms-info-label">Issue Date</div>
         <div class="ms-info-value">{{ $issueDate }}</div>
       </div>
@@ -263,17 +263,17 @@
 
     <div class="ms-info" style="top: 157mm;">
       <div class="ms-info-item" style="width: 33.33%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf295;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:11.3pt">&#xf295;</i></span></span>
         <div class="ms-info-label">Percentage</div>
         <div class="ms-info-value">{{ $percentage }}%</div>
       </div>
       <div class="ms-info-item" style="width: 33.33%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf005;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:9.3pt">&#xf005;</i></span></span>
         <div class="ms-info-label">Grade</div>
         <div class="ms-info-value accent">{{ $grade }}</div>
       </div>
       <div class="ms-info-item" style="width: 33.33%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon">&#xf058;</i></span></span>
+        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:9.3pt">&#xf058;</i></span></span>
         <div class="ms-info-label">Result</div>
         <div class="ms-info-value {{ $result === 'PASS' ? 'pass' : 'fail' }}">{{ $result }}</div>
       </div>
