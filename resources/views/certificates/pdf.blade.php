@@ -76,7 +76,7 @@
   }
   .lead2 { font-size: 12.5pt; color: #45516e; margin-bottom: 2mm; }
   .course-ribbon {
-    display: inline-block; background: #16336e; color: #d9b65c; font-weight: bold; font-size: 17pt;
+    display: inline-block; background: #16336e; color: #d9b65c; font-weight: 900; font-size: 17pt;
     letter-spacing: 0.5pt; padding: 3mm 16mm; border-radius: 6mm; margin-bottom: 2mm;
     max-width: 240mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     box-shadow: 0 2mm 3mm -1.5mm rgba(13,30,60,.4), inset 0 0 0 0.7pt rgba(217,182,92,.55);
