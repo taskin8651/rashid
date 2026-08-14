@@ -118,7 +118,7 @@ class CertificateController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
-        ])->setPaper('a4', 'landscape');
+        ])->setPaper('a4', 'portrait');
 
         return $pdf->download($filename);
     }
@@ -138,7 +138,7 @@ class CertificateController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
-        ])->setPaper('a4', 'landscape');
+        ])->setPaper('a4', 'portrait');
 
         return $pdf->stream($filename);
     }

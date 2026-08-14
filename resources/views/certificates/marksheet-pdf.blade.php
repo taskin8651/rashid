@@ -2,7 +2,6 @@
     $studentName = $certificate->student_name ?: (optional($certificate->user)->name ?: 'Student Name');
     $fatherName = $certificate->father_name ?: 'Father Name';
     $courseName = $certificate->course_name ?: (optional($certificate->course)->name ?: 'Course Name');
-    $batchName = $certificate->batch_name ?: 'Batch/Time';
     $rollNo = $certificate->roll_no ?: 'Roll No.';
     $duration = $certificate->course_duration_text ?: (optional($certificate->course)->duration_text ?: 'Course Duration');
     $issueDate = $certificate->issued_date ? $certificate->issued_date->format('d M Y') : 'DD MM YYYY';
@@ -21,10 +20,10 @@
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { margin: 0; size: A4 landscape; }
+  @page { margin: 0; size: A4 portrait; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: 'Helvetica', 'DejaVu Sans', sans-serif; color: #16233f; }
-  .sheet { position: relative; width: 297mm; height: 210mm; background: #fdfcf8; }
+  .sheet { position: relative; width: 210mm; height: 297mm; background: #fdfcf8; }
 
   /* Self-hosted icon font — dompdf can't fetch remote CDN CSS (enable_remote is off)
      and modern Font Awesome uses CSS custom properties dompdf can't parse, so a local
@@ -56,11 +55,11 @@
     text-align: center; padding-top: 2mm;
   }
   .brand-logo { width: 16mm; height: 16mm; }
-  .brand-text { position: absolute; left: 24mm; top: 0; width: 130mm; }
-  .brand-name { font-size: 19pt; font-weight: bold; color: #16336e; letter-spacing: 0.5pt; }
-  .brand-sub { font-size: 9pt; color: #45516e; margin-top: 1.5mm; }
+  .brand-text { position: absolute; left: 24mm; top: 0; width: 105mm; }
+  .brand-name { font-size: 20pt; font-weight: bold; color: #16336e; letter-spacing: 0.5pt; }
+  .brand-sub { font-size: 10pt; color: #45516e; margin-top: 1.5mm; }
   .brand-sub b { color: #16336e; }
-  .brand-reg { font-size: 7.5pt; color: #5c6a8a; margin-top: 1mm; }
+  .brand-reg { font-size: 8.5pt; color: #5c6a8a; margin-top: 1mm; }
   .brand-reg b { color: #16336e; }
 
   .badges { position: absolute; right: 0; top: 0; }
@@ -68,67 +67,70 @@
   .badge-cell { text-align: center; vertical-align: top; padding: 0 0 0 4mm; }
   .badge-chip {
     width: 17mm; height: 17mm; margin: 0 auto 1.2mm; background: #fff;
-    border: 0.8pt solid #c9a24b; border-radius: 2.6mm; text-align: center; padding-top: 1.6mm;
+    border: 0.8pt solid #c9a24b; border-radius: 2.6mm; text-align: center; padding-top: 0.8mm;
     box-shadow: 0 1.6mm 2.6mm -1.6mm rgba(13,30,60,.35), inset 0 0 0 0.5pt rgba(201,162,75,.25);
   }
-  .badge-img { height: 12.5mm; width: auto; }
+  .badge-img { height: 15.5mm; width: auto; max-width: 20mm; }
   .badge-cap {
     font-family: 'Helvetica', 'DejaVu Sans', sans-serif; font-size: 5.8pt; font-weight: bold;
     color: #16336e; text-transform: uppercase; letter-spacing: 0.3pt; line-height: 1.3;
   }
 
   /* TITLE */
-  .title-block { position: absolute; top: 38mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
-  .title { font-size: 36pt; font-weight: bold; color: #16233f; letter-spacing: 2pt; }
-  .subtitle { font-size: 12pt; color: #5c6a8a; letter-spacing: 5pt; text-transform: uppercase; margin-top: 1mm; }
-  .ornament { margin-top: 2.5mm; font-size: 8pt; color: #c9a24b; }
+  .title-block { position: absolute; top: 42mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
+  .title { font-size: 40pt; font-weight: bold; color: #16233f; letter-spacing: 2pt; }
+  .subtitle { font-size: 13pt; color: #5c6a8a; letter-spacing: 5pt; text-transform: uppercase; margin-top: 1mm; }
+  .ornament { margin-top: 2.5mm; font-size: 8.5pt; color: #c9a24b; }
   .ornament .rl { display: inline-block; width: 22mm; height: 0.8pt; background: #c9a24b; vertical-align: middle; margin: 0 3mm; }
 
   /* STUDENT STRIP */
-  .ms-student { position: absolute; top: 65mm; left: 16mm; right: 96mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
+  .ms-student { position: absolute; top: 74mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
   .ms-student-name {
-    font-size: 21pt; font-weight: bold; font-style: italic; color: #16336e;
+    font-size: 24pt; font-weight: bold; font-style: italic; color: #16336e;
     padding-bottom: 1.6mm; display: inline-block; border-bottom: 1pt solid #c9a24b;
-    max-width: 195mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 176mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .ms-student-sub { font-size: 9pt; color: #5c6a8a; margin-top: 1.6mm; }
+  .ms-student-sub { font-size: 10.5pt; color: #5c6a8a; margin-top: 1.6mm; }
   .ms-student-sub b { color: #16233f; }
 
   /* INFO ROWS (details + summary) — horizontal strips matching certificate language */
-  .ms-info { position: absolute; left: 20mm; right: 96mm; z-index: 5; }
+  .ms-info { position: absolute; left: 20mm; right: 16mm; z-index: 5; }
   .ms-info:after { content: ""; display: table; clear: both; }
   .ms-info-item { float: left; text-align: center; padding: 0 2mm; box-sizing: border-box; }
   .ms-info-icon-ring { display: table; width: 7mm; height: 7mm; margin: 0 auto 1.4mm; }
   .ms-info-icon-cell { display: table-cell; width: 7mm; height: 7mm; border-radius: 50%; border: 0.8pt solid rgba(201,162,75,.65); background: #fff; text-align: center; vertical-align: middle; }
   .ms-info-icon { color: #16336e; font-size: 9.5pt; }
-  .ms-info-label { font-size: 7.6pt; text-transform: uppercase; letter-spacing: 0.4pt; color: #8b96b3; }
-  .ms-info-value { font-size: 10pt; font-weight: bold; color: #16233f; margin-top: 0.6mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ms-info-label { font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.4pt; color: #8b96b3; }
+  .ms-info-value { font-size: 11.5pt; font-weight: bold; color: #16233f; margin-top: 0.6mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ms-info-value.accent { color: #c9924b; }
   .ms-info-value.pass { color: #1c7a44; }
   .ms-info-value.fail { color: #a91515; }
 
   /* MARKS TABLE */
-  .ms-marks { position: absolute; top: 105mm; left: 16mm; right: 96mm; }
+  .ms-marks { position: absolute; top: 120mm; left: 16mm; right: 16mm; }
   .ms-marks table { width: 100%; border-collapse: collapse; }
   .ms-marks th {
-    height: 7mm; background: #16336e; color: #d9b65c; border: 0.5pt solid #c9a24b;
-    font-size: 8.3pt; text-transform: uppercase; font-weight: bold; letter-spacing: 0.3pt;
+    height: 9.5mm; padding: 0 3mm; background: #16336e; color: #d9b65c; border: 0.5pt solid #c9a24b;
+    font-size: 11pt; text-transform: uppercase; font-weight: bold; letter-spacing: 0.3pt;
     box-shadow: inset 0 -0.7pt 0 rgba(217,182,92,.5);
+    text-align: center; vertical-align: middle;
   }
+  .ms-marks th:first-child { text-align: left; }
   .ms-marks td {
-    height: 5.8mm; padding: 0 3mm; border: 0.5pt solid #c9a24b; color: #16233f; font-size: 8.3pt; font-weight: bold;
+    height: 8mm; padding: 0 3mm; border: 0.5pt solid #c9a24b; color: #16233f; font-size: 11pt; font-weight: bold;
+    text-align: left; vertical-align: middle;
   }
   .ms-marks td.num { text-align: center; }
-  .ms-marks tr.total td { background: #16336e; color: #fff; font-size: 9pt; }
+  .ms-marks tr.total td { background: #16336e; color: #fff; font-size: 12.5pt; }
 
-  /* SIGNATURE + QR (right sidebar) */
-  .ms-sign-col { position: absolute; left: 221mm; top: 65mm; width: 60mm; text-align: center; }
+  /* SIGNATURE + QR (bottom row) */
+  .ms-sign-col { position: absolute; left: 35mm; top: 219mm; width: 60mm; text-align: center; }
   .ms-seal-img-wrap { width: 20mm; height: 20mm; margin: 0 auto 1.5mm; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1pt rgba(201,162,75,.55), 0 2mm 3mm -1.5mm rgba(0,0,0,.25); }
   .ms-seal-img { width: 100%; height: 100%; }
-  .ms-sign-name { font-size: 10pt; font-weight: bold; color: #16233f; }
-  .ms-sign-role { font-size: 8.5pt; color: #5c6a8a; margin-top: 0.5mm; }
+  .ms-sign-name { font-size: 11pt; font-weight: bold; color: #16233f; }
+  .ms-sign-role { font-size: 9.5pt; color: #5c6a8a; margin-top: 0.5mm; }
 
-  .ms-qr-col { position: absolute; left: 221mm; top: 112mm; width: 60mm; text-align: center; }
+  .ms-qr-col { position: absolute; left: 115mm; top: 219mm; width: 60mm; text-align: center; }
   .ms-qr-wrap { position: relative; display: inline-block; }
   .ms-qr-img { width: 26mm; height: 26mm; border: 1pt solid #c9a24b; padding: 1.2mm; background: #fff; box-shadow: 0 2mm 3mm -1.5mm rgba(0,0,0,.25); }
   .ms-qr-bracket { position: absolute; width: 4mm; height: 4mm; border-color: #16336e; border-style: solid; border-width: 0; }
@@ -136,20 +138,23 @@
   .ms-qr-bracket.tr { top: -1.6mm; right: -1.6mm; border-top-width: 1.1pt; border-right-width: 1.1pt; }
   .ms-qr-bracket.bl { bottom: -1.6mm; left: -1.6mm; border-bottom-width: 1.1pt; border-left-width: 1.1pt; }
   .ms-qr-bracket.br { bottom: -1.6mm; right: -1.6mm; border-bottom-width: 1.1pt; border-right-width: 1.1pt; }
-  .ms-qr-caption { font-size: 7pt; color: #5c6a8a; margin-top: 1.5mm; line-height: 1.3; }
+  .ms-qr-caption { font-size: 8pt; color: #5c6a8a; margin-top: 1.5mm; line-height: 1.3; }
+
+  .ms-issue-date { position: absolute; top: 259mm; left: 16mm; right: 16mm; text-align: center; font-size: 9.5pt; color: #5c6a8a; }
+  .ms-issue-date b { color: #16233f; }
 
   /* FOOTER */
   .footer-bar {
     position: absolute; left: 9mm; right: 9mm; bottom: 20mm;
-    background: #16336e; color: #fff; padding: 2.6mm 8mm; font-size: 8pt;
+    background: #16336e; color: #fff; padding: 2.6mm 8mm; font-size: 9pt;
     border-top: 0.9pt solid #c9a24b;
   }
   .footer-table { width: 100%; border-collapse: collapse; }
-  .footer-table td { color: rgba(255,255,255,.92); font-size: 7.8pt; }
+  .footer-table td { color: rgba(255,255,255,.92); font-size: 8.8pt; }
 
   .disclaimer {
     position: absolute; left: 18mm; right: 18mm; bottom: 9.5mm;
-    text-align: center; font-size: 6.3pt; color: #8b96b3; line-height: 1.4;
+    text-align: center; font-size: 7pt; color: #8b96b3; line-height: 1.4;
     font-family: 'Times New Roman', 'DejaVu Serif', serif; font-style: italic; letter-spacing: 0.15pt;
   }
 </style>
@@ -206,31 +211,21 @@
       <div class="ms-student-sub">S/o-D/o <b>{{ $fit($fatherName, 26) }}</b> &nbsp;|&nbsp; Roll No. <b>{{ $fit($rollNo, 16) }}</b></div>
     </div>
 
-    <div class="ms-info" style="top: 86mm;">
-      <div class="ms-info-item" style="width: 20%">
+    <div class="ms-info" style="top: 98mm;">
+      <div class="ms-info-item" style="width: 33.33%">
         <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:6.8pt">&#xf19d;</i></span></span>
         <div class="ms-info-label">Course</div>
-        <div class="ms-info-value accent">{{ $fit(strtoupper($courseName), 18) }}</div>
+        <div class="ms-info-value accent">{{ $fit(strtoupper($courseName), 22) }}</div>
       </div>
-      <div class="ms-info-item" style="width: 20%">
+      <div class="ms-info-item" style="width: 33.33%">
         <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:7pt">&#xf2c2;</i></span></span>
         <div class="ms-info-label">Enrollment No.</div>
-        <div class="ms-info-value">{{ $fit($enrollmentNo, 16) }}</div>
+        <div class="ms-info-value">{{ $fit($enrollmentNo, 20) }}</div>
       </div>
-      <div class="ms-info-item" style="width: 20%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:7.2pt">&#xf0c0;</i></span></span>
-        <div class="ms-info-label">Batch</div>
-        <div class="ms-info-value">{{ $fit($batchName, 14) }}</div>
-      </div>
-      <div class="ms-info-item" style="width: 20%">
+      <div class="ms-info-item" style="width: 33.33%">
         <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:13pt">&#xf017;</i></span></span>
         <div class="ms-info-label">Duration</div>
-        <div class="ms-info-value">{{ $fit($duration, 14) }}</div>
-      </div>
-      <div class="ms-info-item" style="width: 20%">
-        <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:9.5pt">&#xf073;</i></span></span>
-        <div class="ms-info-label">Issue Date</div>
-        <div class="ms-info-value">{{ $issueDate }}</div>
+        <div class="ms-info-value">{{ $fit($duration, 18) }}</div>
       </div>
     </div>
 
@@ -261,7 +256,7 @@
       </table>
     </div>
 
-    <div class="ms-info" style="top: 157mm;">
+    <div class="ms-info" style="top: 196mm;">
       <div class="ms-info-item" style="width: 33.33%">
         <span class="ms-info-icon-ring"><span class="ms-info-icon-cell"><i class="fa-ico ms-info-icon" style="font-size:11.3pt">&#xf295;</i></span></span>
         <div class="ms-info-label">Percentage</div>
@@ -296,6 +291,8 @@
       </div>
       <div class="ms-qr-caption">Scan QR Code<br>to Verify Marksheet</div>
     </div>
+
+    <div class="ms-issue-date">Issue Date: <b>{{ $issueDate }}</b></div>
 
     <div class="footer-bar">
       <table class="footer-table">
