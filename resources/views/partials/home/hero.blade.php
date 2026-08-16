@@ -19,6 +19,7 @@
           <div class="d-flex flex-wrap gap-3">
             <a class="btn-p" href="{{ route('courses') }}"><i class="bi bi-lightning-fill"></i>Enroll Now</a>
             <button class="btn-g" type="button" data-bs-toggle="modal" data-bs-target="#demoM"><i class="bi bi-play-circle-fill"></i>Watch Free Demo</button>
+            <a class="btn-g" href="{{ asset('downloads/rtech-app.apk') }}" download><i class="bi bi-android2"></i>Download App</a>
           </div>
           <div class="hero-stats">
             <div><div class="stat-n">500+</div><div class="stat-l">Students</div></div>

@@ -27,6 +27,7 @@
           @else
             <button class="nav-cta ghost" type="button" data-bs-toggle="modal" data-bs-target="#lm"><i class="bi bi-person-fill"></i>Login</button>
           @endauth
+          <a class="nav-cta ghost" href="{{ asset('downloads/rtech-app.apk') }}" download><i class="bi bi-android2"></i>App</a>
           <a class="nav-cta" href="{{ route('courses') }}"><i class="bi bi-lightning-fill"></i>Enroll</a>
         </div>
 
