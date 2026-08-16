@@ -8,8 +8,6 @@
           <a class="nav-link-item {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Home</a>
           <a class="nav-link-item {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">About</a>
           <a class="nav-link-item {{ request()->routeIs('courses') ? 'active' : '' }}" href="{{ route('courses') }}">Courses</a>
-          <a class="nav-link-item {{ request()->routeIs('free-demo') ? 'active' : '' }}" href="{{ route('free-demo') }}">Free Demo</a>
-          <a class="nav-link-item {{ request()->routeIs('why-rtech') ? 'active' : '' }}" href="{{ route('why-rtech') }}">Why R-Tech</a>
           <a class="nav-link-item {{ request()->routeIs('gallery') ? 'active' : '' }}" href="{{ route('gallery') }}">Gallery</a>
           <a class="nav-link-item {{ request()->routeIs('placements') ? 'active' : '' }}" href="{{ route('placements') }}">Placements</a>
           <a class="nav-link-item {{ request()->routeIs('careers*') ? 'active' : '' }}" href="{{ route('careers') }}">Careers</a>
