@@ -121,6 +121,7 @@ class CertificateApplicationController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
+            'studentPhotoDataUri' => $this->studentPhotoDataUri($certificate),
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download($filename);
@@ -138,6 +139,7 @@ class CertificateApplicationController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
+            'studentPhotoDataUri' => $this->studentPhotoDataUri($certificate),
         ])->setPaper('a4', 'portrait');
 
         return $pdf->stream($filename);
@@ -154,6 +156,7 @@ class CertificateApplicationController extends Controller
             'course_duration_text' => ['nullable', 'string', 'max:255'],
             'roll_no' => ['nullable', 'string', 'max:255'],
             'father_name' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'max:2048'],
             'batch_name' => ['nullable', 'string', 'max:255'],
             'subjects' => ['nullable', 'array'],
             'subjects.*.subject' => ['nullable', 'string', 'max:255'],
@@ -192,6 +195,7 @@ class CertificateApplicationController extends Controller
             'course_duration_text' => $validated['course_duration_text'] ?? $course->duration_text,
             'roll_no' => $validated['roll_no'] ?? null,
             'father_name' => $validated['father_name'] ?? null,
+            'photo_path' => $request->hasFile('photo') ? $request->file('photo')->store('certificate-photos', 'public') : null,
             'batch_name' => $validated['batch_name'] ?? null,
             'status' => 'issued',
             'issued_date' => now(),
@@ -250,6 +254,18 @@ class CertificateApplicationController extends Controller
         return $content === false ? '' : 'data:image/png;base64,' . base64_encode($content);
     }
 
+    private function studentPhotoDataUri(Certificate $certificate): string
+    {
+        if (!$certificate->photo_path || !Storage::disk('public')->exists($certificate->photo_path)) {
+            return '';
+        }
+
+        $content = Storage::disk('public')->get($certificate->photo_path);
+        $mime = Storage::disk('public')->mimeType($certificate->photo_path) ?: 'image/jpeg';
+
+        return 'data:' . $mime . ';base64,' . base64_encode($content);
+    }
+
     private function verificationQrDataUri(Certificate $certificate): string
     {
         return Builder::create()
@@ -278,6 +294,7 @@ class CertificateApplicationController extends Controller
             'course_duration_text' => ['nullable', 'string', 'max:255'],
             'roll_no' => ['nullable', 'string', 'max:255'],
             'father_name' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'max:2048'],
             'batch_name' => ['nullable', 'string', 'max:255'],
             'subjects' => ['nullable', 'array'],
             'subjects.*.subject' => ['nullable', 'string', 'max:255'],
@@ -315,6 +332,12 @@ class CertificateApplicationController extends Controller
         $certificate->course_duration_text = $validated['course_duration_text'] ?? $course?->duration_text ?? $certificate->course_duration_text;
         $certificate->roll_no = $validated['roll_no'] ?? null;
         $certificate->father_name = $validated['father_name'] ?? null;
+        if ($request->hasFile('photo')) {
+            if ($certificate->photo_path) {
+                Storage::disk('public')->delete($certificate->photo_path);
+            }
+            $certificate->photo_path = $request->file('photo')->store('certificate-photos', 'public');
+        }
         $certificate->batch_name = $validated['batch_name'] ?? null;
         $certificate->status = 'issued';
         $certificate->issued_date = now();
@@ -362,6 +385,7 @@ class CertificateApplicationController extends Controller
             'issued_date' => ['nullable', 'date'],
             'roll_no' => ['nullable', 'string', 'max:255'],
             'father_name' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'max:2048'],
             'batch_name' => ['nullable', 'string', 'max:255'],
             'subjects' => ['nullable', 'array'],
             'subjects.*.subject' => ['nullable', 'string', 'max:255'],
@@ -370,6 +394,13 @@ class CertificateApplicationController extends Controller
             'include_certificate' => ['nullable', 'boolean'],
             'include_marksheet' => ['nullable', 'boolean'],
         ]);
+
+        if ($request->hasFile('photo')) {
+            if ($certificate->photo_path) {
+                Storage::disk('public')->delete($certificate->photo_path);
+            }
+            $validated['photo_path'] = $request->file('photo')->store('certificate-photos', 'public');
+        }
 
         $certificate->update([
             'student_name' => $validated['student_name'] ?? $certificate->student_name,
@@ -380,6 +411,7 @@ class CertificateApplicationController extends Controller
             'issued_date' => $validated['issued_date'] ?? $certificate->issued_date,
             'roll_no' => $validated['roll_no'] ?? null,
             'father_name' => $validated['father_name'] ?? null,
+            'photo_path' => $validated['photo_path'] ?? $certificate->photo_path,
             'batch_name' => $validated['batch_name'] ?? null,
             'include_certificate' => $request->boolean('include_certificate', true),
             'include_marksheet' => $request->boolean('include_marksheet', true),

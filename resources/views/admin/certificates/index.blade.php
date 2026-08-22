@@ -36,7 +36,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header"><h5 class="modal-title"><i class="bi bi-award-fill"></i>Add Certificate Manually</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-        <form method="POST" action="{{ route('admin.certificate-applications.manual-store') }}">
+        <form method="POST" action="{{ route('admin.certificate-applications.manual-store') }}" enctype="multipart/form-data">
           @csrf
           <div class="modal-body">
             <div class="cert-section-lbl"><i class="bi bi-person-fill"></i>Student Details</div>
@@ -57,6 +57,7 @@
               <div class="col-md-6"><label class="flbl">Roll No.</label><input class="fctrl" type="text" name="roll_no" placeholder="e.g. RTC24001" /></div>
               <div class="col-md-6"><label class="flbl">Father's Name</label><input class="fctrl" type="text" name="father_name" placeholder="e.g. Ahmed Khan" /></div>
               <div class="col-md-6"><label class="flbl">Batch</label><input class="fctrl" type="text" name="batch_name" placeholder="e.g. Morning Batch" /></div>
+              <div class="col-md-6"><label class="flbl">Student Photo (for Marksheet)</label><input class="fctrl" type="file" name="photo" accept="image/*" /></div>
             </div>
 
             <div class="cert-section-lbl"><i class="bi bi-file-earmark-check-fill"></i>Documents to Generate</div>
@@ -176,7 +177,7 @@
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil-square"></i>Edit Certificate &mdash; {{ optional($cert->user)->name ?: ($cert->student_name ?: 'Student') }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form method="POST" action="{{ route('admin.certificates.documents.update', $cert) }}">
+            <form method="POST" action="{{ route('admin.certificates.documents.update', $cert) }}" enctype="multipart/form-data">
               @csrf
               <div class="modal-body">
                 <div class="cert-section-lbl"><i class="bi bi-person-fill"></i>Student Details</div>
@@ -191,6 +192,13 @@
                   <div class="col-md-4"><label class="flbl">Roll No.</label><input class="fctrl" type="text" name="roll_no" value="{{ $cert->roll_no }}" /></div>
                   <div class="col-md-4"><label class="flbl">Father's Name</label><input class="fctrl" type="text" name="father_name" value="{{ $cert->father_name }}" /></div>
                   <div class="col-md-4"><label class="flbl">Batch</label><input class="fctrl" type="text" name="batch_name" value="{{ $cert->batch_name }}" /></div>
+                  <div class="col-md-4">
+                    <label class="flbl">Student Photo (for Marksheet)</label>
+                    <input class="fctrl" type="file" name="photo" accept="image/*" />
+                    @if ($cert->photo_path)
+                      <div style="margin-top:6px"><img src="{{ asset('storage/' . $cert->photo_path) }}" alt="Current photo" style="width:48px;height:60px;object-fit:cover;border:1px solid var(--border);border-radius:4px"></div>
+                    @endif
+                  </div>
                 </div>
 
                 <div class="cert-section-lbl"><i class="bi bi-file-earmark-check-fill"></i>Documents to Generate</div>

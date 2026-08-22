@@ -83,6 +83,19 @@
   .ornament { margin-top: 2.5mm; font-size: 8.5pt; color: #c9a24b; }
   .ornament .rl { display: inline-block; width: 22mm; height: 0.8pt; background: #c9a24b; vertical-align: middle; margin: 0 3mm; }
 
+  /* STUDENT PHOTO */
+  .ms-photo-wrap { position: absolute; top: 44mm; right: 16mm; width: 26mm; height: 32mm; z-index: 6; }
+  .ms-photo-frame {
+    width: 100%; height: 100%; border: 1pt solid #c9a24b; border-radius: 1.5mm; background: #fff;
+    box-shadow: 0 2mm 3mm -1.5mm rgba(0,0,0,.25); overflow: hidden; text-align: center;
+  }
+  .ms-photo-img { width: 100%; height: 100%; }
+  .ms-photo-placeholder {
+    width: 100%; height: 100%; border: 1pt dashed #c9a24b; box-sizing: border-box;
+    color: #8b96b3; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.3pt;
+    padding-top: 13mm; text-align: center;
+  }
+
   /* STUDENT STRIP */
   .ms-student { position: absolute; top: 74mm; left: 16mm; right: 16mm; text-align: center; font-family: 'Times New Roman', 'DejaVu Serif', serif; }
   .ms-student-name {
@@ -204,6 +217,16 @@
       <div class="title">MARKSHEET</div>
       <div class="subtitle">Statement of Marks</div>
       <div class="ornament"><span class="rl"></span>&#9670;<span class="rl"></span></div>
+    </div>
+
+    <div class="ms-photo-wrap">
+      <div class="ms-photo-frame">
+        @if (!empty($studentPhotoDataUri))
+          <img class="ms-photo-img" src="{{ $studentPhotoDataUri }}">
+        @else
+          <div class="ms-photo-placeholder">Photo</div>
+        @endif
+      </div>
     </div>
 
     <div class="ms-student">

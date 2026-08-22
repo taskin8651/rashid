@@ -11,7 +11,7 @@ class Certificate extends Model
 
     protected $fillable = [
         'user_id', 'course_id', 'student_name', 'student_email', 'student_phone',
-        'course_name', 'course_duration_text', 'cert_code', 'roll_no', 'father_name',
+        'course_name', 'course_duration_text', 'cert_code', 'roll_no', 'father_name', 'photo_path',
         'batch_name', 'issued_date', 'status', 'source', 'include_certificate', 'include_marksheet',
     ];
 

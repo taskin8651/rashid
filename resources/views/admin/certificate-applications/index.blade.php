@@ -62,7 +62,7 @@
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">Approve &amp; Issue Certificate</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-            <form method="POST" action="{{ route('admin.certificate-applications.approve', $app) }}">
+            <form method="POST" action="{{ route('admin.certificate-applications.approve', $app) }}" enctype="multipart/form-data">
               @csrf
               <div class="modal-body">
                 <p style="font-size:13px;color:var(--muted)">Issuing a certificate to <b style="color:var(--text)">{{ optional($app->user)->name ?: ($app->certificate?->student_name ?: 'Student') }}</b> for <b style="color:var(--text)">{{ $app->course->name }}</b>. Certificate number, certificate PDF &amp; marksheet PDF are all generated automatically.</p>
@@ -76,6 +76,7 @@
                   <div class="col-md-6"><label class="flbl">Roll No.</label><input class="fctrl" type="text" name="roll_no" placeholder="e.g. RTC24001" /></div>
                   <div class="col-md-6"><label class="flbl">Father's Name</label><input class="fctrl" type="text" name="father_name" value="{{ optional($app->user)->guardian_name ?: ($app->certificate?->father_name ?: '') }}" /></div>
                   <div class="col-md-6"><label class="flbl">Batch</label><input class="fctrl" type="text" name="batch_name" placeholder="e.g. Morning Batch" /></div>
+                  <div class="col-md-6"><label class="flbl">Student Photo (for Marksheet)</label><input class="fctrl" type="file" name="photo" accept="image/*" /></div>
                 </div>
 
                 <label class="flbl mt-2">Documents to Generate</label>

@@ -12,6 +12,7 @@ use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
@@ -118,6 +119,7 @@ class CertificateController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
+            'studentPhotoDataUri' => $this->studentPhotoDataUri($certificate),
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download($filename);
@@ -138,9 +140,22 @@ class CertificateController extends Controller
             'certificate' => $certificate,
             'qrDataUri' => $this->verificationQrDataUri($certificate),
             'signatureImageDataUri' => $this->signatureImageDataUri(),
+            'studentPhotoDataUri' => $this->studentPhotoDataUri($certificate),
         ])->setPaper('a4', 'portrait');
 
         return $pdf->stream($filename);
+    }
+
+    private function studentPhotoDataUri(Certificate $certificate): string
+    {
+        if (!$certificate->photo_path || !Storage::disk('public')->exists($certificate->photo_path)) {
+            return '';
+        }
+
+        $content = Storage::disk('public')->get($certificate->photo_path);
+        $mime = Storage::disk('public')->mimeType($certificate->photo_path) ?: 'image/jpeg';
+
+        return 'data:' . $mime . ';base64,' . base64_encode($content);
     }
 
     private function signatureImageDataUri(): string
