@@ -10,7 +10,7 @@
 
   <details class="card-rt mb-4">
     <summary class="bsave" style="display:inline-block;cursor:pointer;list-style:none"><i class="bi bi-upload me-1"></i>Upload New Video</summary>
-    <form method="POST" action="{{ route('franchise.courses.videos.store', $course) }}" enctype="multipart/form-data" class="mt-4">
+    <form method="POST" action="{{ route('franchise.courses.videos.store', $course) }}" enctype="multipart/form-data" class="mt-4 js-video-upload-form">
       @csrf
       <div class="row g-3">
         <div class="col-md-6"><label class="flbl">Video Title</label><input class="fctrl" type="text" name="title" placeholder="e.g. Introduction to HTML" required/></div>
@@ -34,6 +34,7 @@
       </div>
       <p style="font-size:11px;color:var(--muted);margin-top:8px">MP4, WebM, OGG or MOV &middot; no size limit. Leave the file empty to save the video entry now and attach the file later by editing it. Premium videos are stored privately — only your enrolled students, you and R-Tech admins can stream them.</p>
       <button class="bsave mt-3" type="submit"><i class="bi bi-check2-circle me-1"></i>Save Video</button>
+      @include('partials.video-upload-progress-bar')
     </form>
   </details>
 
@@ -56,4 +57,8 @@
       @include('franchise.courses-videos-table', ['videos' => $unassigned, 'course' => $course])
     </div>
   @endif
+@endsection
+
+@section('scripts')
+  @include('partials.video-upload-progress-script')
 @endsection

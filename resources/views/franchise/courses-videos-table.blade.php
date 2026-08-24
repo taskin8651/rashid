@@ -22,7 +22,7 @@
         </tr>
         <tr id="edit-{{ $video->id }}" class="video-edit-row" style="display:none">
           <td colspan="6">
-            <form method="POST" action="{{ route('franchise.courses.videos.update', [$course, $video]) }}" enctype="multipart/form-data" class="py-2">
+            <form method="POST" action="{{ route('franchise.courses.videos.update', [$course, $video]) }}" enctype="multipart/form-data" class="py-2 js-video-upload-form">
               @csrf
               <div class="row g-2">
                 <div class="col-md-4"><input class="fctrl" type="text" name="title" value="{{ $video->title }}" required/></div>
@@ -50,6 +50,7 @@
                 <div class="col-md-4"><input class="fctrl" type="file" name="file" accept="video/mp4,video/webm,video/ogg,video/quicktime"/><span style="font-size:10px;color:var(--muted)">Leave empty to keep current file</span></div>
                 <div class="col-md-2"><button class="bsave" type="submit" style="font-size:12px;padding:8px 16px;width:100%">Save</button></div>
               </div>
+              @include('partials.video-upload-progress-bar')
             </form>
           </td>
         </tr>
