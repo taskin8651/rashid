@@ -30,10 +30,10 @@
         </div>
         <div class="col-md-4"><label class="flbl">Duration (seconds)</label><input class="fctrl" type="number" name="duration_seconds" min="0" placeholder="e.g. 480"/></div>
         <div class="col-md-4"><label class="flbl">Status</label><select class="fctrl" name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
-        <div class="col-md-4"><label class="flbl">Video File</label><input class="fctrl" type="file" name="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" required/></div>
+        <div class="col-md-4"><label class="flbl">Video File (optional)</label><input class="fctrl" type="file" name="file" accept="video/mp4,video/webm,video/ogg,video/quicktime"/></div>
       </div>
-      <p style="font-size:11px;color:var(--muted);margin-top:8px">MP4, WebM, OGG or MOV &middot; up to 95MB. Premium videos are stored privately — only your enrolled students, you and R-Tech admins can stream them.</p>
-      <button class="bsave mt-3" type="submit"><i class="bi bi-check2-circle me-1"></i>Upload Video</button>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">MP4, WebM, OGG or MOV &middot; no size limit. Leave the file empty to save the video entry now and attach the file later by editing it. Premium videos are stored privately — only your enrolled students, you and R-Tech admins can stream them.</p>
+      <button class="bsave mt-3" type="submit"><i class="bi bi-check2-circle me-1"></i>Save Video</button>
     </form>
   </details>
 

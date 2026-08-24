@@ -32,6 +32,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'manage-careers',
         'manage-attendance',
         'manage-attendance-locations',
+        'manage-daily-reports',
         'manage-faqs',
         'manage-blog',
         'manage-team',
@@ -53,5 +54,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         Role::firstOrCreate(['name' => 'student', 'guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'franchisee', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'teacher', 'guard_name' => 'web']);
     }
 }

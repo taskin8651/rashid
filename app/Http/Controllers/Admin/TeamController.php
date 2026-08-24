@@ -15,12 +15,12 @@ class TeamController extends Controller
 {
     protected function adminRoleNames(): array
     {
-        return Role::whereNotIn('name', ['student', 'franchisee'])->pluck('name')->all();
+        return Role::whereNotIn('name', ['student', 'franchisee', 'staff', 'teacher'])->pluck('name')->all();
     }
 
     public function index()
     {
-        $roles = Role::whereNotIn('name', ['student', 'franchisee'])
+        $roles = Role::whereNotIn('name', ['student', 'franchisee', 'staff', 'teacher'])
             ->with('permissions')
             ->withCount('users')
             ->get();

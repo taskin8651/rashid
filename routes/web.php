@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\CourseNoteController as AdminCourseNoteController;
 use App\Http\Controllers\Admin\CourseQuizController as AdminCourseQuizController;
 use App\Http\Controllers\Admin\CourseVideoController as AdminCourseVideoController;
+use App\Http\Controllers\Admin\DailyReportController as AdminDailyReportController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\FranchiseController as AdminFranchiseController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TeamController as AdminTeamController;
 use App\Http\Controllers\Admin\TeamMemberController as AdminTeamMemberController;
@@ -64,6 +66,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NoteDownloadController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PlacementController;
+use App\Http\Controllers\Portal\DailyReportController as PortalDailyReportController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\AttendanceController as StudentAttendanceController;
 use App\Http\Controllers\Student\CertificateController as StudentCertificateController;
@@ -328,6 +331,24 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::post('/change-password', [FranchiseProfileController::class, 'changePassword'])->name('franchise.password.update');
     });
 
+    Route::prefix('staff')->middleware('role:staff')->group(function () {
+        Route::get('/reports', [PortalDailyReportController::class, 'index'])->name('staff.reports.index');
+        Route::get('/reports/create', [PortalDailyReportController::class, 'create'])->name('staff.reports.create');
+        Route::post('/reports', [PortalDailyReportController::class, 'store'])->name('staff.reports.store');
+        Route::get('/reports/{dailyReport}/edit', [PortalDailyReportController::class, 'edit'])->name('staff.reports.edit');
+        Route::put('/reports/{dailyReport}', [PortalDailyReportController::class, 'update'])->name('staff.reports.update');
+        Route::get('/reports/{dailyReport}/attachment', [PortalDailyReportController::class, 'download'])->name('staff.reports.attachment');
+    });
+
+    Route::prefix('teacher')->middleware('role:teacher')->group(function () {
+        Route::get('/reports', [PortalDailyReportController::class, 'index'])->name('teacher.reports.index');
+        Route::get('/reports/create', [PortalDailyReportController::class, 'create'])->name('teacher.reports.create');
+        Route::post('/reports', [PortalDailyReportController::class, 'store'])->name('teacher.reports.store');
+        Route::get('/reports/{dailyReport}/edit', [PortalDailyReportController::class, 'edit'])->name('teacher.reports.edit');
+        Route::put('/reports/{dailyReport}', [PortalDailyReportController::class, 'update'])->name('teacher.reports.update');
+        Route::get('/reports/{dailyReport}/attachment', [PortalDailyReportController::class, 'download'])->name('teacher.reports.attachment');
+    });
+
     Route::prefix('admin')->middleware('permission:access-admin-panel')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -501,6 +522,18 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::middleware('permission:manage-attendance')->group(function () {
             Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
             Route::get('/attendance/export', [AdminAttendanceController::class, 'export'])->name('admin.attendance.export');
+        });
+
+        Route::middleware('permission:manage-daily-reports')->group(function () {
+            Route::get('/daily-reports', [AdminDailyReportController::class, 'index'])->name('admin.daily-reports.index');
+            Route::get('/daily-reports/export', [AdminDailyReportController::class, 'export'])->name('admin.daily-reports.export');
+            Route::post('/daily-reports/{dailyReport}/approve', [AdminDailyReportController::class, 'approve'])->name('admin.daily-reports.approve');
+            Route::post('/daily-reports/{dailyReport}/reject', [AdminDailyReportController::class, 'reject'])->name('admin.daily-reports.reject');
+
+            Route::get('/staff', [AdminStaffController::class, 'index'])->name('admin.staff.index');
+            Route::post('/staff', [AdminStaffController::class, 'store'])->name('admin.staff.store');
+            Route::put('/staff/{member}', [AdminStaffController::class, 'update'])->name('admin.staff.update');
+            Route::delete('/staff/{member}', [AdminStaffController::class, 'destroy'])->name('admin.staff.destroy');
         });
 
         Route::middleware('permission:manage-faqs')->group(function () {

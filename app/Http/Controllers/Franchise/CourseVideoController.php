@@ -30,7 +30,7 @@ class CourseVideoController extends Controller
             'type' => ['required', Rule::in(['demo', 'premium'])],
             'duration_seconds' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
-            'file' => ['required', 'file', 'mimes:mp4,webm,ogg,mov', 'max:97280'],
+            'file' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov'],
         ]);
 
         if ($validated['module_id'] ?? null) {
@@ -51,9 +51,11 @@ class CourseVideoController extends Controller
             'status' => $validated['status'],
         ]);
 
-        $video->addMediaFromRequest('file')->toMediaCollection('file');
+        if ($request->hasFile('file')) {
+            $video->addMediaFromRequest('file')->toMediaCollection('file');
+        }
 
-        return back()->with('status', 'Video uploaded.');
+        return back()->with('status', $request->hasFile('file') ? 'Video uploaded.' : 'Video added — edit it to attach the file whenever you\'re ready.');
     }
 
     public function update(Request $request, Course $course, Video $video)
@@ -67,7 +69,7 @@ class CourseVideoController extends Controller
             'type' => ['required', Rule::in(['demo', 'premium'])],
             'duration_seconds' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
-            'file' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov', 'max:97280'],
+            'file' => ['nullable', 'file', 'mimes:mp4,webm,ogg,mov'],
         ]);
 
         if ($validated['module_id'] ?? null) {

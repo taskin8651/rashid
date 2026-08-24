@@ -238,6 +238,11 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Attendance::class);
     }
 
+    public function dailyReports()
+    {
+        return $this->hasMany(DailyReport::class);
+    }
+
     public function referralsMade()
     {
         return $this->hasMany(Referral::class, 'referrer_id');

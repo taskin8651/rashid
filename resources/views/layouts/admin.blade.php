@@ -18,7 +18,7 @@
   <nav class="sb-nav">
     <div class="nsec">Overview</div>
     <a class="slink {{ request()->routeIs('admin.dashboard') ? 'act' : '' }}" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2"></i>Dashboard</a>
-    @canany(['manage-leads', 'follow-up-leads', 'manage-students', 'manage-certificate-applications', 'manage-placements', 'manage-careers', 'manage-attendance', 'manage-attendance-locations', 'manage-courses', 'manage-categories', 'manage-admins'])
+    @canany(['manage-leads', 'follow-up-leads', 'manage-students', 'manage-certificate-applications', 'manage-placements', 'manage-careers', 'manage-attendance', 'manage-attendance-locations', 'manage-daily-reports', 'manage-courses', 'manage-categories', 'manage-admins'])
       <div class="nsec">Management</div>
       @canany(['manage-leads', 'follow-up-leads'])
         <a class="slink {{ request()->routeIs('admin.leads.*') ? 'act' : '' }}" href="{{ route('admin.leads.index') }}"><i class="bi bi-person-lines-fill"></i>Leads</a>
@@ -42,6 +42,10 @@
       @endcan
       @can('manage-attendance-locations')
         <a class="slink {{ request()->routeIs('admin.attendance-locations.*') ? 'act' : '' }}" href="{{ route('admin.attendance-locations.index') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Locations</a>
+      @endcan
+      @can('manage-daily-reports')
+        <a class="slink {{ request()->routeIs('admin.daily-reports.*') ? 'act' : '' }}" href="{{ route('admin.daily-reports.index') }}"><i class="bi bi-journal-text"></i>Daily Reports</a>
+        <a class="slink {{ request()->routeIs('admin.staff.*') ? 'act' : '' }}" href="{{ route('admin.staff.index') }}"><i class="bi bi-person-badge-fill"></i>Staff & Teachers</a>
       @endcan
       @can('manage-courses')
         <a class="slink {{ request()->routeIs('admin.courses.*') ? 'act' : '' }}" href="{{ route('admin.courses.index') }}"><i class="bi bi-collection-play-fill"></i>Courses</a>

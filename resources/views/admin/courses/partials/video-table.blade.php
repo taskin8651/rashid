@@ -7,7 +7,7 @@
       @foreach ($videos as $video)
         <tr>
           <td>{{ $loop->iteration }}</td>
-          <td>{{ $video->title }}</td>
+          <td>{{ $video->title }} @unless ($video->getFirstMedia('file')) <span class="badge-rt bg-pending">No file</span> @endunless</td>
           <td><span class="badge-rt {{ $video->type === 'demo' ? 'bg-active' : 'bg-pending' }}">{{ $video->type === 'demo' ? 'Demo · Public' : 'Premium' }}</span></td>
           <td>{{ gmdate('i:s', $video->duration_seconds) }}</td>
           <td><span class="badge-rt {{ $video->status === 'active' ? 'bg-active' : 'bg-inactive' }}">{{ $video->status }}</span></td>
