@@ -95,6 +95,41 @@
     </div>
   </div>
 
+  <div class="card-rt mb-4">
+    <div class="card-title">System Roles</div>
+    <p style="font-size:11.5px;color:var(--muted);margin-top:-6px;margin-bottom:14px">These roles have their own dedicated login area, gated by role — not by the permissions above — so they're read-only here.</p>
+    @php
+      $systemRoleNotes = [
+        'student' => 'Signs up publicly and logs into the student portal.',
+        'franchisee' => 'Manages their own franchise via the franchise portal.',
+        'staff' => 'Submits daily work reports. Manage accounts under Staff & Teachers.',
+        'teacher' => 'Submits daily work reports. Manage accounts under Staff & Teachers.',
+      ];
+    @endphp
+    <div class="row g-3">
+      @foreach ($systemRoles as $role)
+        <div class="col-md-6 col-lg-3">
+          <div style="border:1px solid var(--border);border-radius:12px;padding:16px">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 style="font-size:14px;font-weight:700;margin:0;text-transform:capitalize">{{ $role->name }}</h6>
+              <span class="badge-rt bg-pending">{{ $role->users_count }} {{ \Illuminate\Support\Str::plural('member', $role->users_count) }}</span>
+            </div>
+            <p style="font-size:11.5px;color:var(--muted);margin-bottom:8px">{{ $systemRoleNotes[$role->name] ?? '' }}</p>
+            @if ($role->permissions->count())
+              <div class="d-flex flex-wrap gap-1">
+                @foreach ($role->permissions as $perm)
+                  <span class="badge-rt bg-inactive" style="font-size:10px">{{ $permissionLabels[$perm->name] ?? $perm->name }}</span>
+                @endforeach
+              </div>
+            @else
+              <span class="badge-rt bg-inactive" style="font-size:10px">No admin permissions</span>
+            @endif
+          </div>
+        </div>
+      @endforeach
+    </div>
+  </div>
+
   <div class="card-rt">
     <div class="card-title">Team Members</div>
     <div class="table-wrap"><table class="table-rt">

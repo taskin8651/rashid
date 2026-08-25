@@ -25,10 +25,22 @@ class TeamController extends Controller
             ->withCount('users')
             ->get();
 
+        // Shown read-only below the editable roles above. These roles gate
+        // access via their own route middleware (role:student, role:staff,
+        // ...), not via the ADMIN_PERMISSIONS list, so they're deliberately
+        // excluded from $roles — editing them here would let an admin
+        // accidentally grant them ADMIN_BASELINE_PERMISSION and pull them
+        // into the admin panel (see updateRole()).
+        $systemRoles = Role::whereIn('name', ['student', 'franchisee', 'staff', 'teacher'])
+            ->with('permissions')
+            ->withCount('users')
+            ->get();
+
         $members = User::role($this->adminRoleNames())->with('roles')->get();
 
         return view('admin.team.index', [
             'roles' => $roles,
+            'systemRoles' => $systemRoles,
             'members' => $members,
             'availablePermissions' => RolesAndPermissionsSeeder::ADMIN_PERMISSIONS,
         ]);
