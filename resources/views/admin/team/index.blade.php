@@ -97,7 +97,7 @@
 
   <div class="card-rt mb-4">
     <div class="card-title">System Roles</div>
-    <p style="font-size:11.5px;color:var(--muted);margin-top:-6px;margin-bottom:14px">These roles have their own dedicated login area, gated by role — not by the permissions above — so they're read-only here.</p>
+    <p style="font-size:11.5px;color:var(--muted);margin-top:-6px;margin-bottom:14px">These roles get into their own dedicated login area by role, not by permission. You can still grant one of these admin-panel permissions on top of that — every member of the role gets it — using Edit below.</p>
     @php
       $systemRoleNotes = [
         'student' => 'Signs up publicly and logs into the student portal.',
@@ -116,7 +116,7 @@
             </div>
             <p style="font-size:11.5px;color:var(--muted);margin-bottom:8px">{{ $systemRoleNotes[$role->name] ?? '' }}</p>
             @if ($role->permissions->count())
-              <div class="d-flex flex-wrap gap-1">
+              <div class="d-flex flex-wrap gap-1 mb-2">
                 @foreach ($role->permissions as $perm)
                   <span class="badge-rt bg-inactive" style="font-size:10px">{{ $permissionLabels[$perm->name] ?? $perm->name }}</span>
                 @endforeach
@@ -124,6 +124,34 @@
             @else
               <span class="badge-rt bg-inactive" style="font-size:10px">No admin permissions</span>
             @endif
+            <button class="bghost w-100 mt-2" style="font-size:12px;padding:7px" data-bs-toggle="modal" data-bs-target="#editSystemRole{{ $role->id }}"><i class="bi bi-pencil-fill me-1"></i>Edit</button>
+          </div>
+        </div>
+
+        <div class="modal fade" id="editSystemRole{{ $role->id }}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header"><h5 class="modal-title">Edit Permissions — {{ ucfirst($role->name) }}</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+              <form method="POST" action="{{ route('admin.team.roles.update', $role) }}">
+                @csrf
+                <div class="modal-body">
+                  <p style="font-size:11.5px;color:var(--muted)">{{ $role->name }} still logs into its own portal regardless of what's checked here. Checking any box also lets every {{ $role->name }} member into the admin panel for that permission — leave everything unchecked to keep them portal-only.</p>
+                  <label class="flbl mb-2">Permissions</label>
+                  <div class="row g-2">
+                    @foreach ($availablePermissions as $perm)
+                      <div class="col-6 form-check">
+                        <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $perm }}" id="sysperm{{ $role->id }}_{{ $loop->index }}" @checked($role->permissions->pluck('name')->contains($perm))>
+                        <label class="form-check-label" for="sysperm{{ $role->id }}_{{ $loop->index }}" style="font-size:12.5px">{{ $permissionLabels[$perm] ?? $perm }}</label>
+                      </div>
+                    @endforeach
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="bsave">Save Permissions</button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       @endforeach

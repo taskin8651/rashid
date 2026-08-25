@@ -55,7 +55,7 @@ class TeamController extends Controller
         ]);
 
         $role = Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
-        $role->syncPermissions(array_merge($validated['permissions'] ?? [], [RolesAndPermissionsSeeder::ADMIN_BASELINE_PERMISSION]));
+        $role->syncPermissions($this->withBaselineIfAny($validated['permissions'] ?? []));
 
         return back()->with('status', 'Role created.');
     }
@@ -69,9 +69,25 @@ class TeamController extends Controller
             'permissions.*' => [Rule::in(RolesAndPermissionsSeeder::ADMIN_PERMISSIONS)],
         ]);
 
-        $role->syncPermissions(array_merge($validated['permissions'] ?? [], [RolesAndPermissionsSeeder::ADMIN_BASELINE_PERMISSION]));
+        $role->syncPermissions($this->withBaselineIfAny($validated['permissions'] ?? []));
 
         return back()->with('status', 'Role updated.');
+    }
+
+    /**
+     * access-admin-panel is only meaningful alongside at least one real
+     * permission — merging it in unconditionally meant saving a role with
+     * every box unchecked (e.g. clicking Save on student/staff/teacher
+     * without picking anything) would still silently let that role into
+     * the admin panel. With this, an empty permission list stays empty.
+     */
+    protected function withBaselineIfAny(array $permissions): array
+    {
+        if (empty($permissions)) {
+            return [];
+        }
+
+        return array_merge($permissions, [RolesAndPermissionsSeeder::ADMIN_BASELINE_PERMISSION]);
     }
 
     public function destroyRole(Role $role)
