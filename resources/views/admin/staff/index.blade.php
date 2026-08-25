@@ -27,6 +27,7 @@
             <td>{{ $member->daily_reports_count }}</td>
             <td><span class="badge-rt {{ $member->is_active ? 'bg-active' : 'bg-inactive' }}">{{ $member->is_active ? 'Active' : 'Inactive' }}</span></td>
             <td>
+              <a class="action-btn" href="{{ route('admin.daily-reports.performance', $member) }}" title="Performance"><i class="bi bi-graph-up"></i></a>
               <button class="action-btn" data-bs-toggle="modal" data-bs-target="#editMember{{ $member->id }}" title="Edit"><i class="bi bi-pencil-fill"></i></button>
               <form method="POST" action="{{ route('admin.staff.destroy', $member) }}" onsubmit="return confirm('Remove {{ $member->name }}\'s access?')" class="d-inline">
                 @csrf @method('DELETE')

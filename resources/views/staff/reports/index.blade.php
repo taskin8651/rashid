@@ -21,11 +21,12 @@
 
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">
-      <thead><tr><th>Date</th><th>Task / Subject</th><th>Hours</th><th>Status</th><th>Review</th><th></th></tr></thead>
+      <thead><tr><th>Date</th><th>Course</th><th>Task / Subject</th><th>Hours</th><th>Status</th><th>Review</th><th></th></tr></thead>
       <tbody>
         @forelse ($reports as $r)
           <tr>
             <td>{{ $r->report_date->format('d M Y') }}</td>
+            <td>{{ $r->course->name ?? '—' }}</td>
             <td>{{ $r->task_subject ?? '—' }}</td>
             <td>{{ $r->hours_worked ?? '—' }}</td>
             <td><span class="badge-rt {{ $r->status === 'present' ? 'bg-active' : ($r->status === 'leave' ? 'bg-pending' : 'bg-inactive') }}">{{ ucfirst($r->status) }}</span></td>
@@ -45,7 +46,7 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="6" style="color:var(--muted)">No reports submitted yet.</td></tr>
+          <tr><td colspan="7" style="color:var(--muted)">No reports submitted yet.</td></tr>
         @endforelse
       </tbody>
     </table></div>

@@ -527,6 +527,7 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::middleware('permission:manage-daily-reports')->group(function () {
             Route::get('/daily-reports', [AdminDailyReportController::class, 'index'])->name('admin.daily-reports.index');
             Route::get('/daily-reports/export', [AdminDailyReportController::class, 'export'])->name('admin.daily-reports.export');
+            Route::get('/daily-reports/performance/{member}', [AdminDailyReportController::class, 'performance'])->name('admin.daily-reports.performance');
             Route::post('/daily-reports/{dailyReport}/approve', [AdminDailyReportController::class, 'approve'])->name('admin.daily-reports.approve');
             Route::post('/daily-reports/{dailyReport}/reject', [AdminDailyReportController::class, 'reject'])->name('admin.daily-reports.reject');
 

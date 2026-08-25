@@ -55,16 +55,24 @@
 
   <div class="card-rt">
     <div class="table-wrap"><table class="table-rt">
-      <thead><tr><th>Name</th><th>Role</th><th>Date</th><th>Task/Subject</th><th>Hours</th><th>Status</th><th>Review</th><th></th></tr></thead>
+      <thead><tr><th>Name</th><th>Role</th><th>Date</th><th>Course</th><th>Task/Subject</th><th>Hours</th><th>Status</th><th>Metrics</th><th>Review</th><th></th></tr></thead>
       <tbody>
         @forelse ($reports as $r)
           <tr>
-            <td>{{ $r->user->name }}</td>
+            <td><a href="{{ route('admin.daily-reports.performance', $r->user) }}" style="text-decoration:none">{{ $r->user->name }}</a></td>
             <td style="text-transform:capitalize">{{ $r->user->getRoleNames()->first() }}</td>
             <td>{{ $r->report_date->format('d M Y') }}</td>
+            <td>{{ $r->course->name ?? '—' }}</td>
             <td>{{ $r->task_subject ?? '—' }}</td>
             <td>{{ $r->hours_worked ?? '—' }}</td>
             <td><span class="badge-rt {{ $r->status === 'present' ? 'bg-active' : ($r->status === 'leave' ? 'bg-pending' : 'bg-inactive') }}">{{ ucfirst($r->status) }}</span></td>
+            <td style="font-size:11.5px;color:var(--muted)">
+              @if ($r->user->hasRole('teacher'))
+                {{ $r->students_present ?? '—' }} students · HW: {{ $r->homework_assigned ? 'Yes' : 'No' }}
+              @else
+                {{ $r->leads_followed_up ?? 0 }} leads · {{ $r->students_enrolled ?? 0 }} enrolled · {{ $r->calls_made ?? 0 }} calls
+              @endif
+            </td>
             <td>
               @if ($r->review_status === 'approved')
                 <span class="badge-rt bg-active">Approved</span>
@@ -103,7 +111,7 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="8" style="color:var(--muted)">No reports found for these filters.</td></tr>
+          <tr><td colspan="10" style="color:var(--muted)">No reports found for these filters.</td></tr>
         @endforelse
       </tbody>
     </table></div>

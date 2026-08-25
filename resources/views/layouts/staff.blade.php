@@ -38,6 +38,7 @@
     <button class="sbtn" onclick="document.getElementById('sb').classList.toggle('open')"><i class="bi bi-list"></i></button>
     <div class="tt">@yield('title', 'Dashboard')</div>
     <div class="tact">
+      @include('partials.notification-bell')
       @include('partials.theme-toggle-button')
     </div>
   </div>

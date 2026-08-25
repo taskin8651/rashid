@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\DailyReport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,7 @@ class DailyReportController extends Controller
 
     public function index(Request $request)
     {
-        $reports = $request->user()->dailyReports()->latest('report_date')->paginate(20);
+        $reports = $request->user()->dailyReports()->with('course')->latest('report_date')->paginate(20);
 
         $stats = [
             'this_month' => $request->user()->dailyReports()->whereMonth('report_date', now()->month)->whereYear('report_date', now()->year)->count(),
@@ -27,26 +28,48 @@ class DailyReportController extends Controller
         return view($this->portal($request) . '.reports.index', compact('reports', 'stats'));
     }
 
-    public function create(Request $request)
+    protected function courseOptions()
     {
-        return view($this->portal($request) . '.reports.create');
+        return Course::where('status', 'active')->orderBy('name')->get();
     }
 
-    public function store(Request $request)
+    protected function reportRules(): array
     {
-        $validated = $request->validate([
-            'report_date' => [
-                'required', 'date', 'before_or_equal:today',
-                Rule::unique('daily_reports')->where('user_id', $request->user()->id),
-            ],
+        return [
+            'course_id' => ['nullable', 'exists:courses,id'],
             'task_subject' => ['nullable', 'string', 'max:255'],
             'hours_worked' => ['nullable', 'numeric', 'min:0', 'max:24'],
             'status' => ['required', Rule::in(['present', 'absent', 'leave'])],
             'description' => ['required', 'string'],
             'attachment' => ['nullable', 'file', 'max:10240'],
-        ], [
+            'topics_covered' => ['nullable', 'string'],
+            'students_present' => ['nullable', 'integer', 'min:0'],
+            'homework_assigned' => ['nullable', 'boolean'],
+            'leads_followed_up' => ['nullable', 'integer', 'min:0'],
+            'students_enrolled' => ['nullable', 'integer', 'min:0'],
+            'calls_made' => ['nullable', 'integer', 'min:0'],
+        ];
+    }
+
+    public function create(Request $request)
+    {
+        $courses = $this->courseOptions();
+
+        return view($this->portal($request) . '.reports.create', compact('courses'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate(array_merge($this->reportRules(), [
+            'report_date' => [
+                'required', 'date', 'before_or_equal:today',
+                Rule::unique('daily_reports')->where('user_id', $request->user()->id),
+            ],
+        ]), [
             'report_date.unique' => 'You already submitted a report for that date.',
         ]);
+
+        $validated['homework_assigned'] = $request->boolean('homework_assigned');
 
         if ($request->hasFile('attachment')) {
             $validated['attachment_path'] = $request->file('attachment')->store('daily-report-attachments');
@@ -63,7 +86,9 @@ class DailyReportController extends Controller
         abort_unless($dailyReport->user_id === $request->user()->id, 404);
         abort_unless($dailyReport->isEditable(), 403, 'This report has already been reviewed and can no longer be edited.');
 
-        return view($this->portal($request) . '.reports.edit', compact('dailyReport'));
+        $courses = $this->courseOptions();
+
+        return view($this->portal($request) . '.reports.edit', compact('dailyReport', 'courses'));
     }
 
     public function update(Request $request, DailyReport $dailyReport)
@@ -71,19 +96,16 @@ class DailyReportController extends Controller
         abort_unless($dailyReport->user_id === $request->user()->id, 404);
         abort_unless($dailyReport->isEditable(), 403, 'This report has already been reviewed and can no longer be edited.');
 
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge($this->reportRules(), [
             'report_date' => [
                 'required', 'date', 'before_or_equal:today',
                 Rule::unique('daily_reports')->where('user_id', $request->user()->id)->ignore($dailyReport->id),
             ],
-            'task_subject' => ['nullable', 'string', 'max:255'],
-            'hours_worked' => ['nullable', 'numeric', 'min:0', 'max:24'],
-            'status' => ['required', Rule::in(['present', 'absent', 'leave'])],
-            'description' => ['required', 'string'],
-            'attachment' => ['nullable', 'file', 'max:10240'],
-        ], [
+        ]), [
             'report_date.unique' => 'You already submitted a report for that date.',
         ]);
+
+        $validated['homework_assigned'] = $request->boolean('homework_assigned');
 
         if ($request->hasFile('attachment')) {
             $validated['attachment_path'] = $request->file('attachment')->store('daily-report-attachments');
