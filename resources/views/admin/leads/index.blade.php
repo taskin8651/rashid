@@ -17,8 +17,10 @@
         <input class="fctrl" type="text" name="search" value="{{ $search }}" placeholder="Search name/phone/email…" style="width:220px"/>
         <button class="bsave" type="submit">Search</button>
       </form>
-      @can('manage-leads')
+      @can('leads-index')
         <a href="{{ route('admin.leads.export') }}" class="bghost" style="text-decoration:none;font-size:14px;padding:11px 20px"><i class="bi bi-download me-1"></i>Export CSV</a>
+      @endcan
+      @can('leads-create')
         <button class="bsave" style="font-size:14px;padding:11px 20px" data-bs-toggle="modal" data-bs-target="#addLead"><i class="bi bi-person-plus-fill me-1"></i>Add Lead</button>
       @endcan
     </div>
@@ -83,7 +85,7 @@
             <td style="font-size:12px">{{ optional($lead->next_follow_up_date)->format('d M Y') ?? '—' }}</td>
             <td>
               <a href="{{ route('admin.leads.show', $lead) }}" class="action-btn" title="View"><i class="bi bi-eye-fill"></i></a>
-              @can('manage-leads')
+              @can('leads-delete')
                 <form method="POST" action="{{ route('admin.leads.destroy', $lead) }}" onsubmit="return confirm('Delete this lead? This cannot be undone.')" class="d-inline">
                   @csrf @method('DELETE')
                   <button type="submit" class="action-btn danger" style="border:none;background:none" title="Delete"><i class="bi bi-trash-fill"></i></button>
@@ -99,7 +101,7 @@
   </div>
   <div class="mt-3">{{ $leads->links() }}</div>
 
-  @can('manage-leads')
+  @can('leads-create')
     <!-- Add Lead Modal -->
     <div class="modal fade" id="addLead" tabindex="-1">
       <div class="modal-dialog">

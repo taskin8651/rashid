@@ -25,11 +25,19 @@
             <td>{{ $p->user->name ?? ($payable->name ?? '—') }}</td>
             <td>{{ $p->payable_type === 'course_enrollment' ? ($payable->course->name ?? '—') : 'Franchise Booking' }}</td>
             <td>₹{{ number_format($p->amount, 0) }}</td>
-            <td>{{ $p->method ?? '—' }}</td>
+            <td>
+              {{ $p->method ?? '—' }}
+              @if ($p->method === 'upi' && $p->note)
+                <div style="font-size:10.5px;color:var(--muted)">{{ $p->note }}</div>
+              @endif
+            </td>
             <td>{{ $p->created_at->format('d M Y') }}</td>
             <td>
-              @php $badge = ['paid' => 'bg-paid', 'created' => 'bg-pending', 'failed' => 'bg-failed', 'refunded' => 'bg-inactive'][$p->status] ?? 'bg-inactive'; @endphp
-              <span class="badge-rt {{ $badge }}">{{ ucfirst($p->status) }}</span>
+              @php
+                $badge = ['paid' => 'bg-paid', 'created' => 'bg-pending', 'failed' => 'bg-failed', 'refunded' => 'bg-inactive'][$p->status] ?? 'bg-inactive';
+                $statusLabel = $p->status === 'created' && $p->method === 'upi' ? 'Awaiting Verification' : ucfirst($p->status);
+              @endphp
+              <span class="badge-rt {{ $badge }}">{{ $statusLabel }}</span>
             </td>
             <td>
               @if ($p->status === 'paid' && $p->razorpay_payment_id)
@@ -37,6 +45,17 @@
                   @csrf
                   <button type="submit" class="bghost" style="font-size:11px;padding:5px 10px;color:var(--danger);border-color:rgba(239,68,68,.3)"><i class="bi bi-arrow-counterclockwise me-1"></i>Refund</button>
                 </form>
+              @elseif ($p->status === 'created' && $p->method === 'upi')
+                <div class="d-flex gap-1">
+                  <form method="POST" action="{{ route('admin.payments.verify-upi', $p) }}" onsubmit="return confirm('Confirm you have received ₹{{ number_format($p->amount, 0) }} via UPI from {{ $p->user->name ?? 'this student' }} and activate the course?')">
+                    @csrf
+                    <button type="submit" class="bghost" style="font-size:11px;padding:5px 10px;color:#16a34a;border-color:rgba(22,163,74,.3)"><i class="bi bi-check-lg me-1"></i>Verify</button>
+                  </form>
+                  <form method="POST" action="{{ route('admin.payments.reject-upi', $p) }}" onsubmit="return confirm('Mark this UPI payment as failed?')">
+                    @csrf
+                    <button type="submit" class="bghost" style="font-size:11px;padding:5px 10px;color:var(--danger);border-color:rgba(239,68,68,.3)"><i class="bi bi-x-lg me-1"></i>Reject</button>
+                  </form>
+                </div>
               @elseif ($p->status === 'paid')
                 <span style="font-size:11px;color:var(--muted)">Offline</span>
               @endif

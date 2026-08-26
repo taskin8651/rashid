@@ -9,6 +9,16 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet" />
+  <style>
+    .pay-tabs { display: flex; gap: 8px; margin: 20px 0 18px; }
+    .pay-tab-btn {
+      flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(148,163,184,.35);
+      background: transparent; color: var(--muted, #64748b); font-weight: 600; font-size: 13px; cursor: pointer;
+    }
+    .pay-tab-btn.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .upi-qr-box { text-align: center; }
+    .upi-qr-box img { width: 220px; height: 220px; border-radius: 12px; border: 1px solid rgba(148,163,184,.35); }
+  </style>
 </head>
 <body>
   <nav class="navbar scrolled" id="topnav">
@@ -65,15 +75,47 @@
             </div>
           </div>
 
-          <button class="pay-btn" id="payBtn"><i class="bi bi-shield-lock-fill"></i>Pay Securely with Razorpay</button>
-
-          <div class="pay-trust">
-            <div class="pay-trust-item"><i class="bi bi-patch-check-fill"></i>256-bit SSL Secured</div>
-            <div class="pay-trust-item"><i class="bi bi-lightning-charge-fill"></i>Instant Access</div>
-            <div class="pay-trust-item"><i class="bi bi-shield-check"></i>Trusted by Razorpay</div>
+          <div class="pay-tabs">
+            <button type="button" class="pay-tab-btn active" id="tabRazorpay"><i class="bi bi-credit-card-fill me-1"></i>Razorpay</button>
+            @if ($upiQr)
+              <button type="button" class="pay-tab-btn" id="tabUpi"><i class="bi bi-qr-code me-1"></i>UPI / QR</button>
+            @endif
           </div>
 
-          <p class="pay-secure-note">Your payment is processed securely by Razorpay. R-Tech Computer never stores your card details.</p>
+          <div id="panelRazorpay">
+            <button class="pay-btn" id="payBtn"><i class="bi bi-shield-lock-fill"></i>Pay Securely with Razorpay</button>
+
+            <div class="pay-trust">
+              <div class="pay-trust-item"><i class="bi bi-patch-check-fill"></i>256-bit SSL Secured</div>
+              <div class="pay-trust-item"><i class="bi bi-lightning-charge-fill"></i>Instant Access</div>
+              <div class="pay-trust-item"><i class="bi bi-shield-check"></i>Trusted by Razorpay</div>
+            </div>
+
+            <p class="pay-secure-note">Your payment is processed securely by Razorpay. R-Tech Computer never stores your card details.</p>
+          </div>
+
+          @if ($upiQr)
+            <div id="panelUpi" style="display:none">
+              <div class="upi-qr-box">
+                <img src="{{ $upiQr }}" alt="UPI QR Code">
+                <div style="margin:10px 0;font-size:12.5px;color:var(--muted)">Scan with GPay, PhonePe, Paytm or any UPI app</div>
+                <a href="{{ $upiLink }}" class="bghost" style="display:inline-block;margin-bottom:10px;text-decoration:none">Open in UPI App</a>
+                <div style="font-size:13px;margin-bottom:6px"><strong>UPI ID:</strong> {{ $upiId }}</div>
+              </div>
+
+              @if ($errors->has('utr'))
+                <div class="alert alert-danger" style="font-size:13px">{{ $errors->first('utr') }}</div>
+              @endif
+
+              <form method="POST" action="{{ route('enroll.upi.submit', $course) }}">
+                @csrf
+                <label class="fl">UPI Transaction Ref / UTR Number</label>
+                <input class="mi" type="text" name="utr" placeholder="e.g. 123456789012" required />
+                <button class="pay-btn" type="submit" style="margin-top:14px"><i class="bi bi-check-circle-fill"></i>I've Paid — Submit for Verification</button>
+                <p class="pay-secure-note">Your course will be activated once we confirm the transfer — usually within a few hours.</p>
+              </form>
+            </div>
+          @endif
         </div>
       </div>
     </div>
@@ -88,6 +130,21 @@
 
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
+    @if ($upiQr)
+      document.getElementById('tabRazorpay').addEventListener('click', function () {
+        document.getElementById('panelRazorpay').style.display = '';
+        document.getElementById('panelUpi').style.display = 'none';
+        document.getElementById('tabRazorpay').classList.add('active');
+        document.getElementById('tabUpi').classList.remove('active');
+      });
+      document.getElementById('tabUpi').addEventListener('click', function () {
+        document.getElementById('panelRazorpay').style.display = 'none';
+        document.getElementById('panelUpi').style.display = '';
+        document.getElementById('tabUpi').classList.add('active');
+        document.getElementById('tabRazorpay').classList.remove('active');
+      });
+    @endif
+
     document.getElementById('payBtn').addEventListener('click', function () {
       var rzp = new Razorpay({
         key: '{{ $order['key_id'] }}',

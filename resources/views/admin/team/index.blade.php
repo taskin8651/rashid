@@ -3,27 +3,43 @@
 @section('title', 'Team & Roles')
 
 @php
-  $permissionLabels = [
-    'view-admin-dashboard' => 'Dashboard',
-    'manage-leads' => 'Leads (full — create, edit, convert, delete)',
-    'follow-up-leads' => 'Leads (follow-up only — notes & status, no edit/convert/delete)',
-    'manage-students' => 'Students',
-    'manage-courses' => 'Courses (videos, quiz, assignments, notes)',
-    'manage-categories' => 'Categories',
-    'manage-coupons' => 'Coupons',
-    'manage-payments' => 'Payments & Refunds',
-    'manage-franchise-leads' => 'Franchise Leads & Bookings',
-    'manage-franchise-resources' => 'Franchise Resources',
-    'manage-gallery' => 'Gallery',
-    'manage-reviews' => 'Reviews',
-    'manage-certificate-applications' => 'Certificate Applications',
-    'manage-attendance' => 'Attendance Records',
-    'manage-attendance-locations' => 'Attendance Locations',
-    'manage-faqs' => 'FAQs',
-    'manage-blog' => 'Blog',
-    'manage-team' => 'Team & Roles',
-    'manage-team-members' => 'Our Team (public profiles)',
+  $moduleLabels = [
+    'leads' => 'Leads',
+    'students' => 'Students',
+    'courses' => 'Courses',
+    'categories' => 'Categories',
+    'coupons' => 'Coupons',
+    'payments' => 'Payments',
+    'expenses' => 'Expenses',
+    'franchise-leads' => 'Franchise Leads & Bookings',
+    'franchise-resources' => 'Franchise Resources',
+    'gallery' => 'Gallery',
+    'reviews' => 'Reviews',
+    'certificate-applications' => 'Certificate Applications',
+    'certificates' => 'Certificates',
+    'careers' => 'Careers (Job Postings)',
+    'job-applications' => 'Job Applications',
+    'placements' => 'Placements',
+    'attendance-locations' => 'Attendance Locations',
+    'attendance' => 'Attendance Records',
+    'daily-reports' => 'Daily Reports',
+    'staff' => 'Staff & Teachers',
+    'faqs' => 'FAQs',
+    'blog' => 'Blog',
+    'team' => 'Team & Roles',
+    'team-members' => 'Our Team (public profiles)',
   ];
+  $actionLabels = ['index' => 'List', 'show' => 'View', 'create' => 'Create', 'edit' => 'Edit', 'delete' => 'Delete', 'follow-up' => 'Follow-up'];
+  $permLabel = function (string $permission) use ($permissionModules, $moduleLabels, $actionLabels) {
+    foreach ($permissionModules as $module => $actions) {
+      foreach ($actions as $action) {
+        if ($permission === "{$module}-{$action}") {
+          return ($moduleLabels[$module] ?? $module) . ': ' . ($actionLabels[$action] ?? $action);
+        }
+      }
+    }
+    return $permission;
+  };
 @endphp
 
 @section('content')
@@ -73,14 +89,7 @@
                   @csrf
                   <div class="modal-body">
                     <label class="flbl mb-2">Permissions</label>
-                    <div class="row g-2">
-                      @foreach ($availablePermissions as $perm)
-                        <div class="col-6 form-check">
-                          <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $perm }}" id="perm{{ $role->id }}_{{ $loop->index }}" @checked($role->permissions->pluck('name')->contains($perm))>
-                          <label class="form-check-label" for="perm{{ $role->id }}_{{ $loop->index }}" style="font-size:12.5px">{{ $permissionLabels[$perm] ?? $perm }}</label>
-                        </div>
-                      @endforeach
-                    </div>
+                    @include('admin.team.partials.permission-matrix', ['idPrefix' => 'role' . $role->id, 'checkedPermissions' => $role->permissions->pluck('name')->all()])
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
@@ -118,7 +127,7 @@
             @if ($role->permissions->count())
               <div class="d-flex flex-wrap gap-1 mb-2">
                 @foreach ($role->permissions as $perm)
-                  <span class="badge-rt bg-inactive" style="font-size:10px">{{ $permissionLabels[$perm->name] ?? $perm->name }}</span>
+                  <span class="badge-rt bg-inactive" style="font-size:10px">{{ $permLabel($perm->name) }}</span>
                 @endforeach
               </div>
             @else
@@ -137,14 +146,7 @@
                 <div class="modal-body">
                   <p style="font-size:11.5px;color:var(--muted)">{{ $role->name }} still logs into its own portal regardless of what's checked here. Checking any box also lets every {{ $role->name }} member into the admin panel for that permission — leave everything unchecked to keep them portal-only.</p>
                   <label class="flbl mb-2">Permissions</label>
-                  <div class="row g-2">
-                    @foreach ($availablePermissions as $perm)
-                      <div class="col-6 form-check">
-                        <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $perm }}" id="sysperm{{ $role->id }}_{{ $loop->index }}" @checked($role->permissions->pluck('name')->contains($perm))>
-                        <label class="form-check-label" for="sysperm{{ $role->id }}_{{ $loop->index }}" style="font-size:12.5px">{{ $permissionLabels[$perm] ?? $perm }}</label>
-                      </div>
-                    @endforeach
-                  </div>
+                  @include('admin.team.partials.permission-matrix', ['idPrefix' => 'sysrole' . $role->id, 'checkedPermissions' => $role->permissions->pluck('name')->all()])
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>
@@ -223,14 +225,7 @@
           <div class="modal-body">
             <div class="mb-3"><label class="flbl">Role Name</label><input class="fctrl" name="name" placeholder="e.g. Content Manager" required/></div>
             <label class="flbl mb-2">Permissions</label>
-            <div class="row g-2">
-              @foreach ($availablePermissions as $perm)
-                <div class="col-6 form-check">
-                  <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $perm }}" id="newperm{{ $loop->index }}">
-                  <label class="form-check-label" for="newperm{{ $loop->index }}" style="font-size:12.5px">{{ $permissionLabels[$perm] ?? $perm }}</label>
-                </div>
-              @endforeach
-            </div>
+            @include('admin.team.partials.permission-matrix', ['idPrefix' => 'new', 'checkedPermissions' => []])
           </div>
           <div class="modal-footer">
             <button type="button" class="bghost" data-bs-dismiss="modal">Cancel</button>

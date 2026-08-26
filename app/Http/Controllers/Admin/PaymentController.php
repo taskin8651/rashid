@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\Payment;
+use App\Services\EnrollmentActivationService;
 use App\Services\RazorpayService;
 use Illuminate\Support\Facades\Response;
 
@@ -67,5 +68,23 @@ class PaymentController extends Controller
         ]);
 
         return back()->with('status', 'Payment refunded via Razorpay.');
+    }
+
+    public function verifyUpi(Payment $payment, EnrollmentActivationService $activation)
+    {
+        abort_unless($payment->method === 'upi' && $payment->status === 'created', 422);
+
+        $activation->activate($payment, auth()->id());
+
+        return back()->with('status', 'UPI payment verified — course activated.');
+    }
+
+    public function rejectUpi(Payment $payment)
+    {
+        abort_unless($payment->method === 'upi' && $payment->status === 'created', 422);
+
+        $payment->update(['status' => 'failed']);
+
+        return back()->with('status', 'UPI payment marked as failed.');
     }
 }

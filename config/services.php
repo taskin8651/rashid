@@ -36,6 +36,11 @@ return [
         'key_secret' => env('RAZORPAY_KEY_SECRET'),
     ],
 
+    'upi' => [
+        'id' => env('UPI_ID'),
+        'name' => env('UPI_PAYEE_NAME', env('APP_NAME', 'R-Tech Computer')),
+    ],
+
     'franchise' => [
         'booking_fee' => env('FRANCHISE_BOOKING_FEE', 25000),
     ],

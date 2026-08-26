@@ -27,7 +27,7 @@ class TeamController extends Controller
 
         // Shown read-only below the editable roles above. These roles gate
         // access via their own route middleware (role:student, role:staff,
-        // ...), not via the ADMIN_PERMISSIONS list, so they're deliberately
+        // ...), not via the granular admin permissions, so they're deliberately
         // excluded from $roles — editing them here would let an admin
         // accidentally grant them ADMIN_BASELINE_PERMISSION and pull them
         // into the admin panel (see updateRole()).
@@ -42,7 +42,7 @@ class TeamController extends Controller
             'roles' => $roles,
             'systemRoles' => $systemRoles,
             'members' => $members,
-            'availablePermissions' => RolesAndPermissionsSeeder::ADMIN_PERMISSIONS,
+            'permissionModules' => RolesAndPermissionsSeeder::ADMIN_PERMISSION_MODULES,
         ]);
     }
 
@@ -51,7 +51,7 @@ class TeamController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('roles', 'name')],
             'permissions' => ['array'],
-            'permissions.*' => [Rule::in(RolesAndPermissionsSeeder::ADMIN_PERMISSIONS)],
+            'permissions.*' => [Rule::in(RolesAndPermissionsSeeder::adminPermissions())],
         ]);
 
         $role = Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
@@ -66,7 +66,7 @@ class TeamController extends Controller
 
         $validated = $request->validate([
             'permissions' => ['array'],
-            'permissions.*' => [Rule::in(RolesAndPermissionsSeeder::ADMIN_PERMISSIONS)],
+            'permissions.*' => [Rule::in(RolesAndPermissionsSeeder::adminPermissions())],
         ]);
 
         $role->syncPermissions($this->withBaselineIfAny($validated['permissions'] ?? []));

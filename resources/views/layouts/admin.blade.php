@@ -18,77 +18,85 @@
   <nav class="sb-nav">
     <div class="nsec">Overview</div>
     <a class="slink {{ request()->routeIs('admin.dashboard') ? 'act' : '' }}" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2"></i>Dashboard</a>
-    @canany(['manage-leads', 'follow-up-leads', 'manage-students', 'manage-certificate-applications', 'manage-placements', 'manage-careers', 'manage-attendance', 'manage-attendance-locations', 'manage-daily-reports', 'manage-courses', 'manage-categories', 'manage-admins'])
+    @canany(['leads-index', 'leads-follow-up', 'students-index', 'certificate-applications-index', 'certificates-index', 'placements-index', 'careers-index', 'job-applications-index', 'attendance-index', 'attendance-locations-index', 'daily-reports-index', 'staff-index', 'courses-index', 'categories-index'])
       <div class="nsec">Management</div>
-      @canany(['manage-leads', 'follow-up-leads'])
+      @canany(['leads-index', 'leads-follow-up'])
         <a class="slink {{ request()->routeIs('admin.leads.*') ? 'act' : '' }}" href="{{ route('admin.leads.index') }}"><i class="bi bi-person-lines-fill"></i>Leads</a>
       @endcanany
-      @can('manage-students')
+      @can('students-index')
         <a class="slink {{ request()->routeIs('admin.students.*') ? 'act' : '' }}" href="{{ route('admin.students.index') }}"><i class="bi bi-people-fill"></i>Students</a>
       @endcan
-      @canany(['manage-certificate-applications', 'manage-admins'])
+      @can('certificates-index')
         <a class="slink {{ request()->routeIs('admin.certificates.*') ? 'act' : '' }}" href="{{ route('admin.certificates.index') }}"><i class="bi bi-award-fill"></i>Certificates</a>
+      @endcan
+      @can('certificate-applications-index')
         <a class="slink {{ request()->routeIs('admin.certificate-applications.*') ? 'act' : '' }}" href="{{ route('admin.certificate-applications.index') }}"><i class="bi bi-patch-question-fill"></i>Certificate Applications</a>
-      @endcanany
-      @can('manage-placements')
+      @endcan
+      @can('placements-index')
         <a class="slink {{ request()->routeIs('admin.placements.*') ? 'act' : '' }}" href="{{ route('admin.placements.index') }}"><i class="bi bi-briefcase-fill"></i>Placements</a>
       @endcan
-      @can('manage-careers')
+      @can('careers-index')
         <a class="slink {{ request()->routeIs('admin.careers.*') ? 'act' : '' }}" href="{{ route('admin.careers.index') }}"><i class="bi bi-file-earmark-post-fill"></i>Job Postings</a>
+      @endcan
+      @can('job-applications-index')
         <a class="slink {{ request()->routeIs('admin.job-applications.*') ? 'act' : '' }}" href="{{ route('admin.job-applications.index') }}"><i class="bi bi-file-earmark-person-fill"></i>Job Applications</a>
       @endcan
-      @can('manage-attendance')
+      @can('attendance-index')
         <a class="slink {{ request()->routeIs('admin.attendance.*') ? 'act' : '' }}" href="{{ route('admin.attendance.index') }}"><i class="bi bi-qr-code-scan"></i>Attendance</a>
       @endcan
-      @can('manage-attendance-locations')
+      @can('attendance-locations-index')
         <a class="slink {{ request()->routeIs('admin.attendance-locations.*') ? 'act' : '' }}" href="{{ route('admin.attendance-locations.index') }}"><i class="bi bi-geo-alt-fill"></i>Attendance Locations</a>
       @endcan
-      @can('manage-daily-reports')
+      @can('daily-reports-index')
         <a class="slink {{ request()->routeIs('admin.daily-reports.*') ? 'act' : '' }}" href="{{ route('admin.daily-reports.index') }}"><i class="bi bi-journal-text"></i>Daily Reports</a>
+      @endcan
+      @can('staff-index')
         <a class="slink {{ request()->routeIs('admin.staff.*') ? 'act' : '' }}" href="{{ route('admin.staff.index') }}"><i class="bi bi-person-badge-fill"></i>Staff & Teachers</a>
       @endcan
-      @can('manage-courses')
+      @can('courses-index')
         <a class="slink {{ request()->routeIs('admin.courses.*') ? 'act' : '' }}" href="{{ route('admin.courses.index') }}"><i class="bi bi-collection-play-fill"></i>Courses</a>
       @endcan
-      @can('manage-categories')
+      @can('categories-index')
         <a class="slink {{ request()->routeIs('admin.categories.*') ? 'act' : '' }}" href="{{ route('admin.categories.index') }}"><i class="bi bi-tags-fill"></i>Categories</a>
       @endcan
     @endcanany
-    @canany(['manage-coupons', 'manage-payments', 'manage-franchise-leads', 'manage-franchise-resources'])
+    @canany(['coupons-index', 'payments-index', 'expenses-index', 'franchise-leads-index', 'franchise-resources-index'])
       <div class="nsec">Commerce</div>
-      @can('manage-coupons')
+      @can('coupons-index')
         <a class="slink {{ request()->routeIs('admin.coupons.*') ? 'act' : '' }}" href="{{ route('admin.coupons.index') }}"><i class="bi bi-ticket-perforated-fill"></i>Coupons</a>
       @endcan
-      @can('manage-payments')
+      @can('payments-index')
         <a class="slink {{ request()->routeIs('admin.payments.*') ? 'act' : '' }}" href="{{ route('admin.payments.index') }}"><i class="bi bi-credit-card-fill"></i>Payments</a>
+      @endcan
+      @can('expenses-index')
         <a class="slink {{ request()->routeIs('admin.expenses.*') ? 'act' : '' }}" href="{{ route('admin.expenses.index') }}"><i class="bi bi-receipt-cutoff"></i>Expenses</a>
       @endcan
-      @can('manage-franchise-leads')
+      @can('franchise-leads-index')
         <a class="slink {{ request()->routeIs('admin.franchise.index') ? 'act' : '' }}" href="{{ route('admin.franchise.index') }}"><i class="bi bi-flag-fill"></i>Franchise Leads</a>
       @endcan
-      @can('manage-franchise-resources')
+      @can('franchise-resources-index')
         <a class="slink {{ request()->routeIs('admin.franchise.resources.*') ? 'act' : '' }}" href="{{ route('admin.franchise.resources.index') }}"><i class="bi bi-folder2-open"></i>Franchise Resources</a>
       @endcan
     @endcanany
-    @canany(['manage-gallery', 'manage-reviews', 'manage-faqs', 'manage-blog', 'manage-team-members'])
+    @canany(['gallery-index', 'reviews-index', 'faqs-index', 'blog-index', 'team-members-index'])
       <div class="nsec">Content</div>
-      @can('manage-gallery')
+      @can('gallery-index')
         <a class="slink {{ request()->routeIs('admin.gallery.*') ? 'act' : '' }}" href="{{ route('admin.gallery.index') }}"><i class="bi bi-images"></i>Gallery</a>
       @endcan
-      @can('manage-team-members')
+      @can('team-members-index')
         <a class="slink {{ request()->routeIs('admin.team-members.*') ? 'act' : '' }}" href="{{ route('admin.team-members.index') }}"><i class="bi bi-person-vcard-fill"></i>Our Team</a>
       @endcan
-      @can('manage-reviews')
+      @can('reviews-index')
         <a class="slink {{ request()->routeIs('admin.reviews.*') ? 'act' : '' }}" href="{{ route('admin.reviews.index') }}"><i class="bi bi-star-fill"></i>Reviews</a>
       @endcan
-      @can('manage-faqs')
+      @can('faqs-index')
         <a class="slink {{ request()->routeIs('admin.faqs.*') ? 'act' : '' }}" href="{{ route('admin.faqs.index') }}"><i class="bi bi-question-circle-fill"></i>FAQs</a>
       @endcan
-      @can('manage-blog')
+      @can('blog-index')
         <a class="slink {{ request()->routeIs('admin.posts.*') ? 'act' : '' }}" href="{{ route('admin.posts.index') }}"><i class="bi bi-file-earmark-richtext-fill"></i>Blog</a>
       @endcan
     @endcanany
-    @can('manage-team')
+    @can('team-index')
       <div class="nsec">Organization</div>
       <a class="slink {{ request()->routeIs('admin.team.*') ? 'act' : '' }}" href="{{ route('admin.team.index') }}"><i class="bi bi-people-fill"></i>Team &amp; Roles</a>
     @endcan

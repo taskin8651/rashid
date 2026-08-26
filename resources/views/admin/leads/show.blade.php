@@ -96,7 +96,7 @@
         </form>
       </div>
 
-      @can('manage-leads')
+      @can('leads-edit')
         @if ($lead->status !== 'converted')
           <div class="card-rt">
             <div class="card-title">Convert to Enrolled Student</div>
@@ -142,7 +142,7 @@
     </div>
 
     <div class="col-lg-5">
-      @can('manage-leads')
+      @can('leads-edit')
         <div class="card-rt mb-4">
           <div class="card-title">Edit Details</div>
           <form method="POST" action="{{ route('admin.leads.update', $lead) }}">

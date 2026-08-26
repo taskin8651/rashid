@@ -168,6 +168,7 @@ Route::middleware(['auth', 'track.active'])->group(function () {
     Route::get('/enroll/{course:slug}', [EnrollmentController::class, 'create'])->name('enroll.create');
     Route::post('/enroll/{course:slug}', [EnrollmentController::class, 'store'])->name('enroll.store');
     Route::post('/enroll/{course:slug}/verify', [EnrollmentController::class, 'verify'])->name('enroll.verify');
+    Route::post('/enroll/{course:slug}/upi-submit', [EnrollmentController::class, 'submitUpiPayment'])->name('enroll.upi.submit');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
@@ -356,217 +357,345 @@ Route::middleware(['auth', 'track.active'])->group(function () {
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
         Route::post('/change-password', [AdminProfileController::class, 'changePassword'])->name('admin.password.update');
 
-        Route::middleware('permission:manage-leads')->group(function () {
+        Route::middleware('permission:leads-index')->group(function () {
             Route::get('/leads/export', [AdminLeadController::class, 'export'])->name('admin.leads.export');
+        });
+        Route::middleware('permission:leads-create')->group(function () {
             Route::post('/leads', [AdminLeadController::class, 'store'])->name('admin.leads.store');
         });
 
         // Viewing + follow-up (notes, status) is open to the lighter
-        // follow-up-leads permission too — e.g. a telecaller role. Editing
-        // core details, converting, and deleting stay manage-leads only.
-        Route::middleware('permission:manage-leads|follow-up-leads')->group(function () {
+        // leads-follow-up permission too — e.g. a telecaller role. Editing
+        // core details, converting, and deleting stay leads-edit/-delete only.
+        Route::middleware('permission:leads-index|leads-follow-up')->group(function () {
             Route::get('/leads', [AdminLeadController::class, 'index'])->name('admin.leads.index');
+        });
+        Route::middleware('permission:leads-show|leads-follow-up')->group(function () {
             Route::get('/leads/{lead}', [AdminLeadController::class, 'show'])->name('admin.leads.show');
+        });
+        Route::middleware('permission:leads-edit|leads-follow-up')->group(function () {
             Route::post('/leads/{lead}/status', [AdminLeadController::class, 'updateStatus'])->name('admin.leads.status.update');
             Route::post('/leads/{lead}/notes', [AdminLeadController::class, 'addNote'])->name('admin.leads.notes.store');
         });
 
-        Route::middleware('permission:manage-leads')->group(function () {
+        Route::middleware('permission:leads-edit')->group(function () {
             Route::post('/leads/{lead}', [AdminLeadController::class, 'update'])->name('admin.leads.update');
             Route::post('/leads/{lead}/convert', [AdminLeadController::class, 'convert'])->name('admin.leads.convert');
+        });
+        Route::middleware('permission:leads-delete')->group(function () {
             Route::delete('/leads/{lead}', [AdminLeadController::class, 'destroy'])->name('admin.leads.destroy');
         });
 
-        Route::middleware('permission:manage-students')->group(function () {
+        Route::middleware('permission:students-index')->group(function () {
             Route::get('/students', [AdminStudentController::class, 'index'])->name('admin.students.index');
             Route::get('/students/export', [AdminStudentController::class, 'export'])->name('admin.students.export');
+        });
+        Route::middleware('permission:students-create')->group(function () {
             Route::post('/students', [AdminStudentController::class, 'store'])->name('admin.students.store');
             Route::post('/students/offline-enroll', [AdminStudentController::class, 'storeOffline'])->name('admin.students.offline-enroll');
-            Route::post('/students/{student}/allot-course', [AdminStudentController::class, 'allotCourse'])->name('admin.students.allot-course');
+        });
+        Route::middleware('permission:students-show')->group(function () {
             Route::get('/students/{student}', [AdminStudentController::class, 'show'])->name('admin.students.show');
             Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCardView'])->name('admin.students.id-card.view');
             Route::get('/students/{student}/id-card/download', [AdminStudentController::class, 'idCardDownload'])->name('admin.students.id-card.download');
+        });
+        Route::middleware('permission:students-edit')->group(function () {
+            Route::post('/students/{student}/allot-course', [AdminStudentController::class, 'allotCourse'])->name('admin.students.allot-course');
             Route::post('/students/{student}', [AdminStudentController::class, 'update'])->name('admin.students.update');
             Route::post('/students/{student}/feature', [AdminStudentController::class, 'toggleFeature'])->name('admin.students.feature');
-            Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
             Route::post('/enrollments/{enrollment}/payments', [AdminStudentController::class, 'storePayment'])->name('admin.enrollments.payments.store');
             Route::post('/enrollments/{enrollment}/fee', [AdminStudentController::class, 'updateFee'])->name('admin.enrollments.fee.update');
         });
+        Route::middleware('permission:students-delete')->group(function () {
+            Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
+        });
 
-        Route::middleware('permission:manage-courses')->group(function () {
+        Route::middleware('permission:courses-index')->group(function () {
             Route::get('/courses', [AdminCourseController::class, 'index'])->name('admin.courses.index');
-            Route::post('/courses', [AdminCourseController::class, 'store'])->name('admin.courses.store');
-            Route::post('/courses/{course}', [AdminCourseController::class, 'update'])->name('admin.courses.update');
-            Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])->name('admin.courses.destroy');
-
             Route::get('/courses/{course}/videos', [AdminCourseVideoController::class, 'index'])->name('admin.courses.videos.index');
-            Route::post('/courses/{course}/videos', [AdminCourseVideoController::class, 'store'])->name('admin.courses.videos.store');
-            Route::post('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'update'])->name('admin.courses.videos.update');
-            Route::delete('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'destroy'])->name('admin.courses.videos.destroy');
-
             Route::get('/courses/{course}/quiz', [AdminCourseQuizController::class, 'index'])->name('admin.courses.quiz.index');
-            Route::post('/courses/{course}/quiz', [AdminCourseQuizController::class, 'store'])->name('admin.courses.quiz.store');
-            Route::post('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'update'])->name('admin.courses.quiz.update');
-            Route::delete('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'destroy'])->name('admin.courses.quiz.destroy');
-
             Route::get('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'index'])->name('admin.courses.assignments.index');
-            Route::post('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'store'])->name('admin.courses.assignments.store');
-            Route::post('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'update'])->name('admin.courses.assignments.update');
-            Route::delete('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'destroy'])->name('admin.courses.assignments.destroy');
-            Route::post('/courses/{course}/submissions/{submission}/grade', [AdminCourseAssignmentController::class, 'grade'])->name('admin.courses.assignments.grade');
-
             Route::get('/courses/{course}/notes', [AdminCourseNoteController::class, 'index'])->name('admin.courses.notes.index');
+        });
+        Route::middleware('permission:courses-create')->group(function () {
+            Route::post('/courses', [AdminCourseController::class, 'store'])->name('admin.courses.store');
+            Route::post('/courses/{course}/videos', [AdminCourseVideoController::class, 'store'])->name('admin.courses.videos.store');
+            Route::post('/courses/{course}/quiz', [AdminCourseQuizController::class, 'store'])->name('admin.courses.quiz.store');
+            Route::post('/courses/{course}/assignments', [AdminCourseAssignmentController::class, 'store'])->name('admin.courses.assignments.store');
             Route::post('/courses/{course}/notes', [AdminCourseNoteController::class, 'store'])->name('admin.courses.notes.store');
+        });
+        Route::middleware('permission:courses-edit')->group(function () {
+            Route::post('/courses/{course}', [AdminCourseController::class, 'update'])->name('admin.courses.update');
+            Route::post('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'update'])->name('admin.courses.videos.update');
+            Route::post('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'update'])->name('admin.courses.quiz.update');
+            Route::post('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'update'])->name('admin.courses.assignments.update');
+            Route::post('/courses/{course}/submissions/{submission}/grade', [AdminCourseAssignmentController::class, 'grade'])->name('admin.courses.assignments.grade');
             Route::post('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'update'])->name('admin.courses.notes.update');
+        });
+        Route::middleware('permission:courses-delete')->group(function () {
+            Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])->name('admin.courses.destroy');
+            Route::delete('/courses/{course}/videos/{video}', [AdminCourseVideoController::class, 'destroy'])->name('admin.courses.videos.destroy');
+            Route::delete('/courses/{course}/quiz/{question}', [AdminCourseQuizController::class, 'destroy'])->name('admin.courses.quiz.destroy');
+            Route::delete('/courses/{course}/assignments/{assignment}', [AdminCourseAssignmentController::class, 'destroy'])->name('admin.courses.assignments.destroy');
             Route::delete('/courses/{course}/notes/{note}', [AdminCourseNoteController::class, 'destroy'])->name('admin.courses.notes.destroy');
         });
 
-        Route::middleware('permission:manage-categories')->group(function () {
+        Route::middleware('permission:categories-index')->group(function () {
             Route::get('/categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
+        });
+        Route::middleware('permission:categories-create')->group(function () {
             Route::post('/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
+        });
+        Route::middleware('permission:categories-delete')->group(function () {
             Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
         });
 
-        Route::middleware('permission:manage-coupons')->group(function () {
+        Route::middleware('permission:coupons-index')->group(function () {
             Route::get('/coupons', [AdminCouponController::class, 'index'])->name('admin.coupons.index');
+        });
+        Route::middleware('permission:coupons-create')->group(function () {
             Route::post('/coupons', [AdminCouponController::class, 'store'])->name('admin.coupons.store');
+        });
+        Route::middleware('permission:coupons-delete')->group(function () {
             Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('admin.coupons.destroy');
         });
 
-        Route::middleware('permission:manage-payments')->group(function () {
+        Route::middleware('permission:payments-index')->group(function () {
             Route::get('/payments', [AdminPaymentController::class, 'index'])->name('admin.payments.index');
             Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('admin.payments.export');
+        });
+        Route::middleware('permission:payments-edit')->group(function () {
             Route::post('/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('admin.payments.refund');
+            Route::post('/payments/{payment}/verify-upi', [AdminPaymentController::class, 'verifyUpi'])->name('admin.payments.verify-upi');
+            Route::post('/payments/{payment}/reject-upi', [AdminPaymentController::class, 'rejectUpi'])->name('admin.payments.reject-upi');
+        });
+        Route::middleware('permission:expenses-index')->group(function () {
             Route::get('/expenses', [AdminExpenseController::class, 'index'])->name('admin.expenses.index');
             Route::get('/expenses/export', [AdminExpenseController::class, 'export'])->name('admin.expenses.export');
+        });
+        Route::middleware('permission:expenses-create')->group(function () {
             Route::post('/expenses', [AdminExpenseController::class, 'store'])->name('admin.expenses.store');
+        });
+        Route::middleware('permission:expenses-show')->group(function () {
             Route::get('/expenses/{expense}/receipt', [AdminExpenseController::class, 'downloadReceipt'])->name('admin.expenses.receipt');
+        });
+        Route::middleware('permission:expenses-delete')->group(function () {
             Route::delete('/expenses/{expense}', [AdminExpenseController::class, 'destroy'])->name('admin.expenses.destroy');
         });
 
-        Route::middleware('permission:manage-franchise-leads')->group(function () {
+        Route::middleware('permission:franchise-leads-index')->group(function () {
             Route::get('/franchise', [AdminFranchiseController::class, 'index'])->name('admin.franchise.index');
             Route::get('/franchise/export', [AdminFranchiseController::class, 'export'])->name('admin.franchise.export');
+        });
+        Route::middleware('permission:franchise-leads-show')->group(function () {
+            Route::get('/franchise/documents/{document}/download', [AdminFranchiseController::class, 'downloadDocument'])->name('admin.franchise.documents.download');
+        });
+        Route::middleware('permission:franchise-leads-edit')->group(function () {
             Route::post('/franchise/leads/{lead}', [AdminFranchiseController::class, 'updateLead'])->name('admin.franchise.leads.update');
             Route::post('/franchise/bookings/{booking}', [AdminFranchiseController::class, 'updateBooking'])->name('admin.franchise.bookings.update');
             Route::post('/franchise/bookings/{booking}/documents', [AdminFranchiseController::class, 'uploadAgreement'])->name('admin.franchise.bookings.upload');
-            Route::get('/franchise/documents/{document}/download', [AdminFranchiseController::class, 'downloadDocument'])->name('admin.franchise.documents.download');
         });
 
-        Route::middleware('permission:manage-franchise-resources')->group(function () {
+        Route::middleware('permission:franchise-resources-index')->group(function () {
             Route::get('/franchise/resources', [AdminFranchiseResourceController::class, 'index'])->name('admin.franchise.resources.index');
+        });
+        Route::middleware('permission:franchise-resources-create')->group(function () {
             Route::post('/franchise/resources', [AdminFranchiseResourceController::class, 'store'])->name('admin.franchise.resources.store');
+        });
+        Route::middleware('permission:franchise-resources-delete')->group(function () {
             Route::delete('/franchise/resources/{resource}', [AdminFranchiseResourceController::class, 'destroy'])->name('admin.franchise.resources.destroy');
         });
 
-        Route::middleware('permission:manage-gallery')->group(function () {
+        Route::middleware('permission:gallery-index')->group(function () {
             Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('admin.gallery.index');
+        });
+        Route::middleware('permission:gallery-create')->group(function () {
             Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('admin.gallery.store');
+        });
+        Route::middleware('permission:gallery-edit')->group(function () {
             Route::post('/gallery/{gallery}/approve', [AdminGalleryController::class, 'approve'])->name('admin.gallery.approve');
             Route::post('/gallery/{gallery}/reject', [AdminGalleryController::class, 'reject'])->name('admin.gallery.reject');
+        });
+        Route::middleware('permission:gallery-delete')->group(function () {
             Route::delete('/gallery/{gallery}', [AdminGalleryController::class, 'destroy'])->name('admin.gallery.destroy');
         });
 
-        Route::middleware('permission:manage-reviews')->group(function () {
+        Route::middleware('permission:reviews-index')->group(function () {
             Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
+        });
+        Route::middleware('permission:reviews-edit')->group(function () {
             Route::post('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('admin.reviews.approve');
             Route::post('/reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('admin.reviews.reject');
             Route::post('/reviews/{review}/feature', [AdminReviewController::class, 'toggleFeature'])->name('admin.reviews.feature');
+        });
+        Route::middleware('permission:reviews-delete')->group(function () {
             Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
         });
 
-        Route::middleware('permission:manage-certificate-applications')->group(function () {
+        Route::middleware('permission:certificate-applications-index')->group(function () {
             Route::get('/certificate-applications', [AdminCertificateApplicationController::class, 'index'])->name('admin.certificate-applications.index');
-            Route::get('/certificates', [AdminCertificateApplicationController::class, 'certificatesIndex'])->name('admin.certificates.index');
-            Route::post('/certificate-applications/manual', [AdminCertificateApplicationController::class, 'storeManual'])->name('admin.certificate-applications.manual-store');
+        });
+        Route::middleware('permission:certificate-applications-show')->group(function () {
             Route::get('/certificate-applications/{application}/proof', [AdminCertificateApplicationController::class, 'downloadProof'])->name('admin.certificate-applications.proof');
+        });
+        Route::middleware('permission:certificate-applications-edit')->group(function () {
+            Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
+            Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
+        });
+        Route::middleware('permission:certificates-index')->group(function () {
+            Route::get('/certificates', [AdminCertificateApplicationController::class, 'certificatesIndex'])->name('admin.certificates.index');
+        });
+        Route::middleware('permission:certificates-show')->group(function () {
             Route::get('/certificates/{certificate}/download', [AdminCertificateApplicationController::class, 'download'])->name('admin.certificates.download');
             Route::get('/certificates/{certificate}/view', [AdminCertificateApplicationController::class, 'view'])->name('admin.certificates.view');
             Route::get('/certificates/{certificate}/marksheet', [AdminCertificateApplicationController::class, 'downloadMarksheet'])->name('admin.certificates.marksheet');
             Route::get('/certificates/{certificate}/marksheet/view', [AdminCertificateApplicationController::class, 'viewMarksheet'])->name('admin.certificates.marksheet.view');
-            Route::post('/certificate-applications/{application}/approve', [AdminCertificateApplicationController::class, 'approve'])->name('admin.certificate-applications.approve');
-            Route::post('/certificate-applications/{application}/reject', [AdminCertificateApplicationController::class, 'reject'])->name('admin.certificate-applications.reject');
+        });
+        Route::middleware('permission:certificates-create')->group(function () {
+            Route::post('/certificate-applications/manual', [AdminCertificateApplicationController::class, 'storeManual'])->name('admin.certificate-applications.manual-store');
+        });
+        Route::middleware('permission:certificates-edit')->group(function () {
             Route::post('/certificates/{certificate}/documents', [AdminCertificateApplicationController::class, 'updateDocuments'])->name('admin.certificates.documents.update');
         });
 
-        Route::middleware('permission:manage-careers')->group(function () {
+        Route::middleware('permission:careers-index')->group(function () {
             Route::get('/careers', [AdminJobPostingController::class, 'index'])->name('admin.careers.index');
+        });
+        Route::middleware('permission:careers-create')->group(function () {
             Route::post('/careers', [AdminJobPostingController::class, 'store'])->name('admin.careers.store');
+        });
+        Route::middleware('permission:careers-edit')->group(function () {
             Route::post('/careers/{career}', [AdminJobPostingController::class, 'update'])->name('admin.careers.update');
             Route::post('/careers/{career}/toggle', [AdminJobPostingController::class, 'toggleStatus'])->name('admin.careers.toggle');
+        });
+        Route::middleware('permission:careers-delete')->group(function () {
             Route::delete('/careers/{career}', [AdminJobPostingController::class, 'destroy'])->name('admin.careers.destroy');
+        });
 
+        Route::middleware('permission:job-applications-index')->group(function () {
             Route::get('/job-applications', [AdminJobApplicationController::class, 'index'])->name('admin.job-applications.index');
+        });
+        Route::middleware('permission:job-applications-show')->group(function () {
             Route::get('/job-applications/{application}/resume', [AdminJobApplicationController::class, 'downloadResume'])->name('admin.job-applications.resume');
+        });
+        Route::middleware('permission:job-applications-edit')->group(function () {
             Route::post('/job-applications/{application}/status', [AdminJobApplicationController::class, 'updateStatus'])->name('admin.job-applications.status');
+        });
+        Route::middleware('permission:job-applications-delete')->group(function () {
             Route::delete('/job-applications/{application}', [AdminJobApplicationController::class, 'destroy'])->name('admin.job-applications.destroy');
         });
 
-        Route::middleware('permission:manage-placements')->group(function () {
+        Route::middleware('permission:placements-index')->group(function () {
             Route::get('/placements', [AdminPlacementController::class, 'index'])->name('admin.placements.index');
+        });
+        Route::middleware('permission:placements-show')->group(function () {
             Route::get('/placements/{placement}/proof', [AdminPlacementController::class, 'downloadProof'])->name('admin.placements.proof');
+        });
+        Route::middleware('permission:placements-edit')->group(function () {
             Route::post('/placements/{placement}/approve', [AdminPlacementController::class, 'approve'])->name('admin.placements.approve');
             Route::post('/placements/{placement}/reject', [AdminPlacementController::class, 'reject'])->name('admin.placements.reject');
             Route::post('/placements/{placement}/update', [AdminPlacementController::class, 'update'])->name('admin.placements.update');
             Route::post('/placements/{placement}/feature', [AdminPlacementController::class, 'toggleFeatured'])->name('admin.placements.feature');
+        });
+        Route::middleware('permission:placements-delete')->group(function () {
             Route::delete('/placements/{placement}', [AdminPlacementController::class, 'destroy'])->name('admin.placements.destroy');
         });
 
-        Route::middleware('permission:manage-attendance-locations')->group(function () {
+        Route::middleware('permission:attendance-locations-index')->group(function () {
             Route::get('/attendance-locations', [AdminAttendanceLocationController::class, 'index'])->name('admin.attendance-locations.index');
+        });
+        Route::middleware('permission:attendance-locations-create')->group(function () {
             Route::post('/attendance-locations', [AdminAttendanceLocationController::class, 'store'])->name('admin.attendance-locations.store');
+        });
+        Route::middleware('permission:attendance-locations-edit')->group(function () {
             Route::post('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'update'])->name('admin.attendance-locations.update');
+        });
+        Route::middleware('permission:attendance-locations-delete')->group(function () {
             Route::delete('/attendance-locations/{location}', [AdminAttendanceLocationController::class, 'destroy'])->name('admin.attendance-locations.destroy');
         });
 
-        Route::middleware('permission:manage-attendance')->group(function () {
+        Route::middleware('permission:attendance-index')->group(function () {
             Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
             Route::get('/attendance/export', [AdminAttendanceController::class, 'export'])->name('admin.attendance.export');
         });
 
-        Route::middleware('permission:manage-daily-reports')->group(function () {
+        Route::middleware('permission:daily-reports-index')->group(function () {
             Route::get('/daily-reports', [AdminDailyReportController::class, 'index'])->name('admin.daily-reports.index');
             Route::get('/daily-reports/export', [AdminDailyReportController::class, 'export'])->name('admin.daily-reports.export');
             Route::get('/daily-reports/performance/{member}', [AdminDailyReportController::class, 'performance'])->name('admin.daily-reports.performance');
+        });
+        Route::middleware('permission:daily-reports-edit')->group(function () {
             Route::post('/daily-reports/{dailyReport}/approve', [AdminDailyReportController::class, 'approve'])->name('admin.daily-reports.approve');
             Route::post('/daily-reports/{dailyReport}/reject', [AdminDailyReportController::class, 'reject'])->name('admin.daily-reports.reject');
+        });
 
+        Route::middleware('permission:staff-index')->group(function () {
             Route::get('/staff', [AdminStaffController::class, 'index'])->name('admin.staff.index');
+        });
+        Route::middleware('permission:staff-create')->group(function () {
             Route::post('/staff', [AdminStaffController::class, 'store'])->name('admin.staff.store');
+        });
+        Route::middleware('permission:staff-edit')->group(function () {
             Route::put('/staff/{member}', [AdminStaffController::class, 'update'])->name('admin.staff.update');
+        });
+        Route::middleware('permission:staff-delete')->group(function () {
             Route::delete('/staff/{member}', [AdminStaffController::class, 'destroy'])->name('admin.staff.destroy');
         });
 
-        Route::middleware('permission:manage-faqs')->group(function () {
+        Route::middleware('permission:faqs-index')->group(function () {
             Route::get('/faqs', [AdminFaqController::class, 'index'])->name('admin.faqs.index');
+        });
+        Route::middleware('permission:faqs-create')->group(function () {
             Route::post('/faqs', [AdminFaqController::class, 'store'])->name('admin.faqs.store');
+        });
+        Route::middleware('permission:faqs-edit')->group(function () {
             Route::post('/faqs/{faq}', [AdminFaqController::class, 'update'])->name('admin.faqs.update');
+        });
+        Route::middleware('permission:faqs-delete')->group(function () {
             Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])->name('admin.faqs.destroy');
         });
 
-        Route::middleware('permission:manage-blog')->group(function () {
+        Route::middleware('permission:blog-index')->group(function () {
             Route::get('/posts', [AdminPostController::class, 'index'])->name('admin.posts.index');
+        });
+        Route::middleware('permission:blog-create')->group(function () {
             Route::post('/posts', [AdminPostController::class, 'store'])->name('admin.posts.store');
+        });
+        Route::middleware('permission:blog-edit')->group(function () {
             Route::post('/posts/{post}', [AdminPostController::class, 'update'])->name('admin.posts.update');
+        });
+        Route::middleware('permission:blog-delete')->group(function () {
             Route::delete('/posts/{post}', [AdminPostController::class, 'destroy'])->name('admin.posts.destroy');
         });
 
-        Route::middleware('permission:manage-team')->group(function () {
+        Route::middleware('permission:team-index')->group(function () {
             Route::get('/team', [AdminTeamController::class, 'index'])->name('admin.team.index');
+        });
+        Route::middleware('permission:team-create')->group(function () {
             Route::post('/team/roles', [AdminTeamController::class, 'storeRole'])->name('admin.team.roles.store');
-            Route::post('/team/roles/{role}', [AdminTeamController::class, 'updateRole'])->name('admin.team.roles.update');
-            Route::delete('/team/roles/{role}', [AdminTeamController::class, 'destroyRole'])->name('admin.team.roles.destroy');
             Route::post('/team/members', [AdminTeamController::class, 'storeMember'])->name('admin.team.members.store');
+        });
+        Route::middleware('permission:team-edit')->group(function () {
+            Route::post('/team/roles/{role}', [AdminTeamController::class, 'updateRole'])->name('admin.team.roles.update');
             Route::post('/team/members/{member}', [AdminTeamController::class, 'updateMember'])->name('admin.team.members.update');
+        });
+        Route::middleware('permission:team-delete')->group(function () {
+            Route::delete('/team/roles/{role}', [AdminTeamController::class, 'destroyRole'])->name('admin.team.roles.destroy');
             Route::delete('/team/members/{member}', [AdminTeamController::class, 'destroyMember'])->name('admin.team.members.destroy');
         });
 
-        Route::middleware('permission:manage-team-members')->group(function () {
+        Route::middleware('permission:team-members-index')->group(function () {
             Route::get('/team-members', [AdminTeamMemberController::class, 'index'])->name('admin.team-members.index');
+        });
+        Route::middleware('permission:team-members-create')->group(function () {
             Route::post('/team-members', [AdminTeamMemberController::class, 'store'])->name('admin.team-members.store');
+        });
+        Route::middleware('permission:team-members-edit')->group(function () {
             Route::post('/team-members/{teamMember}', [AdminTeamMemberController::class, 'update'])->name('admin.team-members.update');
             Route::post('/team-members/{teamMember}/approve', [AdminTeamMemberController::class, 'approve'])->name('admin.team-members.approve');
             Route::post('/team-members/{teamMember}/reject', [AdminTeamMemberController::class, 'reject'])->name('admin.team-members.reject');
+        });
+        Route::middleware('permission:team-members-delete')->group(function () {
             Route::delete('/team-members/{teamMember}', [AdminTeamMemberController::class, 'destroy'])->name('admin.team-members.destroy');
         });
     });
