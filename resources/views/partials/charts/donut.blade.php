@@ -20,13 +20,15 @@
       @endif
     </div>
   </div>
-  <div class="donut-legend">
-    @foreach ($segments as $seg)
-      <div class="donut-legend-item">
-        <span class="donut-dot" style="background:rgb({{ $seg['color'] }})"></span>
-        <span>{{ $seg['label'] }}</span>
-        <b>{{ $seg['display'] ?? $seg['value'] }}</b>
-      </div>
-    @endforeach
-  </div>
+  @unless (!empty($hideLegend))
+    <div class="donut-legend">
+      @foreach ($segments as $seg)
+        <div class="donut-legend-item">
+          <span class="donut-dot" style="background:rgb({{ $seg['color'] }})"></span>
+          <span>{{ $seg['label'] }}</span>
+          <b>{{ $seg['display'] ?? $seg['value'] }}</b>
+        </div>
+      @endforeach
+    </div>
+  @endunless
 </div>

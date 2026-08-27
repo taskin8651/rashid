@@ -84,6 +84,18 @@
                   @endif
                 </div>
 
+                @if ($certificate->include_certificate)
+                  <div class="cert-verify-section-title"><i class="bi bi-file-earmark-image-fill"></i>Certificate</div>
+
+                  <div class="cert-verify-doc-frame">
+                    <span class="cert-verify-doc-badge"><i class="bi bi-patch-check-fill"></i>Authentic</span>
+                    <iframe src="{{ route('certificates.verify.preview', ['certificate' => $certificate->cert_code]) }}" title="{{ $displayName }}'s Certificate" loading="lazy"></iframe>
+                  </div>
+                  <div class="cert-verify-doc-actions">
+                    <a href="{{ route('certificates.verify.preview', ['certificate' => $certificate->cert_code]) }}" target="_blank" rel="noopener" class="btn-enr" style="text-decoration:none"><i class="bi bi-arrow-up-right-square me-1"></i>Open Full Certificate</a>
+                  </div>
+                @endif
+
                 @if ($hasMarksheet)
                   <div class="cert-verify-section-title"><i class="bi bi-clipboard-data-fill"></i>Marksheet</div>
 
@@ -139,6 +151,31 @@
                         <div class="cert-verify-stat-value">{{ $result }}</div>
                       </div>
                     </div>
+                  </div>
+
+                  <div class="cert-verify-section-title"><i class="bi bi-pie-chart-fill"></i>Subject-wise Performance</div>
+
+                  <div class="cert-verify-subjects-grid">
+                    @foreach ($certificate->subjects as $subject)
+                      @php
+                        $subMax = (int) $subject->max_marks;
+                        $subObtained = (int) ($subject->marks_obtained ?? 0);
+                        $subPct = $subMax > 0 ? round($subObtained / $subMax * 100) : 0;
+                      @endphp
+                      <div class="cert-verify-subject-card">
+                        @include('partials.charts.donut', [
+                          'segments' => [
+                            ['label' => 'Obtained', 'value' => $subObtained, 'color' => '22,51,110'],
+                            ['label' => 'Remaining', 'value' => max($subMax - $subObtained, 0), 'color' => '201,162,75'],
+                          ],
+                          'centerValue' => $subPct . '%',
+                          'size' => 76,
+                          'hideLegend' => true,
+                        ])
+                        <div class="cert-verify-subject-name" title="{{ $subject->subject }}">{{ $subject->subject }}</div>
+                        <div class="cert-verify-subject-score">{{ $subObtained }}/{{ $subMax }} marks</div>
+                      </div>
+                    @endforeach
                   </div>
                 @endif
               </div>
