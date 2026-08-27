@@ -3203,6 +3203,16 @@ footer::after {
   z-index: 1;
 }
 
+.cert-verify-ms-photo {
+  width: 64px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 18px -10px rgba(15, 23, 42, .35);
+  flex-shrink: 0;
+}
+
 .cert-verify-mtable th.chart,
 .cert-verify-mtable td.chart {
   text-align: center;

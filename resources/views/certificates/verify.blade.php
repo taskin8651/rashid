@@ -87,7 +87,12 @@
                 </div>
 
                 @if ($hasMarksheet)
-                  <div class="cert-verify-section-title"><i class="bi bi-clipboard-data-fill"></i>Marksheet</div>
+                  <div class="cert-verify-section-title" style="justify-content:space-between;align-items:flex-start">
+                    <span style="display:flex;align-items:center;gap:8px"><i class="bi bi-clipboard-data-fill"></i>Marksheet</span>
+                    @if ($certificate->photo_path)
+                      <img src="{{ asset('storage/' . $certificate->photo_path) }}" alt="{{ $displayName }}" class="cert-verify-ms-photo">
+                    @endif
+                  </div>
 
                   <div style="overflow-x:auto">
                     <table class="cert-verify-mtable">
