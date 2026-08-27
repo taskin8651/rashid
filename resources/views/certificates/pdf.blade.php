@@ -85,6 +85,11 @@
 
   /* WATERMARK */
   .watermark { position: absolute; width: 110mm; height: 110mm; top: 100mm; left: 93.5mm; opacity: 0.06; }
+  .watermark-text {
+    position: absolute; left: 0; right: 0; top: 96mm; text-align: center;
+    font-family: 'Helvetica', 'DejaVu Sans', sans-serif; font-weight: 900; font-size: 44pt;
+    letter-spacing: 3pt; color: #16336e; opacity: 0.07; z-index: 1;
+  }
 
   /* LEFT ACCENT SPINE */
   .accent-spine { position: absolute; top: 9mm; bottom: 9mm; left: 9mm; width: 3mm; background: #c9a24b; border-top-left-radius: 7mm; border-bottom-left-radius: 7mm; }
@@ -144,6 +149,7 @@
     @if (file_exists(public_path('assets/img/logo.png')))
       <img class="watermark" src="file://{{ str_replace('\\', '/', public_path('assets/img/logo.png')) }}">
     @endif
+    <div class="watermark-text">R-TECH COMPUTER</div>
     <div class="border-outer"></div>
     <div class="border-inner"></div>
     <div class="accent-spine"></div>

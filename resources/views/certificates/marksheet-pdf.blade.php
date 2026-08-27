@@ -123,18 +123,27 @@
   .ms-marks { position: absolute; top: 120mm; left: 16mm; right: 16mm; }
   .ms-marks table { width: 100%; border-collapse: collapse; }
   .ms-marks th {
-    height: 9.5mm; padding: 0 3mm; background: #16336e; color: #d9b65c; border: 0.5pt solid #c9a24b;
-    font-size: 11pt; text-transform: uppercase; font-weight: bold; letter-spacing: 0.3pt;
-    box-shadow: inset 0 -0.7pt 0 rgba(217,182,92,.5);
+    height: 9.5mm; padding: 0 4mm; background: #16336e; color: #d9b65c; border: 0.5pt solid #16336e;
+    font-family: 'Helvetica', 'DejaVu Sans', sans-serif; font-size: 10pt; text-transform: uppercase;
+    font-weight: bold; letter-spacing: 0.6pt; box-shadow: inset 0 -0.7pt 0 rgba(217,182,92,.5);
     text-align: center; vertical-align: middle;
   }
   .ms-marks th:first-child { text-align: left; }
   .ms-marks td {
-    height: 8mm; padding: 0 3mm; border: 0.5pt solid #c9a24b; color: #16233f; font-size: 11pt; font-weight: bold;
-    text-align: left; vertical-align: middle;
+    height: 8.6mm; padding: 0 4mm; border: 0.5pt solid #e4dcc8; vertical-align: middle;
   }
-  .ms-marks td.num { text-align: center; }
-  .ms-marks tr.total td { background: #16336e; color: #fff; font-size: 12.5pt; }
+  .ms-marks tbody tr:nth-child(even) td { background: #f8f4e9; }
+  .ms-marks td.subject {
+    font-family: 'Times New Roman', 'DejaVu Serif', serif; font-size: 11.5pt; font-weight: normal;
+    font-style: italic; color: #16233f; text-align: left;
+  }
+  .ms-marks td.num { text-align: center; font-family: 'Helvetica', 'DejaVu Sans', sans-serif; }
+  .ms-marks td.max { font-size: 10.5pt; font-weight: normal; color: #5c6a8a; }
+  .ms-marks td.obtained { font-size: 12.5pt; font-weight: bold; color: #16336e; }
+  .ms-marks tr.total td {
+    background: #16336e !important; color: #fff; font-size: 13pt; font-weight: bold; letter-spacing: 0.5pt;
+    border-color: #16336e; font-family: 'Helvetica', 'DejaVu Sans', sans-serif; text-transform: uppercase;
+  }
 
   /* SIGNATURE + QR (bottom row) */
   .ms-sign-col { position: absolute; left: 35mm; top: 219mm; width: 60mm; text-align: center; }
@@ -265,9 +274,9 @@
           @for ($i = 0; $i < max(6, $subjects->count()); $i++)
             @php $subject = $subjects->get($i); @endphp
             <tr>
-              <td>{!! $subject ? e($fit($subject->subject, 40)) : '&nbsp;' !!}</td>
-              <td class="num">{!! $subject ? e($subject->max_marks ?? '') : '&nbsp;' !!}</td>
-              <td class="num">{!! $subject && $subject->marks_obtained !== null ? e($subject->marks_obtained) : '&nbsp;' !!}</td>
+              <td class="subject">{!! $subject ? e($fit($subject->subject, 40)) : '&nbsp;' !!}</td>
+              <td class="num max">{!! $subject ? e($subject->max_marks ?? '') : '&nbsp;' !!}</td>
+              <td class="num obtained">{!! $subject && $subject->marks_obtained !== null ? e($subject->marks_obtained) : '&nbsp;' !!}</td>
             </tr>
           @endfor
           <tr class="total">
