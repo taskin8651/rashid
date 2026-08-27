@@ -123,7 +123,6 @@ Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/refund-policy', [PageController::class, 'refundPolicy'])->name('refund-policy');
 
 Route::get('/certificates/verify', [CertificateVerificationController::class, 'show'])->name('certificates.verify');
-Route::get('/certificates/{certificate:cert_code}/preview', [CertificateVerificationController::class, 'preview'])->name('certificates.verify.preview');
 
 Route::get('/apply-certificate', [CertificateApplicationController::class, 'create'])->name('certificate-applications.create');
 Route::post('/apply-certificate', [CertificateApplicationController::class, 'store'])->name('certificate-applications.store')->middleware('throttle:5,1');

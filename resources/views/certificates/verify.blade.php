@@ -22,7 +22,9 @@
             @php
               $hasMarksheet = $certificate->hasMarksheetData();
               $result = $hasMarksheet ? $certificate->result() : null;
-              $photoUrl = optional($certificate->user)->photoUrl();
+              $photoUrl = $certificate->photo_path
+                ? asset('storage/' . $certificate->photo_path)
+                : optional($certificate->user)->photoUrl();
               $displayName = $certificate->student_name ?: $certificate->user->name;
               $displayCourseName = $certificate->course_name ?: $certificate->course->name;
               $initial = strtoupper(substr($displayName ?: 'S', 0, 1));
@@ -83,18 +85,6 @@
                     </div>
                   @endif
                 </div>
-
-                @if ($certificate->include_certificate)
-                  <div class="cert-verify-section-title"><i class="bi bi-file-earmark-image-fill"></i>Certificate</div>
-
-                  <div class="cert-verify-doc-frame">
-                    <span class="cert-verify-doc-badge"><i class="bi bi-patch-check-fill"></i>Authentic</span>
-                    <iframe src="{{ route('certificates.verify.preview', ['certificate' => $certificate->cert_code]) }}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" title="{{ $displayName }}'s Certificate" loading="lazy" scrolling="no"></iframe>
-                  </div>
-                  <div class="cert-verify-doc-actions">
-                    <a href="{{ route('certificates.verify.preview', ['certificate' => $certificate->cert_code]) }}" target="_blank" rel="noopener" class="btn-enr" style="text-decoration:none"><i class="bi bi-arrow-up-right-square me-1"></i>Open Full Certificate</a>
-                  </div>
-                @endif
 
                 @if ($hasMarksheet)
                   <div class="cert-verify-section-title"><i class="bi bi-clipboard-data-fill"></i>Marksheet</div>
