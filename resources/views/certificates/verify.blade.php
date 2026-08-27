@@ -22,9 +22,7 @@
             @php
               $hasMarksheet = $certificate->hasMarksheetData();
               $result = $hasMarksheet ? $certificate->result() : null;
-              $photoUrl = $certificate->photo_path
-                ? asset('storage/' . $certificate->photo_path)
-                : optional($certificate->user)->photoUrl();
+              $photoUrl = $certificate->photoUrl();
               $displayName = $certificate->student_name ?: $certificate->user->name;
               $displayCourseName = $certificate->course_name ?: $certificate->course->name;
               $initial = strtoupper(substr($displayName ?: 'S', 0, 1));

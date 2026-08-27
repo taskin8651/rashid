@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Certificate extends Model
 {
@@ -42,6 +43,21 @@ class Certificate extends Model
     public function subjects()
     {
         return $this->hasMany(CertificateSubject::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Prefers the marksheet-specific upload, but falls back to the student's
+     * profile photo when that's missing — and re-checks the file actually
+     * exists on disk rather than trusting a stale photo_path, since a broken
+     * URL there would otherwise take priority over a perfectly good fallback.
+     */
+    public function photoUrl(): ?string
+    {
+        if ($this->photo_path && Storage::disk('public')->exists($this->photo_path)) {
+            return Storage::disk('public')->url($this->photo_path);
+        }
+
+        return optional($this->user)->photoUrl();
     }
 
     public function hasMarksheetData(): bool
