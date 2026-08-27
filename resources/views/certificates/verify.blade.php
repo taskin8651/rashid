@@ -4,7 +4,7 @@
 
 @section('content')
   <section class="sec">
-    <div class="container" style="max-width:720px">
+    <div class="container" style="max-width:1100px">
       <div class="text-center mb-4 rv">
         <div class="sec-lbl">Trust &amp; Authenticity</div>
         <h2 class="sec-h">Verify a <em>Certificate</em></h2>
